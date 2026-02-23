@@ -1,15 +1,14 @@
 package com.kredia.dashboard.service;
 
-import com.kredia.common.UserStatus;
 import com.kredia.dashboard.dto.AdminDashboardStatsDTO;
 import com.kredia.dashboard.dto.ClientDashboardStatsDTO;
 import com.kredia.dashboard.dto.EmployeeDashboardStatsDTO;
+import com.kredia.dashboard.dto.PublicStatsDTO;
 import com.kredia.entity.credit.Credit;
 import com.kredia.enums.CreditStatus;
 import com.kredia.enums.RiskLevel;
 import com.kredia.repository.CreditRepository;
 import com.kredia.user.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,12 +26,16 @@ import java.util.List;
  * </p>
  */
 @Service
-@RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class DashboardService {
 
     private final CreditRepository creditRepository;
     private final UserRepository userRepository;
+
+    public DashboardService(CreditRepository creditRepository, UserRepository userRepository) {
+        this.creditRepository = creditRepository;
+        this.userRepository = userRepository;
+    }
 
     // ─── CLIENT DASHBOARD ─────────────────────────────────────────────
 
@@ -101,48 +104,90 @@ public class DashboardService {
     // ─── ADMIN DASHBOARD ──────────────────────────────────────────────
 
     /**
-     * Build platform-wide dashboard stats for admins with 100% mathematical accuracy.
+     * Build platform-wide dashboard stats for admins with 100% mathematical
+     * accuracy.
      * 
      * @return AdminDashboardStatsDTO with real database-driven financial analytics
      */
     public AdminDashboardStatsDTO getAdminStats() {
-        LocalDateTime thirtyDaysAgo = LocalDateTime.now().minusDays(30);
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime thirtyDaysAgo = now.minusDays(30);
 
-        // 1. Core Financial KPIs (Using standardized queries)
+        // 1. Core Financial KPIs
         long totalLoans = creditRepository.countTotalLoans();
         long approvedLoans = creditRepository.countApprovedLoans();
         long rejectedLoans = creditRepository.countRejectedLoans();
-        
+        long pendingLoans = creditRepository.countByStatus(CreditStatus.PENDING);
+        long totalUsers = userRepository.count();
+
         Double totalBorrowedAmount = creditRepository.sumApprovedLoans().orElse(0.0);
         Double averageLoanAmount = creditRepository.averageLoanAmount().orElse(0.0);
         Double approvalRate = safeDivide(approvedLoans, totalLoans) * 100;
 
-        // 2. Risk Distribution (Based on Credit Risk Levels)
+        // 2. Monthly Growth Calculation
+        LocalDateTime currentMonthStart = now.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
+        LocalDateTime prevMonthStart = currentMonthStart.minusMonths(1);
+        LocalDateTime prevMonthEnd = currentMonthStart.minusNanos(1);
+
+        Double currentMonthVolume = creditRepository.sumApprovedVolumeInPeriod(currentMonthStart, now).orElse(0.0);
+        Double prevMonthVolume = creditRepository.sumApprovedVolumeInPeriod(prevMonthStart, prevMonthEnd).orElse(0.0);
+
+        Double growth = prevMonthVolume == 0 ? (currentMonthVolume > 0 ? 100.0 : 0.0)
+                : ((currentMonthVolume - prevMonthVolume) / prevMonthVolume) * 100;
+
+        // 3. Risk Distribution
         long lowRiskCount = creditRepository.countByRiskLevel(RiskLevel.LOW);
         long mediumRiskCount = creditRepository.countByRiskLevel(RiskLevel.MEDIUM);
-        long highRiskCount = creditRepository.countByRiskLevel(RiskLevel.HIGH) 
-                           + creditRepository.countByRiskLevel(RiskLevel.VERY_HIGH);
+        long highRiskCount = creditRepository.countByRiskLevel(RiskLevel.HIGH)
+                + creditRepository.countByRiskLevel(RiskLevel.VERY_HIGH);
 
-        // 3. Time-Series Data (Real database trends)
-        List<AdminDashboardStatsDTO.ChartPoint> loanVolumeTrend = mapTimeSeries(creditRepository.getVolumeTimeSeries(thirtyDaysAgo));
-        List<AdminDashboardStatsDTO.ChartPoint> userGrowthTrend = mapTimeSeries(userRepository.getUserGrowthTimeSeries(thirtyDaysAgo));
-        
-        // Approval Rate Trend (Simulated precision based on real volume)
-        List<AdminDashboardStatsDTO.ChartPoint> approvalRateTrend = generateApprovalTrend(thirtyDaysAgo);
+        // 4. Time-Series Data
+        List<AdminDashboardStatsDTO.ChartPoint> loanVolumeTrend = mapTimeSeries(
+                creditRepository.getVolumeTimeSeries(thirtyDaysAgo));
+        List<AdminDashboardStatsDTO.ChartPoint> userGrowthTrend = mapCumulativeTimeSeries(
+                userRepository.getUserGrowthTimeSeries(thirtyDaysAgo));
+        List<AdminDashboardStatsDTO.ChartPoint> approvalRateTrend = mapApprovalTrend(
+                creditRepository.getApprovalRateTimeSeries(thirtyDaysAgo));
 
         return AdminDashboardStatsDTO.builder()
                 .totalLoans(totalLoans)
                 .approvedLoans(approvedLoans)
                 .rejectedLoans(rejectedLoans)
+                .pendingLoans(pendingLoans)
+                .totalUsers(totalUsers)
                 .totalBorrowedAmount(round(totalBorrowedAmount))
                 .averageLoanAmount(round(averageLoanAmount))
                 .approvalRate(round(approvalRate))
+                .monthlyGrowth(round(growth))
                 .lowRiskUsers(lowRiskCount)
                 .mediumRiskUsers(mediumRiskCount)
                 .highRiskUsers(highRiskCount)
                 .loanVolumeTrend(loanVolumeTrend)
                 .userGrowthTrend(userGrowthTrend)
                 .approvalRateTrend(approvalRateTrend)
+                .build();
+    }
+
+    /**
+     * Build public stats for the landing page.
+     * No sensitive data exposed.
+     * 
+     * @return PublicStatsDTO
+     */
+    public PublicStatsDTO getPublicStats() {
+        long totalLoans = creditRepository.countTotalLoans();
+        long approvedLoans = creditRepository.countApprovedLoans();
+        long totalUsers = userRepository.count();
+
+        Double approvalRate = safeDivide(approvedLoans, totalLoans) * 100;
+        Double avgDecisionHours = creditRepository.avgDecisionTimeInHours().orElse(0.0);
+        Double avgDecisionDays = avgDecisionHours / 24.0;
+
+        return PublicStatsDTO.builder()
+                .activeClients(totalUsers)
+                .approvalRate(round(approvalRate))
+                .processedCredits(totalLoans)
+                .averageDecisionDays(round(avgDecisionDays))
                 .build();
     }
 
@@ -156,34 +201,27 @@ public class DashboardService {
         return points;
     }
 
-    private List<AdminDashboardStatsDTO.ChartPoint> generateApprovalTrend(LocalDateTime since) {
+    private List<AdminDashboardStatsDTO.ChartPoint> mapCumulativeTimeSeries(List<Object[]> results) {
         List<AdminDashboardStatsDTO.ChartPoint> points = new ArrayList<>();
-        java.time.LocalDate today = java.time.LocalDate.now();
-        for (int i = 6; i >= 0; i--) {
-            java.time.LocalDate date = today.minusDays(i);
-            // Baseline 75% + 15% random variance for the demo to look realistic but driven by real dates
-            points.add(new AdminDashboardStatsDTO.ChartPoint(date.toString(), 75.0 + (new java.util.Random().nextDouble() * 15.0)));
+        double runningTotal = 0;
+        for (Object[] row : results) {
+            String label = row[0].toString();
+            runningTotal += ((Number) row[1]).doubleValue();
+            points.add(new AdminDashboardStatsDTO.ChartPoint(label, runningTotal));
         }
         return points;
     }
 
-    /**
-     * Compute average decision time globally for all handled credits.
-     */
-    private Double computeGlobalAverageDecisionTime() {
-        List<Credit> credits = creditRepository.findAllWithDecision();
-        if (credits.isEmpty()) return 0.0;
-
-        double totalDays = 0;
-        int count = 0;
-
-        for (Credit c : credits) {
-            long seconds = Duration.between(c.getCreatedAt(), c.getDecisionDate()).getSeconds();
-            totalDays += seconds / 86400.0;
-            count++;
+    private List<AdminDashboardStatsDTO.ChartPoint> mapApprovalTrend(List<Object[]> results) {
+        List<AdminDashboardStatsDTO.ChartPoint> points = new ArrayList<>();
+        for (Object[] row : results) {
+            String label = row[0].toString();
+            double approved = ((Number) row[1]).doubleValue();
+            double total = ((Number) row[2]).doubleValue();
+            double rate = safeDivide(approved, total) * 100;
+            points.add(new AdminDashboardStatsDTO.ChartPoint(label, round(rate)));
         }
-
-        return count == 0 ? 0.0 : totalDays / count;
+        return points;
     }
 
     // ─── HELPER METHODS ───────────────────────────────────────────────

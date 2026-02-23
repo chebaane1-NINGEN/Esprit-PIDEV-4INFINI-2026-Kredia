@@ -5,7 +5,6 @@ import com.kredia.dashboard.dto.ClientDashboardStatsDTO;
 import com.kredia.dashboard.dto.EmployeeDashboardStatsDTO;
 import com.kredia.dashboard.service.DashboardService;
 import com.kredia.user.entity.User;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -29,10 +28,13 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/api/dashboard")
-@RequiredArgsConstructor
 public class DashboardController {
 
     private final DashboardService dashboardService;
+
+    public DashboardController(DashboardService dashboardService) {
+        this.dashboardService = dashboardService;
+    }
 
     /**
      * Client dashboard: personal loan statistics.

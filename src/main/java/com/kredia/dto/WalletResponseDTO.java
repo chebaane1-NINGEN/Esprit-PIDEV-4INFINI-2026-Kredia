@@ -1,14 +1,9 @@
 package com.kredia.dto;
 
 import com.kredia.enums.WalletStatus;
-import lombok.Builder;
-import lombok.Data;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-@Data
-@Builder
 public class WalletResponseDTO {
     private Long walletId;
     private BigDecimal balance;

@@ -1,44 +1,65 @@
 document.getElementById('registerForm').addEventListener('submit', async (e) => {
     e.preventDefault();
 
+    const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    const email = document.getElementById('email').value;
+    const errorDiv = document.getElementById('errorMessage');
+
+    // Reset error
+    errorDiv.textContent = '';
+    errorDiv.style.color = 'var(--error-color)';
+
+    // Validation Rules
+    if (password !== confirmPassword) {
+        errorDiv.textContent = 'Passwords do not match.';
+        return;
+    }
+
+    if (password.length < 8) {
+        errorDiv.textContent = 'Password must be at least 8 characters long.';
+        return;
+    }
+
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/;
+    if (!passwordRegex.test(password)) {
+        errorDiv.textContent = 'Password must contain at least one uppercase letter, one lowercase letter, and one number.';
+        return;
+    }
+
     const formData = {
         firstName: document.getElementById('firstName').value,
         lastName: document.getElementById('lastName').value,
-        email: document.getElementById('email').value,
+        email: email,
         phoneNumber: document.getElementById('phone').value,
-        passwordHash: document.getElementById('password').value,
-        role: 'CLIENT' // Enforce Client registration
+        passwordHash: password,
+        role: 'CLIENT'
     };
 
-    const errorDiv = document.getElementById('errorMessage');
+    const btn = e.target.querySelector('button');
+    btn.disabled = true;
+    btn.textContent = 'Creating Account...';
 
     try {
         const response = await fetch('/api/users/register', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(formData)
         });
 
         if (response.ok) {
-            // Smooth transition to login
-            showToast('Account created successfully! Redirecting to sign in...', 'success');
-            setTimeout(() => {
-                window.location.href = '/auth/login';
-            }, 1500);
+            errorDiv.style.color = 'var(--success-color)';
+            errorDiv.textContent = 'Account created successfully! Redirecting...';
+            setTimeout(() => window.location.href = '/login.html', 2000);
         } else {
-            // Try to parse error message
-            const text = await response.text();
-            try {
-                const json = JSON.parse(text);
-                errorDiv.textContent = json.message || 'Registration failed.';
-            } catch (e) {
-                errorDiv.textContent = text || 'Registration failed.';
-            }
+            const data = await response.json();
+            errorDiv.textContent = data.message || 'Registration failed. Email or Phone might already be in use.';
+            btn.disabled = false;
+            btn.textContent = 'Create Account';
         }
     } catch (error) {
         errorDiv.textContent = 'An error occurred. Please try again.';
-        console.error('Registration error:', error);
+        btn.disabled = false;
+        btn.textContent = 'Create Account';
     }
 });

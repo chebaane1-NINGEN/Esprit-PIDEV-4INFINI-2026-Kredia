@@ -6,267 +6,520 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - Kredia</title>
     <link rel="icon" type="image/png" href="/images/favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/zarss.css">
+    <style>
+        /* ADVANCED STYLES FALLBACK */
+        .zarss-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .zarss-table th {
+            text-align: left;
+            padding: 16px;
+            color: var(--zarss-text-muted);
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--zarss-bg);
+        }
+
+        .zarss-table td {
+            padding: 16px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            border-bottom: 1px solid var(--zarss-bg);
+        }
+
+        .zarss-status-badge {
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: capitalize;
+        }
+
+        .status-verified {
+            background: #E6F3E6;
+            color: #2D6A4F;
+        }
+
+        .status-pending {
+            background: #FFF9E6;
+            color: #B08500;
+        }
+
+        .status-blocked {
+            background: #FFE6E6;
+            color: #A4161A;
+        }
+
+        .zarss-msg-item {
+            padding: 20px;
+            border-bottom: 1px solid var(--zarss-bg);
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .zarss-msg-item:hover {
+            background: #FAFAFA;
+        }
+
+        .zarss-msg-item.active {
+            background: #FAFAFA;
+            border-left: 4px solid var(--zarss-active);
+        }
+
+        .zarss-msg-bubble {
+            max-width: 80%;
+            padding: 12px 18px;
+            border-radius: 18px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+
+        .msg-admin {
+            align-self: flex-end;
+            background: var(--zarss-sidebar);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .msg-client {
+            align-self: flex-start;
+            background: var(--zarss-bg);
+            color: var(--zarss-text);
+            border-bottom-left-radius: 4px;
+        }
+
+        .zarss-input {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 1px solid var(--zarss-bg);
+            background: var(--zarss-bg);
+            font-family: inherit;
+            font-size: 0.9rem;
+            transition: 0.2s;
+            box-sizing: border-box;
+        }
+
+        .zarss-input:focus {
+            border-color: var(--zarss-sidebar);
+            background: white;
+            outline: none;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: var(--zarss-text-muted);
+        }
+    </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
-<body>
-    <div class="dashboard-layout">
-        <aside class="sidebar">
-            <div class="sidebar-header" style="border-bottom: 1px solid #eee; padding-bottom: 20px;">
-                <a href="/"><img src="/images/logo.png" alt="Kredia Logo" style="height:40px;"></a>
-            </div>
-            <div class="sidebar-user">Logged in as <strong id="sidebarUser">Admin</strong></div>
-            <nav>
-                <a href="#" class="active" onclick="showSection('overview')">
-                    <span class="nav-icon">📊</span> Overview
-                </a>
-                <a href="#" onclick="showSection('users')">
-                    <span class="nav-icon">👥</span> Users & Access
-                </a>
-                <a href="#" onclick="showSection('kyc')">
-                    <span class="nav-icon">🛡️</span> KYC Governance
-                </a>
-                <a href="#" onclick="showSection('credits')">
-                    <span class="nav-icon">💳</span> Credit Portfolio
-                </a>
-                <div style="margin-top: auto; padding-top: 20px;">
-                    <a href="#" onclick="logout()">
-                        <span class="nav-icon">🚪</span> Logout
-                    </a>
+<body class="zarss-theme">
+    <div class="zarss-layout">
+        <!-- SIDEBAR -->
+        <aside class="zarss-sidebar">
+            <div class="zarss-logo">
+                <div
+                    style="background:white; padding:6px; border-radius:8px; display:flex; align-items:center; justify-content:center;">
+                    <img src="/images/favicon.png" alt="Logo" style="height:24px;">
                 </div>
+                <span>Kredia</span>
+            </div>
+
+            <div class="zarss-profile-modern">
+                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop"
+                    class="zarss-avatar-sm" alt="Admin">
+                <div style="display:flex; flex-direction:column;">
+                    <span style="font-size: 0.75rem; color: var(--kredia-text-muted); font-weight: 500;">Admin
+                        User</span>
+                    <span style="font-weight: 700; font-size: 0.9375rem;" id="sidebarUser">Administrator</span>
+                </div>
+            </div>
+
+            <nav class="zarss-nav">
+                <a href="#" class="zarss-nav-item active" onclick="showSection('overview')">
+                    <span class="icon">📊</span> Dashboard
+                </a>
+                <a href="#" class="zarss-nav-item" onclick="showSection('users')">
+                    <span class="icon">👥</span> Users
+                </a>
+                <a href="#" class="zarss-nav-item" onclick="showSection('agents')">
+                    <span class="icon">🧑‍💼</span> Agents
+                </a>
+                <a href="#" class="zarss-nav-item" onclick="showSection('kyc')">
+                    <span class="icon">🛡️</span> KYC
+                </a>
+                <a href="#" class="zarss-nav-item" onclick="showSection('credits')">
+                    <span class="icon">💳</span> Credits
+                </a>
+                <a href="#" class="zarss-nav-item" onclick="showSection('messages')">
+                    <span class="icon">✉️</span> Messages
+                </a>
+                <a href="#" class="zarss-nav-item" onclick="showSection('settings')">
+                    <span class="icon">⚙️</span> Settings
+                </a>
             </nav>
+
+            <div class="zarss-logout-container">
+                <button class="zarss-logout-btn" onclick="logout()">
+                    <span class="icon">🚪</span> Log Out
+                </button>
+            </div>
         </aside>
-        <main class="main-content">
-            <!-- OVERVIEW (Fintech Upgrade) -->
+
+        <!-- MAIN -->
+        <main class="zarss-main">
+            <!-- OVERVIEW SECTION -->
             <div id="section-overview" class="section active">
-                <div class="dashboard-header">
-                    <div style="display:flex; justify-content:space-between; align-items:flex-end;">
+                <header class="zarss-header">
+                    <div class="zarss-header-title">
+                        <h1>Dashboard</h1>
+                        <p>Real-time Kredia Intelligence</p>
+                    </div>
+                    <div class="zarss-search">
+                        🔍 <input type="text" placeholder="Search analytics...">
+                    </div>
+                </header>
+
+                <!-- KPI GRID -->
+                <div class="zarss-kpi-grid">
+                    <!-- CARD 1: LOAN VOLUME -->
+                    <div class="zarss-card zarss-card-green">
+                        <div class="zarss-card-body">
+                            <p>Total Loan Volume</p>
+                            <h2 id="statTotalBorrowed">$0</h2>
+                            <div class="zarss-card-trend">
+                                <span id="statGrowthTrend"
+                                    style="color:var(--kredia-success); font-weight:700;">+0%</span>
+                                <span style="color:var(--kredia-text-muted); font-weight:500;">this month</span>
+                            </div>
+                        </div>
+                        <div class="zarss-card-icon">💰</div>
+                    </div>
+
+                    <!-- CARD 2: LOAN ACTIVITY -->
+                    <div class="zarss-card zarss-card-yellow">
+                        <div class="zarss-card-body">
+                            <p>Active Loans</p>
+                            <h2 id="statTotalLoans">0</h2>
+                            <div class="zarss-card-trend">
+                                <span id="statApprovalRate"
+                                    style="color:var(--kredia-primary); font-weight:700;">0%</span>
+                                <span style="color:var(--kredia-text-muted); font-weight:500;">approval rate</span>
+                            </div>
+                        </div>
+                        <div class="zarss-card-icon">📊</div>
+                    </div>
+
+                    <!-- CARD 3: USER ECOSYSTEM -->
+                    <div class="zarss-card zarss-card-purple">
+                        <div class="zarss-card-body">
+                            <p>Registered Users</p>
+                            <h2 id="statTotalUsers">0</h2>
+                            <div class="zarss-card-trend">
+                                <span style="color:var(--kredia-primary); font-weight:700;">Active</span>
+                                <span style="color:var(--kredia-text-muted); font-weight:500;">platform ecosystem</span>
+                            </div>
+                        </div>
+                        <div class="zarss-card-icon">👥</div>
+                    </div>
+                </div>
+
+                <!-- USER GROWTH -->
+                <div class="zarss-chart-card">
+                    <div class="zarss-chart-header">
                         <div>
-                            <h2>Fintech Command Center</h2>
-                            <p class="subtitle">Advanced Portfolio Analytics & Risk Governance</p>
+                            <h3>User Growth (Cumulative)</h3>
+                            <span class="value" id="statGrowthValue">+3,2%</span>
                         </div>
-                        <div class="stat-trend glass" style="margin-bottom:10px;">
-                            ⚡ Platform Pulse: <strong class="text-success">HEALTHY</strong>
-                        </div>
+                        <span style="font-size: 0.8rem; color: #8E8E8E; cursor: pointer;">See statistics for all time
+                            ></span>
                     </div>
-                </div>
-                <!-- Dynamic Filter Bar -->
-                <div class="filter-bar">
-                    <div class="filter-group">
-                        <label>📅 Time Range:</label>
-                        <select id="filterTimeRange" onchange="loadAdminStats()">
-                            <option value="30">Last 30 Days</option>
-                            <option value="90">Last 90 Days</option>
-                            <option value="365">Last Year</option>
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label>⚖️ Risk Tier:</label>
-                        <select id="filterRiskTier" onchange="loadAdminStats()">
-                            <option value="ALL">All Tiers</option>
-                            <option value="LOW">Low Risk</option>
-                            <option value="MEDIUM">Medium Risk</option>
-                            <option value="HIGH">High Risk</option>
-                        </select>
-                    </div>
-                    <div class="stat-pulse">
-                        <span class="pulse-dot"></span>
-                        <span id="platformStatus">Live Portfolio Feed</span>
+                    <div style="height: 300px;">
+                        <canvas id="growthChart"></canvas>
                     </div>
                 </div>
 
-                <!-- DASHBOARD MODULES -->
-                <div class="dashboard-modules">
-                    <!-- 1. Performance Hub -->
-                    <h3 class="group-title">🚀 Performance Hub</h3>
-                    <div class="stats-grid stats-4">
-                        <div class="card card-kpi" title="Total amount borrowed and approved.">
-                            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                                <div>
-                                    <p class="stat-label">Total Borrowed Amount</p>
-                                    <p class="stat-value" id="statTotalBorrowed">0 TND</p>
-                                </div>
-                                <div
-                                    style="background:rgba(79, 70, 229, 0.1); padding:10px; border-radius:12px; font-size:1.2rem;">
-                                    💰</div>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top:20px;">
+                    <div class="zarss-chart-card">
+                        <div class="zarss-chart-header">
+                            <div>
+                                <h3>Loan Volume Evolution (Approved)</h3>
+                                <span class="value" id="statLoanVolumeRange">Last 30 days</span>
                             </div>
-                            <div class="stat-trend"
-                                style="background:rgba(16, 185, 129, 0.1); color:var(--success-color); border:none;">
-                                Portfolio Healthy</div>
                         </div>
-
-                        <div class="card card-kpi" title="Total number of loan applications.">
-                            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                                <div>
-                                    <p class="stat-label">Total Applications</p>
-                                    <p class="stat-value" id="statTotalLoans">0</p>
-                                </div>
-                                <div
-                                    style="background:rgba(59, 130, 246, 0.1); padding:10px; border-radius:12px; font-size:1.2rem;">
-                                    📄</div>
-                            </div>
-                            <p class="stat-sub">Across all users</p>
-                        </div>
-
-                        <div class="card card-kpi" title="Average loan amount approved.">
-                            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                                <div>
-                                    <p class="stat-label">Average Loan Amount</p>
-                                    <p class="stat-value" id="statAvgLoan">0 TND</p>
-                                </div>
-                                <div
-                                    style="background:rgba(16, 185, 129, 0.1); padding:10px; border-radius:12px; font-size:1.2rem;">
-                                    ⚖️</div>
-                            </div>
-                            <p class="stat-sub">Global average</p>
-                        </div>
-
-                        <div class="card card-kpi" title="Platform-wide approval rate.">
-                            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                                <div>
-                                    <p class="stat-label">Global Approval Rate</p>
-                                    <p class="stat-value" id="statApprovalRate">0%</p>
-                                </div>
-                                <div
-                                    style="background:rgba(245, 158, 11, 0.1); padding:10px; border-radius:12px; font-size:1.2rem;">
-                                    📈</div>
-                            </div>
-                            <p class="stat-sub" id="statApprovedRejected">0 Approved / 0 Total</p>
+                        <div style="height: 300px;">
+                            <canvas id="loanVolumeChart"></canvas>
                         </div>
                     </div>
 
-                    <!-- 2. Risk Intelligence -->
-                    <h3 class="group-title">⚖️ Risk Intelligence (AI Scoring)</h3>
-                    <div class="stats-grid stats-3">
-                        <div class="card card-kpi" style="border-left: 4px solid var(--success-color);">
-                            <p class="stat-label">Low Risk Users</p>
-                            <p class="stat-value" id="riskLow">0</p>
-                            <p class="stat-sub">Score ≥ 700</p>
+                    <div class="zarss-chart-card">
+                        <div class="zarss-chart-header">
+                            <div>
+                                <h3>Approval Rate Trend</h3>
+                                <span class="value" id="statApprovalRange">Last 30 days</span>
+                            </div>
                         </div>
-                        <div class="card card-kpi" style="border-left: 4px solid var(--warning-color);">
-                            <p class="stat-label">Medium Risk Users</p>
-                            <p class="stat-value" id="riskMedium">0</p>
-                            <p class="stat-sub">Score 500–699</p>
+                        <div style="height: 300px;">
+                            <canvas id="approvalRateChart"></canvas>
                         </div>
-                        <div class="card card-kpi" style="border-left: 4px solid var(--error-color);">
-                            <p class="stat-label">High Risk Users</p>
-                            <p class="stat-value" id="riskHigh">0</p>
-                            <p class="stat-sub">Score < 500</p>
-                        </div>
-                    </div>
-
-                    <!-- 3. Visual Analytics -->
-                    <h3 class="group-title">📊 Visual Portfolio Analytics</h3>
-                    <div class="charts-container">
-                        <div class="card chart-card">
-                            <h3>📈 Loan Volume Trends (Daily)</h3>
-                            <div style="height:250px;"><canvas id="volumeTrendChart"></canvas></div>
-                        </div>
-                        <div class="card chart-card">
-                            <h3>🔄 Approval Rate Evolution</h3>
-                            <div style="height:250px;"><canvas id="approvalTrendChart"></canvas></div>
-                        </div>
-                        <div class="card chart-card full-width" style="grid-column: span 2;">
-                            <h3>📉 User Growth Curve</h3>
-                            <div style="height:250px;"><canvas id="growthChart"></canvas></div>
-                        </div>
-                    </div>
-                </div> <!-- End dashboard-modules -->
-            </div> <!-- End section-overview -->
-
-            <!-- AI Assistant Floating Toggle & Panel -->
-            <div class="ai-toggle" id="aiToggle" onclick="toggleAiPanel()">
-                <span>🤖</span>
-            </div>
-
-            <div class="ai-panel minimized" id="aiPanel">
-                <div class="ai-header">
-                    <div style="display:flex; align-items:center; gap:12px;">
-                        <div style="background:rgba(255,255,255,0.2); padding:8px; border-radius:10px;">🤖</div>
-                        <div>
-                            <h4 style="margin:0;">Kredia AI Assistant</h4>
-                            <span style="font-size:0.75rem; opacity:0.8;">Phase 3: Deep Reasoning Active</span>
-                        </div>
-                    </div>
-                    <button onclick="toggleAiPanel()"
-                        style="background:none; border:none; color:white; cursor:pointer; font-size:1.8rem;">&times;</button>
-                </div>
-                <div class="ai-messages" id="aiChatBox">
-                    <div class="msg msg-ai">Hello Admin. I've analyzed the platform's current financial and risk
-                        data.
-                        Today's PAR(30) is under control. How can I assist you with the portfolio analysis today?
                     </div>
                 </div>
-                <div class="ai-input-area">
-                    <input type="text" id="aiPrompt" placeholder="Ask about PAR, risk or volume..."
-                        onkeypress="if(event.key==='Enter') sendAiQuery()">
-                    <button class="btn btn-primary" onclick="sendAiQuery()">Send</button>
+
+                <!-- LAST ORDERS -->
+                <div class="zarss-chart-card">
+                    <div class="zarss-table-header">
+                        <h3 style="margin:0; font-size:1.1rem;">Last Applications</h3>
+                        <div style="display:flex; gap:20px; font-size:0.85rem; color:#8E8E8E;">
+                            <span style="background:#F4F5F0; padding:4px 12px; border-radius:50px;">Real-time
+                                sync</span>
+                            <span style="cursor:pointer;" onclick="showSection('credits')">View All ></span>
+                        </div>
+                    </div>
+                    <div class="zarss-list" id="lastCreditsList">
+                        <!-- Items rendered via JS -->
+                    </div>
                 </div>
             </div>
 
-            <!-- USER MANAGEMENT -->
+            <!-- OTHER SECTIONS -->
+
+            <!-- USERS SECTION -->
             <div id="section-users" class="section">
-                <div class="section-header">
-                    <h2>User Management</h2>
-                    <button class="btn btn-primary"
-                        onclick="document.getElementById('createEmployeeModal').classList.add('active')">+ Create
-                        Employee</button>
+                <header class="zarss-header">
+                    <div class="zarss-header-title">
+                        <h1>User management</h1>
+                        <p>Control client accounts and permissions</p>
+                    </div>
+                    <div class="zarss-search">
+                        🔍 <input type="text" id="userSearchInput" placeholder="Search users..."
+                            onkeyup="filterUsers()">
+                    </div>
+                </header>
+                <div class="zarss-chart-card" style="margin-top: 20px;">
+                    <table class="zarss-table" id="usersTable">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersListContent">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
                 </div>
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Role</th>
-                            <th>Status</th>
-                            <th>Created</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="usersList"></tbody>
-                </table>
             </div>
 
-            <!-- KYC QUEUE -->
+            <!-- AGENTS SECTION -->
+            <div id="section-agents" class="section">
+                <header class="zarss-header">
+                    <div class="zarss-header-title">
+                        <h1>Agent management</h1>
+                        <p>Manage platform agents and auditors</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="showAddAgentModal()"
+                        style="background:var(--zarss-primary); border-radius:12px;">+ Add Agent</button>
+                </header>
+                <div class="zarss-chart-card" style="margin-top: 20px;">
+                    <table class="zarss-table">
+                        <thead>
+                            <tr>
+                                <th>Agent Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="agentsListContent">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- KYC SECTION -->
             <div id="section-kyc" class="section">
-                <h2>Pending KYC Documents</h2>
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>User ID</th>
-                            <th>Type</th>
-                            <th>Status</th>
-                            <th>Uploaded</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="kycQueue"></tbody>
-                </table>
+                <header class="zarss-header">
+                    <div class="zarss-header-title">
+                        <h1>KYC Verification</h1>
+                        <p>Review and approve identity documents</p>
+                    </div>
+                </header>
+                <div class="zarss-chart-card" style="margin-top:20px;">
+                    <p style="color:var(--zarss-text-muted);">KYC Management Interface coming soon...</p>
+                </div>
             </div>
 
-            <!-- ALL CREDITS -->
+            <!-- CREDITS SECTION -->
             <div id="section-credits" class="section">
-                <h2>All Credits</h2>
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>User</th>
-                            <th>Amount</th>
-                            <th>Rate</th>
-                            <th>Term</th>
-                            <th>Status</th>
-                            <th>Risk</th>
-                            <th>Created</th>
-                        </tr>
-                    </thead>
-                    <tbody id="allCreditsList"></tbody>
-                </table>
+                <header class="zarss-header">
+                    <div class="zarss-header-title">
+                        <h1>Loan Portfolio</h1>
+                        <p>Track and manage all credit applications</p>
+                    </div>
+                </header>
+                <div class="zarss-chart-card" style="margin-top:20px;">
+                    <div class="zarss-list" id="fullCreditsList">
+                        <!-- Populated via JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- MESSAGES SECTION -->
+            <div id="section-messages" class="section">
+                <header class="zarss-header">
+                    <div class="zarss-header-title">
+                        <h1>Messages & Support</h1>
+                        <p>Real-time client assistance hub</p>
+                    </div>
+                </header>
+                <div style="display:flex; height: 600px; gap: 20px; margin-top:20px;">
+                    <div class="zarss-chart-card" style="flex: 1; overflow-y:auto; padding:0;">
+                        <div id="ticketList" class="zarss-msg-sidebar">
+                            <!-- Tickets populated here -->
+                        </div>
+                    </div>
+                    <div class="zarss-chart-card" style="flex: 2; display:flex; flex-direction:column; padding:0;">
+                        <div id="chatHeader"
+                            style="padding:20px; border-bottom:1px solid var(--zarss-border); font-weight:700;">Select a
+                            conversation</div>
+                        <div id="chatHistory"
+                            style="flex:1; padding:20px; overflow-y:auto; display:flex; flex-direction:column; gap:10px;">
+                        </div>
+                        <div id="chatInputArea"
+                            style="padding:20px; border-top:1px solid var(--zarss-border); display:flex; gap:10px;">
+                            <input type="text" id="msgInput" placeholder="Type your reply..."
+                                style="flex:1; padding:12px; border-radius:12px; border:1px solid var(--zarss-border); background:var(--zarss-bg-soft);">
+                            <button onclick="handleSendMessage()" class="btn btn-primary"
+                                style="border-radius:12px;">Send</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SETTINGS SECTION -->
+            <div id="section-settings" class="section">
+                <header class="zarss-header">
+                    <div class="zarss-header-title">
+                        <h1>Platform Settings</h1>
+                        <p>Security and Profile configuration</p>
+                    </div>
+                </header>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top:20px;">
+                    <div class="zarss-chart-card">
+                        <h3 style="margin-top:0;">Profile Information</h3>
+                        <form id="profileForm" onsubmit="handleProfileUpdate(event)"
+                            style="display:flex; flex-direction:column; gap:15px; margin-top:15px;">
+                            <div class="form-group">
+                                <label>First Name</label>
+                                <input type="text" id="setFirstName" class="zarss-input">
+                            </div>
+                            <div class="form-group">
+                                <label>Last Name</label>
+                                <input type="text" id="setLastName" class="zarss-input">
+                            </div>
+                            <div class="form-group">
+                                <label>Email (Locked)</label>
+                                <input type="email" id="setEmail" class="zarss-input" disabled>
+                            </div>
+                            <button type="submit" class="btn btn-primary"
+                                style="width:fit-content; border-radius:12px;">Save Changes</button>
+                        </form>
+                    </div>
+                    <div class="zarss-chart-card">
+                        <h3 style="margin-top:0;">Security & Password</h3>
+                        <form id="passwordForm" onsubmit="handlePasswordUpdate(event)"
+                            style="display:flex; flex-direction:column; gap:15px; margin-top:15px;">
+                            <div class="form-group">
+                                <label>Current Password</label>
+                                <input type="password" id="oldPass" class="zarss-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label>New Password</label>
+                                <input type="password" id="newPass" class="zarss-input" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary"
+                                style="background:var(--zarss-danger); width:fit-content; border-radius:12px;">Update
+                                Password</button>
+                        </form>
+                    </div>
+                </div>
             </div>
         </main>
+
+        <!-- RIGHT PANEL -->
+        <aside class="zarss-right">
+            <!-- LOAN STATUS MIX -->
+            <div class="zarss-panel">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                    <div>
+                        <h3>Loan Status Mix</h3>
+                        <span class="subtitle">Approved / Pending / Rejected</span>
+                    </div>
+                    <div
+                        style="background:#EEE; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer;">
+                        ⋮</div>
+                </div>
+                <div class="zarss-donut-container">
+                    <canvas id="profitDonut"></canvas>
+                    <div class="zarss-donut-info">
+                        <span>Total</span>
+                        <strong id="statTotalProfit">$0</strong>
+                    </div>
+                </div>
+                <div class="zarss-breakdown">
+                    <div class="breakdown-item">
+                        <div class="breakdown-label">
+                            <div class="breakdown-dot" style="background:#6C5DD3;"></div> Approved
+                        </div>
+                        <div class="breakdown-val" id="breakdownApproved">0%</div>
+                    </div>
+                    <div class="breakdown-item">
+                        <div class="breakdown-label">
+                            <div class="breakdown-dot" style="background:#FFBC99;"></div> Pending
+                        </div>
+                        <div class="breakdown-val" id="breakdownPending">0%</div>
+                    </div>
+                    <div class="breakdown-item">
+                        <div class="breakdown-label">
+                            <div class="breakdown-dot" style="background:#FF754C;"></div> Rejected
+                        </div>
+                        <div class="breakdown-val" id="breakdownRejected">0%</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RECENT SALES -->
+            <div class="zarss-panel">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 24px;">
+                    <h3 style="margin:0;">Recent Activity</h3>
+                    <span style="font-size: 0.8rem; color: #8E8E8E; cursor: pointer;">See All</span>
+                </div>
+                <div class="zarss-list" id="recentActivityList">
+                    <!-- Items rendered via JS -->
+                </div>
+            </div>
+        </aside>
     </div>
 
     <!-- CREATE EMPLOYEE MODAL -->
@@ -301,286 +554,575 @@
 
     <script src="/js/common.js"></script>
     <script>
+        let charts = {};
+        let currentTicketId = null;
+        let adminStatsCache = { ts: 0, data: null, promise: null };
+
+        async function ensureChartJsLoaded() {
+            if (window.Chart) return;
+            const candidates = [
+                'https://cdn.jsdelivr.net/npm/chart.js',
+                'https://unpkg.com/chart.js@4.4.1/dist/chart.umd.min.js'
+            ];
+
+            for (const src of candidates) {
+                try {
+                    await new Promise((resolve, reject) => {
+                        const s = document.createElement('script');
+                        s.src = src;
+                        s.async = true;
+                        s.onload = () => resolve();
+                        s.onerror = () => reject(new Error('Failed to load ' + src));
+                        document.head.appendChild(s);
+                    });
+                    if (window.Chart) return;
+                } catch (e) {
+                    console.warn(e);
+                }
+            }
+
+            throw new Error('Chart.js failed to load from all configured sources');
+        }
+
         document.addEventListener('DOMContentLoaded', async () => {
             checkAuth('ADMIN');
             document.getElementById('sidebarUser').textContent = 'Admin';
+
+            // Initial load
+            try {
+                await ensureChartJsLoaded();
+            } catch (e) {
+                console.error('Chart.js loading error:', e);
+            }
             await loadAdminStats();
             await loadUsers();
-            await loadKycQueue();
+            await loadAgents();
             await loadAllCredits();
+            await loadMessages();
+            await loadCurrentProfile();
+
+            // Show overview by default
+            showSection('overview');
         });
+
+        // SECTION NAVIGATION
+        function showSection(name) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.zarss-nav-item').forEach(a => a.classList.remove('active'));
+            const target = document.getElementById('section-' + name);
+            if (target) target.classList.add('active');
+
+            if (window.event) {
+                const link = window.event.target.closest('.zarss-nav-item');
+                if (link) link.classList.add('active');
+            }
+        }
+
+        // STATS & CHARTS
+        async function fetchAdminStatsCached() {
+            const ttlMs = 30 * 1000;
+            const now = Date.now();
+            if (adminStatsCache.data && (now - adminStatsCache.ts) < ttlMs) return adminStatsCache.data;
+            if (adminStatsCache.promise) return adminStatsCache.promise;
+
+            adminStatsCache.promise = (async () => {
+                const res = await authenticatedFetch('/api/dashboard/admin');
+                if (!res.ok) {
+                    const body = await res.text().catch(() => '');
+                    throw new Error(`Failed to load admin stats (HTTP ${res.status}) ${body}`);
+                }
+                const data = await res.json();
+                adminStatsCache.data = data;
+                adminStatsCache.ts = Date.now();
+                return data;
+            })().finally(() => {
+                adminStatsCache.promise = null;
+            });
+
+            return adminStatsCache.promise;
+        }
+
+        async function loadAdminStats() {
+            try {
+                const s = await fetchAdminStatsCached();
+                animateValue('statTotalBorrowed', formatCurrency(s.totalBorrowedAmount), true);
+                animateValue('statTotalLoans', s.totalLoans);
+                setTextIfExists('statPendingLoans', s.pendingLoans);
+                animateValue('statTotalUsers', s.totalUsers);
+                const growth = s.monthlyGrowth || 0;
+                setTextIfExists('statGrowthTrend', (growth >= 0 ? '+' : '') + growth + '%');
+                setTextIfExists('statApprovalRate', (s.approvalRate || 0).toFixed(1) + '%');
+                setTextIfExists('statGrowthValue', (growth >= 0 ? '+' : '') + (growth || 0).toFixed(1) + '%');
+                renderAdminCharts(s);
+                renderRecentApplications();
+                renderRecentActivity();
+            } catch (err) {
+                console.error('Stats error', err);
+            }
+        }
+
+        function setTextIfExists(id, value) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.textContent = value ?? '';
+        }
 
         function animateValue(id, value, isCurrency = false) {
             const obj = document.getElementById(id);
             if (!obj) return;
-            const start = 0;
             const end = parseFloat(value.toString().replace(/[^0-9.-]+/g, ""));
-            if (isNaN(end)) {
-                obj.textContent = value;
-                return;
-            }
+            if (isNaN(end)) { obj.textContent = value; return; }
             const duration = 800;
             let startTimestamp = null;
             const step = (timestamp) => {
                 if (!startTimestamp) startTimestamp = timestamp;
                 const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-                const current = progress * (end - start) + start;
+                const current = progress * end;
                 obj.textContent = isCurrency ? formatCurrency(current) : Math.round(current * 10) / 10 + (value.toString().includes('%') ? '%' : '');
-                if (progress < 1) {
-                    window.requestAnimationFrame(step);
-                } else {
-                    obj.textContent = value;
-                }
+                if (progress < 1) window.requestAnimationFrame(step);
+                else obj.textContent = value;
             };
             window.requestAnimationFrame(step);
         }
 
-        function showSection(name) {
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.sidebar nav a').forEach(a => a.classList.remove('active'));
-            const target = document.getElementById('section-' + name);
-            if (target) target.classList.add('active');
-            if (event && event.target) {
-                const link = event.target.closest('a');
-                if (link) link.classList.add('active');
-            }
-        }
+        function renderAdminCharts(s) {
+            const palette = {
+                primary: '#6C5DD3',
+                accent: '#FF754C',
+                warning: '#FFBC99',
+                grid: 'rgba(15, 23, 42, 0.06)',
+                text: '#0F172A'
+            };
 
-        let charts = {};
+            const formatDay = (iso) => {
+                const d = new Date(iso);
+                if (Number.isNaN(d.getTime())) return iso;
+                return d.toLocaleDateString(undefined, { month: 'short', day: '2-digit' });
+            };
 
-        async function loadAdminStats() {
-            try {
-                const res = await authenticatedFetch('/api/dashboard/admin');
-                if (res.ok) {
-                    const s = await res.json();
+            const fillDailySeries = (points, { days = 30, mode = 'zero', carryForward = false } = {}) => {
+                const map = new Map((points || []).map(p => [String(p.label).slice(0, 10), Number(p.value || 0)]));
+                const end = new Date();
+                end.setHours(0, 0, 0, 0);
+                const start = new Date(end);
+                start.setDate(end.getDate() - (days - 1));
 
-                    // 1. Performance Hub
-                    animateValue('statTotalBorrowed', formatCurrency(s.totalBorrowedAmount), true);
-                    animateValue('statTotalLoans', s.totalLoans);
-                    animateValue('statAvgLoan', formatCurrency(s.averageLoanAmount), true);
-                    document.getElementById('statApprovalRate').textContent = s.approvalRate.toFixed(1) + '%';
-                    document.getElementById('statApprovedRejected').textContent = `${s.approvedLoans} Approved / ${s.totalLoans} Total`;
-
-                    // 2. Risk Intelligence
-                    animateValue('riskLow', s.lowRiskUsers);
-                    animateValue('riskMedium', s.mediumRiskUsers);
-                    animateValue('riskHigh', s.highRiskUsers);
-
-                    updateFintechCharts(s);
+                const labels = [];
+                const values = [];
+                let last = 0;
+                for (let i = 0; i < days; i++) {
+                    const d = new Date(start);
+                    d.setDate(start.getDate() + i);
+                    const key = d.toISOString().slice(0, 10);
+                    labels.push(formatDay(key));
+                    if (map.has(key)) {
+                        last = map.get(key);
+                        values.push(last);
+                    } else {
+                        if (carryForward) values.push(last);
+                        else values.push(mode === 'null' ? null : 0);
+                    }
                 }
-            } catch (err) { console.error('Stats error', err); }
-        }
+                return { labels, values };
+            };
 
-        function updateFintechCharts(s) {
-            // 1. Volume Trend
-            renderChart('volumeTrendChart', 'line', {
-                labels: s.loanVolumeTrend.map(p => p.label),
+            const volumeSeries = fillDailySeries(s.loanVolumeTrend, { days: 30, mode: 'zero', carryForward: false });
+            renderChart('loanVolumeChart', 'line', {
+                labels: volumeSeries.labels,
                 datasets: [{
-                    label: 'Daily Volume (TND)',
-                    data: s.loanVolumeTrend.map(p => p.value),
-                    borderColor: '#3498db',
-                    backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                    label: 'Approved Volume',
+                    data: volumeSeries.values,
+                    borderColor: palette.primary,
+                    backgroundColor: 'rgba(108, 93, 211, 0.12)',
                     fill: true,
-                    tension: 0.4
+                    tension: 0.35,
+                    pointRadius: 0,
+                    borderWidth: 2
                 }]
+            }, {
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (ctx) => ` ${formatCurrency(ctx.parsed.y || 0)}`
+                        }
+                    }
+                },
+                scales: {
+                    x: { grid: { display: false }, ticks: { color: 'rgba(15, 23, 42, 0.65)', maxRotation: 0 } },
+                    y: {
+                        grid: { color: palette.grid },
+                        ticks: {
+                            color: 'rgba(15, 23, 42, 0.65)',
+                            callback: (v) => formatCurrency(v)
+                        }
+                    }
+                }
             });
 
-            // 2. Approval Ratio Trend
-            renderChart('approvalTrendChart', 'line', {
-                labels: s.approvalRateTrend.map(p => p.label),
+            const approvalSeries = fillDailySeries(s.approvalRateTrend, { days: 30, mode: 'null', carryForward: true });
+            renderChart('approvalRateChart', 'line', {
+                labels: approvalSeries.labels,
                 datasets: [{
-                    label: 'Approval Rate (%)',
-                    data: s.approvalRateTrend.map(p => p.value),
-                    borderColor: '#2ecc71',
-                    tension: 0.4
+                    label: 'Approval Rate',
+                    data: approvalSeries.values,
+                    borderColor: palette.accent,
+                    backgroundColor: 'rgba(255, 117, 76, 0.10)',
+                    fill: true,
+                    tension: 0.35,
+                    pointRadius: 0,
+                    borderWidth: 2
                 }]
+            }, {
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (ctx) => ` ${(ctx.parsed.y ?? 0).toFixed(1)}%`
+                        }
+                    }
+                },
+                scales: {
+                    x: { grid: { display: false }, ticks: { color: 'rgba(15, 23, 42, 0.65)', maxRotation: 0 } },
+                    y: {
+                        min: 0,
+                        max: 100,
+                        grid: { color: palette.grid },
+                        ticks: {
+                            color: 'rgba(15, 23, 42, 0.65)',
+                            callback: (v) => `${v}%`
+                        }
+                    }
+                }
             });
 
-            // 3. User Growth
+            const growthSeries = fillDailySeries(s.userGrowthTrend, { days: 30, mode: 'zero', carryForward: true });
             renderChart('growthChart', 'line', {
-                labels: s.userGrowthTrend.map(p => p.label),
+                labels: growthSeries.labels,
                 datasets: [{
-                    label: 'Registered Users',
-                    data: s.userGrowthTrend.map(p => p.value),
-                    borderColor: '#9b59b6',
-                    tension: 0.3
+                    label: 'Users',
+                    data: growthSeries.values,
+                    borderColor: palette.primary,
+                    backgroundColor: 'rgba(108, 93, 211, 0.10)',
+                    fill: true,
+                    tension: 0.35,
+                    pointRadius: 0,
+                    borderWidth: 2
                 }]
+            }, {
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (ctx) => ` ${Math.round(ctx.parsed.y || 0).toLocaleString()}`
+                        }
+                    }
+                },
+                scales: {
+                    x: { grid: { display: false }, ticks: { color: 'rgba(15, 23, 42, 0.65)', maxRotation: 0 } },
+                    y: { grid: { color: palette.grid }, ticks: { color: 'rgba(15, 23, 42, 0.65)' } }
+                }
+            });
+
+            const approved = Number(s.approvedLoans || 0);
+            const pending = Number(s.pendingLoans || 0);
+            const rejected = Number(s.rejectedLoans || 0);
+            const total = Math.max(approved + pending + rejected, 1);
+            document.getElementById('statTotalProfit').textContent = total.toLocaleString();
+            document.getElementById('breakdownApproved').textContent = `${((approved / total) * 100).toFixed(0)}%`;
+            document.getElementById('breakdownPending').textContent = `${((pending / total) * 100).toFixed(0)}%`;
+            document.getElementById('breakdownRejected').textContent = `${((rejected / total) * 100).toFixed(0)}%`;
+
+            renderChart('profitDonut', 'doughnut', {
+                labels: ['Approved', 'Pending', 'Rejected'],
+                datasets: [{
+                    data: [approved, pending, rejected],
+                    backgroundColor: [palette.primary, palette.warning, palette.accent],
+                    borderWidth: 0,
+                    weight: 2
+                }]
+            }, {
+                cutout: '80%',
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (ctx) => {
+                                const v = Number(ctx.parsed || 0);
+                                const pct = (v / total) * 100;
+                                return ` ${v.toLocaleString()} (${pct.toFixed(1)}%)`;
+                            }
+                        }
+                    }
+                }
             });
         }
 
         function renderChart(id, type, data, options = {}) {
+            if (!window.Chart) {
+                console.error('Chart.js is not available. Cannot render chart:', id);
+                return;
+            }
             if (charts[id]) charts[id].destroy();
             const canvas = document.getElementById(id);
             if (!canvas) return;
+            const parent = canvas.parentElement;
+            const visible = canvas.offsetParent !== null && getComputedStyle(canvas).display !== 'none';
+            if (visible && parent && parent.getBoundingClientRect().height === 0) {
+                console.warn('Chart container has zero height. Chart may not be visible:', id);
+            }
             const ctx = canvas.getContext('2d');
-            charts[id] = new Chart(ctx, {
-                type: type,
-                data: data,
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } }, x: { grid: { display: false } } },
-                    ...options
-                }
-            });
+            charts[id] = new Chart(ctx, { type, data, options: { responsive: true, maintainAspectRatio: false, ...options } });
         }
 
-        // AI Assistant
-        function toggleAiPanel() {
-            const panel = document.getElementById('aiPanel');
-            panel.classList.toggle('minimized');
-        }
-
-        async function sendAiQuery() {
-            const promptInput = document.getElementById('aiPrompt');
-            const prompt = promptInput.value.trim();
-            if (!prompt) return;
-
-            const chatBox = document.getElementById('aiChatBox');
-            chatBox.innerHTML += `<div class="msg msg-user">${prompt}</div>`;
-            promptInput.value = '';
-            chatBox.scrollTop = chatBox.scrollHeight;
-
-            try {
-                const res = await authenticatedFetch('/api/dashboard/ai/query', {
-                    method: 'POST',
-                    body: JSON.stringify({ prompt })
-                });
-                if (res.ok) {
-                    const data = await res.json();
-                    chatBox.innerHTML += `
-                        <div class="msg msg-ai">
-                            ${data.answer}
-                            ${data.insight ? `<div class="ai-insight">${data.insight}</div>` : ''}
-                        </div>`;
-                } else {
-                    chatBox.innerHTML += `<div class="msg msg-ai">Analysis engine is temporarily calibrating. Please try again.</div>`;
-                }
-            } catch (err) { chatBox.innerHTML += `<div class="msg msg-ai">Connection to AI node failed.</div>`; }
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
-
+        // USER MANAGEMENT
         async function loadUsers() {
             try {
                 const res = await authenticatedFetch('/api/admin/users');
                 if (res.ok) {
                     const users = await res.json();
-                    document.getElementById('usersList').innerHTML = users.map(u => `
+                    document.getElementById('usersListContent').innerHTML = users.filter(u => u.role === 'CLIENT').map(u => `
                         <tr>
-                            <td>#${u.userId}</td>
-                            <td>${u.firstName} ${u.lastName}</td>
+                            <td>
+                                <div class="user-info">
+                                    <img src="https://ui-avatars.com/api/?name=${u.firstName}+${u.lastName}&background=EBEBFF&color=6C5DD3" style="border-radius:12px;">
+                                    <span class="name">${u.firstName} ${u.lastName}</span>
+                                </div>
+                            </td>
                             <td>${u.email}</td>
-                            <td><span class="status-badge">${u.role}</span></td>
-                            <td><span class="status-badge status-${u.status}">${u.status}</span></td>
-                            <td>${formatDate(u.createdAt)}</td>
-                            <td><button class="btn btn-danger btn-sm" onclick="deleteUser(${u.userId})">Delete</button></td>
+                            <td><span class="zarss-status-badge" style="background:#F4F4F4; color:var(--kredia-text-muted);">${u.role}</span></td>
+                            <td><span class="zarss-status-badge status-${u.status.toLowerCase()}">${u.status}</span></td>
+                            <td>
+                                <div style="display:flex; gap:8px;">
+                                    <button onclick="handleUserAction(${u.userId}, 'status', '${u.status === 'BLOCKED' ? 'VERIFIED' : 'BLOCKED'}')" class="btn btn-secondary btn-sm" style="background:#F4F4F4; color:var(--kredia-text); border-radius:10px;">${u.status === 'BLOCKED' ? 'Unblock' : 'Block'}</button>
+                                    <button onclick="handleUserAction(${u.userId}, 'reset')" class="btn btn-secondary btn-sm" style="background:#F4F4F4; color:var(--kredia-text); border-radius:10px;">Reset</button>
+                                </div>
+                            </td>
                         </tr>`).join('');
                 }
             } catch (err) { console.error('Users error', err); }
         }
 
-        async function loadKycQueue() {
+        async function handleUserAction(id, action, value) {
+            let url, method = 'PUT', body = null;
+            if (action === 'status') {
+                url = `/api/admin/users/${id}/status`;
+                body = JSON.stringify(value);
+            } else if (action === 'role') {
+                url = `/api/admin/users/${id}/role`;
+                body = JSON.stringify(value);
+            } else if (action === 'reset') {
+                if (!confirm('Reset password to "Kredia123#"?')) return;
+                url = `/api/admin/users/${id}/reset-password`;
+                method = 'POST';
+                body = "Kredia123#";
+            }
+
             try {
-                const res = await authenticatedFetch('/api/admin/kyc/pending');
+                const res = await authenticatedFetch(url, { method, body });
                 if (res.ok) {
-                    const docs = await res.json();
-                    const tbody = document.getElementById('kycQueue');
-                    if (docs.length === 0) {
-                        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#999">No pending KYC documents.</td></tr>';
-                    } else {
-                        tbody.innerHTML = docs.map(d => `
-                            <tr>
-                                <td>#${d.kycId}</td>
-                                <td>#${d.userId}</td>
-                                <td>${d.documentType}</td>
-                                <td><span class="status-badge status-${d.status}">${d.status}</span></td>
-                                <td>${formatDate(d.uploadedAt)}</td>
-                                <td>
-                                    <button class="btn btn-success btn-sm" onclick="approveKyc(${d.kycId})">Approve</button>
-                                    <button class="btn btn-danger btn-sm" onclick="rejectKyc(${d.kycId})">Reject</button>
-                                </td>
-                            </tr>`).join('');
-                    }
-                }
-            } catch (err) { console.error('KYC queue error', err); }
+                    showToast('Action successful', 'success');
+                    await loadUsers();
+                    await loadAgents();
+                } else showToast('Action failed', 'error');
+            } catch (err) { showToast('Connection error', 'error'); }
         }
 
+        // AGENT MANAGEMENT
+        async function loadAgents() {
+            try {
+                const res = await authenticatedFetch('/api/admin/agents');
+                if (res.ok) {
+                    const agents = await res.json();
+                    document.getElementById('agentsListContent').innerHTML = agents.map(u => `
+                        <tr>
+                            <td>
+                                <div class="user-info">
+                                    <img src="https://ui-avatars.com/api/?name=${u.firstName}+${u.lastName}&background=000&color=fff">
+                                    <span class="name">${u.firstName} ${u.lastName}</span>
+                                </div>
+                            </td>
+                            <td>${u.email}</td>
+                            <td><span class="zarss-status-badge" style="background:#eee">${u.role}</span></td>
+                            <td><span class="zarss-status-badge status-${u.status.toLowerCase()}">${u.status}</span></td>
+                            <td>
+                                <button onclick="handleUserAction(${u.userId}, 'status', '${u.status === 'BLOCKED' ? 'VERIFIED' : 'BLOCKED'}')" class="btn btn-secondary btn-sm">Toggle Status</button>
+                            </td>
+                        </tr>`).join('');
+                }
+            } catch (err) { console.error('Agents error', err); }
+        }
+
+        function showAddAgentModal() {
+            document.getElementById('createEmployeeModal').classList.add('active');
+        }
+
+        // MESSAGES
+        async function loadMessages() {
+            try {
+                const res = await authenticatedFetch('/api/admin/support/reclamations');
+                if (res.ok) {
+                    const tickets = await res.json();
+                    document.getElementById('ticketList').innerHTML = tickets.map(t => `
+                        <div class="zarss-msg-item ${currentTicketId == t.reclamationId ? 'active' : ''}" onclick="selectTicket(${t.reclamationId})">
+                            <div style="font-weight:700;">${t.subject}</div>
+                            <div style="font-size:0.8rem; color:var(--zarss-text-muted);">${t.user.firstName} - ${t.status}</div>
+                        </div>`).join('');
+                }
+            } catch (err) { console.error('Msgs error', err); }
+        }
+
+        async function selectTicket(id) {
+            currentTicketId = id;
+            loadMessages(); // Refresh list to show active
+            try {
+                const res = await authenticatedFetch(`/api/admin/support/reclamations/${id}/status?status=OPEN`); // Just fetching details
+                if (res.ok) {
+                    const t = await res.json();
+                    document.getElementById('chatHeader').textContent = `Chat with ${t.user.firstName} - ${t.subject}`;
+                    document.getElementById('chatHistory').innerHTML = `
+                        <div class="zarss-msg-bubble msg-client">${t.description}</div>
+                        ${(t.history || []).map(h => `
+                            <div class="zarss-msg-bubble ${h.changedBy === 'ADMIN' ? 'msg-admin' : 'msg-client'}">${h.note || 'Status changed to ' + h.newStatus}</div>
+                        `).join('')}
+                    `;
+                }
+            } catch (err) { console.error('Ticket error', err); }
+        }
+
+        async function handleSendMessage() {
+            const input = document.getElementById('msgInput');
+            const note = input.value.trim();
+            if (!note || !currentTicketId) return;
+
+            try {
+                const res = await authenticatedFetch(`/api/admin/support/reclamations/${currentTicketId}/status?status=OPEN&note=${encodeURIComponent(note)}`, { method: 'PUT' });
+                if (res.ok) {
+                    input.value = '';
+                    await selectTicket(currentTicketId);
+                }
+            } catch (err) { console.error('Send error', err); }
+        }
+
+        // SETTINGS
+        async function loadCurrentProfile() {
+            const user = JSON.parse(localStorage.getItem('user'));
+            if (user) {
+                document.getElementById('setFirstName').value = user.firstName || '';
+                document.getElementById('setLastName').value = user.lastName || '';
+                document.getElementById('setEmail').value = user.email || '';
+            }
+        }
+
+        async function handleProfileUpdate(e) {
+            e.preventDefault();
+            const data = {
+                firstName: document.getElementById('setFirstName').value,
+                lastName: document.getElementById('setLastName').value
+            };
+            try {
+                const res = await authenticatedFetch('/api/users/profile', { method: 'PUT', body: JSON.stringify(data) });
+                if (res.ok) {
+                    const updated = await res.json();
+                    localStorage.setItem('user', JSON.stringify(updated));
+                    showToast('Profile updated!', 'success');
+                } else showToast('Update failed', 'error');
+            } catch (err) { showToast('Error', 'error'); }
+        }
+
+        async function handlePasswordUpdate(e) {
+            e.preventDefault();
+            const current = document.getElementById('oldPass').value;
+            const next = document.getElementById('newPass').value;
+            try {
+                const res = await authenticatedFetch(`/api/users/password?currentPassword=${current}&newPassword=${next}`, { method: 'PUT' });
+                if (res.ok) {
+                    showToast('Password changed!', 'success');
+                    e.target.reset();
+                } else showToast('Current password incorrect', 'error');
+            } catch (err) { showToast('Error', 'error'); }
+        }
+
+        // OTHER LOADS
         async function loadAllCredits() {
             try {
                 const res = await authenticatedFetch('/api/credits');
                 if (res.ok) {
                     const credits = await res.json();
-                    const tbody = document.getElementById('allCreditsList');
-                    if (credits.length === 0) {
-                        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#999">No credits found.</td></tr>';
-                    } else {
-                        tbody.innerHTML = credits.map(c => `
-                            <tr>
-                                <td>#${c.creditId}</td>
-                                <td>#${c.userId || 'N/A'}</td>
-                                <td>${formatCurrency(c.amount)}</td>
-                                <td>${c.interestRate}%</td>
-                                <td>${c.termMonths}m</td>
-                                <td><span class="status-badge status-${c.status}">${c.status}</span></td>
-                                <td>${c.riskLevel || 'N/A'}</td>
-                                <td>${formatDate(c.createdAt)}</td>
-                            </tr>`).join('');
-                    }
+                    document.getElementById('fullCreditsList').innerHTML = credits.map(c => `
+                        <div class="zarss-list-item">
+                            <div class="user-info">
+                                <span class="name">Loan #${c.creditId}</span>
+                                <span class="time">${formatDate(c.createdAt)}</span>
+                            </div>
+                            <div class="list-val">${formatCurrency(c.amount)}</div>
+                            <div class="list-status" style="color:${c.status === 'APPROVED' ? '#2ecc71' : '#f39c12'}">● ${c.status}</div>
+                        </div>`).join('');
                 }
             } catch (err) { console.error('Credits error', err); }
         }
 
-        async function approveKyc(kycId) {
+        async function renderRecentApplications() {
             try {
-                const res = await authenticatedFetch(`/api/admin/kyc/${kycId}/approve`, { method: 'PUT' });
-                if (res.ok) { showToast('KYC approved!', 'success'); await loadKycQueue(); await loadAdminStats(); }
-                else showToast('Approval failed', 'error');
-            } catch (err) { showToast('Error', 'error'); }
-        }
-
-        async function rejectKyc(kycId) {
-            try {
-                const res = await authenticatedFetch(`/api/admin/kyc/${kycId}/reject`, { method: 'PUT' });
-                if (res.ok) { showToast('KYC rejected', 'warning'); await loadKycQueue(); await loadAdminStats(); }
-                else showToast('Rejection failed', 'error');
-            } catch (err) { showToast('Error', 'error'); }
-        }
-
-        async function deleteUser(userId) {
-            if (!confirm('Are you sure you want to delete this user?')) return;
-            try {
-                const res = await authenticatedFetch(`/api/admin/users/${userId}`, { method: 'DELETE' });
-                if (res.ok) { showToast('User deleted', 'success'); await loadUsers(); await loadAdminStats(); }
-                else showToast('Delete failed', 'error');
-            } catch (err) { showToast('Error', 'error'); }
-        }
-
-        // Create Employee
-        document.getElementById('createEmployeeForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const data = {
-                firstName: document.getElementById('empFirstName').value,
-                lastName: document.getElementById('empLastName').value,
-                email: document.getElementById('empEmail').value,
-                phoneNumber: document.getElementById('empPhone').value,
-                passwordHash: document.getElementById('empPassword').value,
-                role: document.getElementById('empRole').value
-            };
-            try {
-                const res = await authenticatedFetch('/api/admin/users', { method: 'POST', body: JSON.stringify(data) });
+                const res = await authenticatedFetch('/api/credits');
                 if (res.ok) {
-                    showToast('Employee created!', 'success');
-                    document.getElementById('createEmployeeModal').classList.remove('active');
-                    document.getElementById('createEmployeeForm').reset();
-                    await loadUsers();
-                    await loadAdminStats();
-                } else {
-                    const err = await res.text();
-                    showToast('Creation failed: ' + err, 'error');
+                    const credits = await res.json();
+                    document.getElementById('lastCreditsList').innerHTML = credits.slice(0, 5).map(c => `
+                        <div class="zarss-list-item">
+                            <div class="user-info">
+                                <img src="https://ui-avatars.com/api/?name=User+${c.userId}&background=EBEBFF&color=6C5DD3" style="border-radius:10px;">
+                                <div>
+                                    <span class="name">Application #${c.creditId}</span>
+                                    <span class="time">${formatDate(c.createdAt)}</span>
+                                </div>
+                            </div>
+                            <div class="list-val">${formatCurrency(c.amount)}</div>
+                            <div class="list-status" style="color:${c.status === 'APPROVED' ? 'var(--kredia-success)' : 'var(--kredia-secondary)'}">● ${c.status}</div>
+                        </div>`).join('');
                 }
-            } catch (err) { showToast('Error creating employee', 'error'); }
-        });
+            } catch (err) { console.error('Apps error', err); }
+        }
+
+        async function renderRecentActivity() {
+            try {
+                const res = await authenticatedFetch('/api/admin/users');
+                if (res.ok) {
+                    const users = await res.json();
+                    document.getElementById('recentActivityList').innerHTML = users.slice(0, 5).map(u => `
+                        <div class="zarss-list-item">
+                            <div class="user-info">
+                                <img src="https://ui-avatars.com/api/?name=${u.firstName}+${u.lastName}&background=EBEBFF&color=6C5DD3" style="border-radius:10px;">
+                                <div>
+                                    <span class="name">${u.firstName} ${u.lastName}</span>
+                                    <span class="time">${formatDate(u.createdAt)}</span>
+                                </div>
+                            </div>
+                            <div class="list-val" style="color:var(--kredia-primary); font-weight:700;">${u.role}</div>
+                        </div>`).join('');
+                }
+            } catch (err) { console.error('Activity error', err); }
+        }
+
+        function filterUsers() {
+            const input = document.getElementById('userSearchInput');
+            const filter = input.value.toUpperCase();
+            const table = document.getElementById('usersTable');
+            const tr = table.getElementsByTagName('tr');
+
+            for (let i = 1; i < tr.length; i++) {
+                const td = tr[i].getElementsByTagName('td')[0];
+                if (td) {
+                    const txtValue = td.textContent || td.innerText;
+                    tr[i].style.display = txtValue.toUpperCase().indexOf(filter) > -1 ? "" : "none";
+                }
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/index.html';
+        }
     </script>
 </body>
 

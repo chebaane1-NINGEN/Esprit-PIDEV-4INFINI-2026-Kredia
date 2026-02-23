@@ -1,8 +1,6 @@
 package com.kredia.auth;
 
-import com.kredia.user.entity.User;
 import com.kredia.user.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
@@ -11,12 +9,19 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
-@RequiredArgsConstructor
 public class AuthenticationService {
 
         private final UserRepository userRepository;
         private final JwtService jwtService;
         private final AuthenticationManager authenticationManager;
+
+        public AuthenticationService(UserRepository userRepository,
+                                     JwtService jwtService,
+                                     AuthenticationManager authenticationManager) {
+                this.userRepository = userRepository;
+                this.jwtService = jwtService;
+                this.authenticationManager = authenticationManager;
+        }
 
         public AuthenticationResponse authenticate(AuthenticationRequest request) {
                 authenticationManager.authenticate(

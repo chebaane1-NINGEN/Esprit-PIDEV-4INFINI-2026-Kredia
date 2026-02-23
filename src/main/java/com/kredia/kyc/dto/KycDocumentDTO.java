@@ -2,7 +2,6 @@ package com.kredia.kyc.dto;
 
 import com.kredia.enums.KycDocumentType;
 import com.kredia.enums.KycStatus;
-import com.kredia.enums.KycStatus;
 
 import java.time.LocalDateTime;
 

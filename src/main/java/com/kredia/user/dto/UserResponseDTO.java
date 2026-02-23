@@ -2,7 +2,6 @@ package com.kredia.user.dto;
 
 import com.kredia.common.Role;
 import com.kredia.common.UserStatus;
-import com.kredia.common.UserStatus;
 
 import java.time.LocalDateTime;
 

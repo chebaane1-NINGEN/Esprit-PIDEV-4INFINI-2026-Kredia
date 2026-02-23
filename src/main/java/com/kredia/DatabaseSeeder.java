@@ -10,7 +10,6 @@ import com.kredia.repository.CreditRepository;
 import com.kredia.repository.WalletRepository;
 import com.kredia.user.entity.User;
 import com.kredia.user.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,7 +20,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Configuration
-@RequiredArgsConstructor
 public class DatabaseSeeder {
 
     private final UserRepository userRepository;
@@ -29,11 +27,21 @@ public class DatabaseSeeder {
     private final CreditRepository creditRepository;
     private final WalletRepository walletRepository;
 
+    public DatabaseSeeder(UserRepository userRepository,
+                          PasswordEncoder passwordEncoder,
+                          CreditRepository creditRepository,
+                          WalletRepository walletRepository) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.creditRepository = creditRepository;
+        this.walletRepository = walletRepository;
+    }
+
     @Bean
     public CommandLineRunner initDatabase() {
         return args -> {
             // Seed ADMIN
-            User admin = seedUser("admin@kredia.com", "+33000000000", "admin123",
+            seedUser("admin@kredia.com", "+33000000000", "admin123",
                     Role.ADMIN, UserStatus.VERIFIED, "Admin", "Kredia");
 
             // Seed CLIENT (KYC verified for full access)

@@ -8,7 +8,6 @@ import com.kredia.kyc.entity.KycDocument;
 import com.kredia.kyc.repository.KycRepository;
 import com.kredia.user.entity.User;
 import com.kredia.user.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,22 +19,28 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class KycService {
 
     private final KycRepository kycRepository;
     private final UserRepository userRepository;
+
+    public KycService(KycRepository kycRepository, UserRepository userRepository) {
+        this.kycRepository = kycRepository;
+        this.userRepository = userRepository;
+    }
 
     @Value("${application.file.upload-dir:uploads/kyc}")
     private String uploadDir;
 
     @Transactional
     public KycDocumentDTO uploadDocument(Long userId, MultipartFile file, KycDocumentType type) throws IOException {
-        User user = userRepository.findById(userId)
+        Long requiredUserId = Objects.requireNonNull(userId, "userId");
+        User user = userRepository.findById(requiredUserId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         // Create upload directory if not exists
@@ -49,7 +54,7 @@ public class KycService {
         String extension = originalFilename != null && originalFilename.contains(".")
                 ? originalFilename.substring(originalFilename.lastIndexOf("."))
                 : "";
-        String filename = userId + "_" + type + "_" + UUID.randomUUID() + extension;
+        String filename = requiredUserId + "_" + type + "_" + UUID.randomUUID() + extension;
         Path filePath = uploadPath.resolve(filename);
 
         // Save file
@@ -72,7 +77,8 @@ public class KycService {
     }
 
     public UserStatus getKycStatus(Long userId) {
-        User user = userRepository.findById(userId)
+        Long requiredUserId = Objects.requireNonNull(userId, "userId");
+        User user = userRepository.findById(requiredUserId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         return user.getStatus();
     }
@@ -85,11 +91,14 @@ public class KycService {
 
     @Transactional
     public KycDocumentDTO approveDocument(Long kycId, Long adminId) {
-        KycDocument document = kycRepository.findById(kycId)
+        Long requiredKycId = Objects.requireNonNull(kycId, "kycId");
+        Long requiredAdminId = Objects.requireNonNull(adminId, "adminId");
+
+        KycDocument document = kycRepository.findById(requiredKycId)
                 .orElseThrow(() -> new RuntimeException("Document not found"));
 
         document.setStatus(KycStatus.APPROVED);
-        document.setVerifiedBy(adminId);
+        document.setVerifiedBy(requiredAdminId);
         document.setVerifiedAt(LocalDateTime.now());
         KycDocument savedDoc = kycRepository.save(document);
 
@@ -100,11 +109,14 @@ public class KycService {
 
     @Transactional
     public KycDocumentDTO rejectDocument(Long kycId, Long adminId) {
-        KycDocument document = kycRepository.findById(kycId)
+        Long requiredKycId = Objects.requireNonNull(kycId, "kycId");
+        Long requiredAdminId = Objects.requireNonNull(adminId, "adminId");
+
+        KycDocument document = kycRepository.findById(requiredKycId)
                 .orElseThrow(() -> new RuntimeException("Document not found"));
 
         document.setStatus(KycStatus.REJECTED);
-        document.setVerifiedBy(adminId);
+        document.setVerifiedBy(requiredAdminId);
         document.setVerifiedAt(LocalDateTime.now());
 
         // Any rejected doc keeps user in PENDING

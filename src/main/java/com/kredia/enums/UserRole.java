@@ -7,7 +7,10 @@ package com.kredia.enums;
  */
 @Deprecated
 public enum UserRole {
+    @Deprecated
     ADMIN,
+    @Deprecated
     CLIENT,
+    @Deprecated
     AGENT
 }

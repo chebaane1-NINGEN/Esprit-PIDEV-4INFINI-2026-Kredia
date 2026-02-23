@@ -3,19 +3,12 @@ package com.kredia.entity.wallet;
 import com.kredia.user.entity.User;
 import com.kredia.enums.WalletStatus;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
 @Table(name = "wallet")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class Wallet {
     
     @Id
@@ -73,4 +66,24 @@ public class Wallet {
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+
+    public List<Transaction> getOutgoingTransactions() { return outgoingTransactions; }
+    public void setOutgoingTransactions(List<Transaction> outgoingTransactions) { this.outgoingTransactions = outgoingTransactions; }
+
+    public List<Transaction> getIncomingTransactions() { return incomingTransactions; }
+    public void setIncomingTransactions(List<Transaction> incomingTransactions) { this.incomingTransactions = incomingTransactions; }
+
+    public Wallet() {}
+
+    public Wallet(Long walletId, User user, BigDecimal balance, BigDecimal frozenBalance, WalletStatus status, LocalDateTime createdAt, LocalDateTime updatedAt, List<Transaction> outgoingTransactions, List<Transaction> incomingTransactions) {
+        this.walletId = walletId;
+        this.user = user;
+        this.balance = balance;
+        this.frozenBalance = frozenBalance;
+        this.status = status;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.outgoingTransactions = outgoingTransactions;
+        this.incomingTransactions = incomingTransactions;
+    }
 }

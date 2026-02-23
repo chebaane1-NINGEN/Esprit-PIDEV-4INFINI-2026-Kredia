@@ -10,8 +10,6 @@ import com.kredia.enums.*;
 import com.kredia.repository.*;
 import com.kredia.user.entity.User;
 import com.kredia.user.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,11 +22,11 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 import java.util.UUID;
 
 @Service
-@RequiredArgsConstructor
 public class FintechDataSeedingService {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FintechDataSeedingService.class);
 
@@ -40,10 +38,27 @@ public class FintechDataSeedingService {
     private final PasswordEncoder passwordEncoder;
     private final ScoringService scoringService;
 
+    public FintechDataSeedingService(UserRepository userRepository,
+                                     CreditRepository creditRepository,
+                                     EcheanceRepository echeanceRepository,
+                                     WalletRepository walletRepository,
+                                     TransactionRepository transactionRepository,
+                                     PasswordEncoder passwordEncoder,
+                                     ScoringService scoringService) {
+        this.userRepository = userRepository;
+        this.creditRepository = creditRepository;
+        this.echeanceRepository = echeanceRepository;
+        this.walletRepository = walletRepository;
+        this.transactionRepository = transactionRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.scoringService = scoringService;
+    }
+
     private final Random random = new Random(42); // Fixed seed for reproducibility
 
     @EventListener(ApplicationReadyEvent.class)
     @Transactional
+    @SuppressWarnings("null")
     public void seedProductionData() {
         if (userRepository.count() > 10) {
             log.info("Fintech Data Seeding skipped - data already exists.");
@@ -66,15 +81,15 @@ public class FintechDataSeedingService {
         // 3. Generate Wallets and Credits
         for (User client : clients) {
             Wallet wallet = createWallet(client);
-            walletRepository.save(wallet);
+            Wallet savedWallet = Objects.requireNonNull(walletRepository.save(wallet));
 
             int loanCount = random.nextInt(3); // 0 to 2 loans per user
             for (int j = 0; j < loanCount; j++) {
                 Credit credit = createCredit(client, j);
-                creditRepository.save(credit);
+                Credit savedCredit = Objects.requireNonNull(creditRepository.save(credit));
                 
                 // 4. Generate Echeances and Payments
-                generateRepaymentSchedule(credit, wallet);
+                generateRepaymentSchedule(savedCredit, savedWallet);
             }
         }
 

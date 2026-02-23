@@ -1,17 +1,16 @@
 package com.kredia.dashboard.service;
 
 import com.kredia.dashboard.dto.FintechAnalyticsDTO;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
-@lombok.RequiredArgsConstructor
 public class AiAssistantService {
 
     private final FintechAnalyticsService analyticsService;
+
+    public AiAssistantService(FintechAnalyticsService analyticsService) {
+        this.analyticsService = analyticsService;
+    }
 
     /**
      * Advanced Reasoning Engine: Parses user intent and provides data-driven,

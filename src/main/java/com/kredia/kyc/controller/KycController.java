@@ -5,7 +5,6 @@ import com.kredia.enums.KycDocumentType;
 import com.kredia.kyc.dto.KycDocumentDTO;
 import com.kredia.kyc.service.KycService;
 import com.kredia.user.entity.User;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -16,10 +15,13 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/kyc")
-@RequiredArgsConstructor
 public class KycController {
 
     private final KycService kycService;
+
+    public KycController(KycService kycService) {
+        this.kycService = kycService;
+    }
 
     @PostMapping("/upload")
     public ResponseEntity<KycDocumentDTO> uploadDocument(

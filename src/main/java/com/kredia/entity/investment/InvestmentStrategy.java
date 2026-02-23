@@ -1,20 +1,12 @@
 package com.kredia.entity.investment;
 
 import com.kredia.user.entity.User;
-import com.kredia.enums.RiskLevel;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "investment_strategies")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class InvestmentStrategy {
     
     @Id
@@ -56,4 +48,45 @@ public class InvestmentStrategy {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
+
+    public InvestmentStrategy() {}
+
+    public InvestmentStrategy(Long strategyId, User user, String strategyName, BigDecimal maxBudget, BigDecimal stopLossPct, Boolean reinvestProfits, Boolean isActive, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.strategyId = strategyId;
+        this.user = user;
+        this.strategyName = strategyName;
+        this.maxBudget = maxBudget;
+        this.stopLossPct = stopLossPct;
+        this.reinvestProfits = reinvestProfits;
+        this.isActive = isActive;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
+
+    public Long getStrategyId() { return strategyId; }
+    public void setStrategyId(Long strategyId) { this.strategyId = strategyId; }
+
+    public User getUser() { return user; }
+    public void setUser(User user) { this.user = user; }
+
+    public String getStrategyName() { return strategyName; }
+    public void setStrategyName(String strategyName) { this.strategyName = strategyName; }
+
+    public BigDecimal getMaxBudget() { return maxBudget; }
+    public void setMaxBudget(BigDecimal maxBudget) { this.maxBudget = maxBudget; }
+
+    public BigDecimal getStopLossPct() { return stopLossPct; }
+    public void setStopLossPct(BigDecimal stopLossPct) { this.stopLossPct = stopLossPct; }
+
+    public Boolean getReinvestProfits() { return reinvestProfits; }
+    public void setReinvestProfits(Boolean reinvestProfits) { this.reinvestProfits = reinvestProfits; }
+
+    public Boolean getIsActive() { return isActive; }
+    public void setIsActive(Boolean isActive) { this.isActive = isActive; }
+
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 }

@@ -10,16 +10,27 @@
 
 <body>
     <div class="auth-page">
-        <!-- Visual Section -->
+        <!-- Visual Section (Left) -->
         <div class="auth-visual">
+            <div class="auth-visual-logo">
+                <img src="/images/logo.png" alt="Kredia">
+                <span>Kredia</span>
+            </div>
+
             <div class="auth-visual-content">
                 <h2>Invest Smarter.<br>Grow Faster.</h2>
                 <p>Track your credit portfolio, manage your digital wallet, and unlock 2.0 micro-finance intelligence
                     from a single, secure dashboard.</p>
             </div>
+
+            <div class="auth-visual-footer">
+                <div class="dot active"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
         </div>
 
-        <!-- content Section -->
+        <!-- Content Section (Right) -->
         <div class="auth-content">
             <a href="/" class="auth-back-link">
                 <span>← Back to Website</span>
@@ -27,24 +38,23 @@
 
             <div class="auth-form-wrapper">
                 <header class="auth-header">
-                    <img src="/images/logo.png" alt="Kredia" class="auth-logo">
                     <h3>Welcome Back!</h3>
-                    <p>Enter your credentials to access your secure portal.</p>
+                    <p>Log in to start managing your portfolio with ease.</p>
                 </header>
 
                 <form id="loginForm" class="auth-form">
                     <div class="form-group-modern">
-                        <label for="email">Email address</label>
+                        <label for="email">Email</label>
                         <div class="input-wrapper">
-                            <input type="email" id="email" class="input-modern" placeholder="e.g. name@company.com"
-                                required>
+                            <input type="email" id="email" class="input-modern" placeholder="Input your email" required>
                         </div>
                     </div>
 
                     <div class="form-group-modern">
                         <label for="password">Password</label>
                         <div class="input-wrapper">
-                            <input type="password" id="password" class="input-modern" placeholder="••••••••" required>
+                            <input type="password" id="password" class="input-modern" placeholder="Input your password"
+                                required>
                             <button type="button" class="password-toggle"
                                 onclick="togglePasswordVisibility('password')">
                                 👁️
@@ -57,31 +67,31 @@
                             <input type="checkbox" id="rememberMe">
                             <span>Remember Me</span>
                         </label>
-                        <a href="#" class="forgot-password">Forgot Password?</a>
+                        <a href="/forgot-password.html" class="forgot-password">Forgot Password?</a>
                     </div>
 
                     <div class="error-message" id="errorMessage" style="text-align: left; margin-bottom: 24px;"></div>
 
-                    <button type="submit" class="btn-auth">Sign In</button>
+                    <button type="submit" class="btn-auth">Login</button>
 
                     <div class="auth-divider">
-                        <span>Or continue with</span>
+                        <span>Or continue with:</span>
                     </div>
 
                     <div class="social-login">
-                        <button type="button" class="btn-social">
+                        <a href="/oauth2/authorization/google" class="btn-social">
                             <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" alt="Google">
-                            <span>Google</span>
-                        </button>
-                        <button type="button" class="btn-social">
+                            <span>Continue with Google</span>
+                        </a>
+                        <a href="/oauth2/authorization/github" class="btn-social">
                             <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
                                 alt="Github">
-                            <span>Github</span>
-                        </button>
+                            <span>Continue with Github</span>
+                        </a>
                     </div>
 
                     <p class="auth-footer">
-                        Don't have an account? <a href="/auth/register">Sign up here</a>
+                        Don't have an account? <a href="/register.html">Sign up here</a>
                     </p>
                 </form>
             </div>

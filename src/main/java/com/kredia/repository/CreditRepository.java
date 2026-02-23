@@ -105,9 +105,20 @@ public interface CreditRepository extends JpaRepository<Credit, Long> {
     @Query(value = "SELECT AVG(DATEDIFF(hour, created_at, decision_date)) FROM credit WHERE decision_date IS NOT NULL", nativeQuery = true)
     Optional<Double> avgDecisionTimeInHours();
 
-    /** Time-series: Loan volume by day for the last 30 days. */
-    @Query(value = "SELECT CAST(created_at AS DATE) as date, SUM(amount) as volume FROM credit WHERE created_at >= :since GROUP BY CAST(created_at AS DATE) ORDER BY date", nativeQuery = true)
+    /** Time-series: Loan volume by day for the last 30 days (Approved only). */
+    @Query(value = "SELECT CAST(created_at AS DATE) as date, SUM(amount) as volume FROM credit WHERE created_at >= :since AND status = 'APPROVED' GROUP BY CAST(created_at AS DATE) ORDER BY date", nativeQuery = true)
     List<Object[]> getVolumeTimeSeries(@Param("since") LocalDateTime since);
+
+    /** Sum of approved loan volume in a specific period. */
+    @Query("SELECT SUM(c.amount) FROM Credit c WHERE c.status = com.kredia.enums.CreditStatus.APPROVED AND c.createdAt >= :start AND c.createdAt <= :end")
+    Optional<Double> sumApprovedVolumeInPeriod(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
+
+    /** Time-series: Approval rate by day for the last 30 days. */
+    @Query(value = "SELECT CAST(created_at AS DATE) as date, " +
+                   "SUM(CASE WHEN status = 'APPROVED' THEN 1 ELSE 0 END) as approved_count, " +
+                   "COUNT(*) as total_count " +
+                   "FROM credit WHERE created_at >= :since GROUP BY CAST(created_at AS DATE) ORDER BY date", nativeQuery = true)
+    List<Object[]> getApprovalRateTimeSeries(@Param("since") LocalDateTime since);
 
     /** Time-series: User growth by day for the last 30 days (from users table). */
     // Note: This might be better in UserRepository, but I'll add it here if I need it joined, 

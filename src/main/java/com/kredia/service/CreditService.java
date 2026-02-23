@@ -7,7 +7,6 @@ import com.kredia.enums.CreditStatus;
 import com.kredia.enums.EcheanceStatus;
 import com.kredia.repository.CreditRepository;
 import com.kredia.user.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,20 +16,25 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
 @Transactional
-@RequiredArgsConstructor
 public class CreditService {
 
     private final CreditRepository creditRepository;
     private final UserRepository userRepository;
 
+    public CreditService(CreditRepository creditRepository, UserRepository userRepository) {
+        this.creditRepository = creditRepository;
+        this.userRepository = userRepository;
+    }
+
     public Credit createCredit(Credit credit) {
         credit.setStatus(CreditStatus.PENDING);
         // 1. Validate and fetch full User entity
-        Long userId = credit.getUser().getUserId();
+        Long userId = Objects.requireNonNull(Objects.requireNonNull(credit.getUser(), "credit.user").getUserId(), "userId");
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found with id " + userId));
         credit.setUser(user);
@@ -69,7 +73,8 @@ public class CreditService {
     }
 
     public Optional<Credit> getCreditById(Long id) {
-        return creditRepository.findById(id);
+        Long requiredId = Objects.requireNonNull(id, "id");
+        return creditRepository.findById(requiredId);
     }
 
     public List<Credit> getAllCredits() {
@@ -77,7 +82,8 @@ public class CreditService {
     }
 
     public Credit updateCredit(Long id, Credit creditDetails, Long handledByUserId) {
-        return creditRepository.findById(id).map(credit -> {
+        Long requiredId = Objects.requireNonNull(id, "id");
+        return creditRepository.findById(requiredId).map(credit -> {
             credit.setAmount(creditDetails.getAmount());
             credit.setInterestRate(creditDetails.getInterestRate());
             credit.setStartDate(creditDetails.getStartDate());
@@ -97,7 +103,7 @@ public class CreditService {
                 credit.setStatus(newStatus);
                 if (newStatus == CreditStatus.APPROVED || newStatus == CreditStatus.REJECTED) {
                     credit.setDecisionDate(LocalDateTime.now());
-                    credit.setHandledBy(handledByUserId);
+                    credit.setHandledBy(Objects.requireNonNull(handledByUserId, "handledByUserId"));
                 }
             }
 
@@ -106,7 +112,7 @@ public class CreditService {
     }
 
     public void deleteCredit(Long id) {
-        creditRepository.deleteById(id);
+        creditRepository.deleteById(Objects.requireNonNull(id, "id"));
     }
 
     public List<Credit> getCreditsByUser(Long userId) {

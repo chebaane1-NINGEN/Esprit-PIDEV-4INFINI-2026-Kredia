@@ -6,19 +6,23 @@ import com.kredia.user.dto.UserProfileDTO;
 import com.kredia.user.dto.UserResponseDTO;
 import com.kredia.user.entity.User;
 import com.kredia.user.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Service
-@RequiredArgsConstructor
 public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @Transactional
     public User registerUser(User user) {
@@ -52,13 +56,14 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public User getUserById(Long id) {
-        return userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+        Long requiredId = Objects.requireNonNull(id, "id");
+        return userRepository.findById(requiredId)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + requiredId));
     }
     
     @Transactional
     public UserResponseDTO updateProfile(Long userId, UserProfileDTO dto) {
-        User user = getUserById(userId);
+        User user = getUserById(Objects.requireNonNull(userId, "userId"));
         
         if (dto.getFirstName() != null) user.setFirstName(dto.getFirstName());
         if (dto.getLastName() != null) user.setLastName(dto.getLastName());
@@ -76,6 +81,37 @@ public class UserService {
         return mapToResponseDTO(getUserById(userId));
     }
     
+    @Transactional
+    public void resetPassword(Long userId, String newPassword) {
+        User user = getUserById(userId);
+        user.setPasswordHash(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
+
+    @Transactional
+    public void updateUserStatus(Long userId, UserStatus status) {
+        User user = getUserById(userId);
+        user.setStatus(status);
+        userRepository.save(user);
+    }
+
+    @Transactional
+    public void updateUserRole(Long userId, Role role) {
+        User user = getUserById(userId);
+        user.setRole(role);
+        userRepository.save(user);
+    }
+
+    @Transactional
+    public void changePassword(Long userId, String currentPassword, String newPassword) {
+        User user = getUserById(userId);
+        if (!passwordEncoder.matches(currentPassword, user.getPasswordHash())) {
+            throw new RuntimeException("Current password does not match");
+        }
+        user.setPasswordHash(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
+
     private UserResponseDTO mapToResponseDTO(User user) {
         return UserResponseDTO.builder()
                 .userId(user.getUserId())

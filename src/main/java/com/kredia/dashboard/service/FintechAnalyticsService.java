@@ -7,8 +7,6 @@ import com.kredia.repository.CreditRepository;
 import com.kredia.repository.EcheanceRepository;
 import com.kredia.repository.TransactionRepository;
 import com.kredia.user.repository.UserRepository;
-import com.kredia.common.Role;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -19,13 +17,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 public class FintechAnalyticsService {
 
     private final UserRepository userRepository;
     private final CreditRepository creditRepository;
     private final EcheanceRepository echeanceRepository;
     private final TransactionRepository transactionRepository;
+
+    public FintechAnalyticsService(UserRepository userRepository,
+                                   CreditRepository creditRepository,
+                                   EcheanceRepository echeanceRepository,
+                                   TransactionRepository transactionRepository) {
+        this.userRepository = userRepository;
+        this.creditRepository = creditRepository;
+        this.echeanceRepository = echeanceRepository;
+        this.transactionRepository = transactionRepository;
+    }
 
     public FintechAnalyticsDTO getFullFintechAnalytics() {
         LocalDateTime thirtyDaysAgo = LocalDateTime.now().minusDays(30);

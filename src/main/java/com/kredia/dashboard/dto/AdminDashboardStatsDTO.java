@@ -18,6 +18,11 @@ public class AdminDashboardStatsDTO {
     private java.util.List<ChartPoint> loanVolumeTrend;
     private java.util.List<ChartPoint> approvalRateTrend;
     private java.util.List<ChartPoint> userGrowthTrend;
+    
+    // NEW production-ready metrics
+    private long totalUsers;
+    private long pendingLoans;
+    private Double monthlyGrowth;
 
     public AdminDashboardStatsDTO() {}
 
@@ -46,6 +51,13 @@ public class AdminDashboardStatsDTO {
     public java.util.List<ChartPoint> getUserGrowthTrend() { return userGrowthTrend; }
     public void setUserGrowthTrend(java.util.List<ChartPoint> userGrowthTrend) { this.userGrowthTrend = userGrowthTrend; }
 
+    public long getTotalUsers() { return totalUsers; }
+    public void setTotalUsers(long totalUsers) { this.totalUsers = totalUsers; }
+    public long getPendingLoans() { return pendingLoans; }
+    public void setPendingLoans(long pendingLoans) { this.pendingLoans = pendingLoans; }
+    public Double getMonthlyGrowth() { return monthlyGrowth; }
+    public void setMonthlyGrowth(Double monthlyGrowth) { this.monthlyGrowth = monthlyGrowth; }
+
     public static AdminDashboardStatsDTOBuilder builder() { return new AdminDashboardStatsDTOBuilder(); }
 
     public static class AdminDashboardStatsDTOBuilder {
@@ -62,6 +74,9 @@ public class AdminDashboardStatsDTO {
         public AdminDashboardStatsDTOBuilder loanVolumeTrend(java.util.List<ChartPoint> v) { dto.setLoanVolumeTrend(v); return this; }
         public AdminDashboardStatsDTOBuilder approvalRateTrend(java.util.List<ChartPoint> v) { dto.setApprovalRateTrend(v); return this; }
         public AdminDashboardStatsDTOBuilder userGrowthTrend(java.util.List<ChartPoint> v) { dto.setUserGrowthTrend(v); return this; }
+        public AdminDashboardStatsDTOBuilder totalUsers(long v) { dto.setTotalUsers(v); return this; }
+        public AdminDashboardStatsDTOBuilder pendingLoans(long v) { dto.setPendingLoans(v); return this; }
+        public AdminDashboardStatsDTOBuilder monthlyGrowth(Double v) { dto.setMonthlyGrowth(v); return this; }
         public AdminDashboardStatsDTO build() { return dto; }
     }
 

@@ -3,7 +3,6 @@ package com.kredia.kyc.controller;
 import com.kredia.kyc.dto.KycDocumentDTO;
 import com.kredia.kyc.service.KycService;
 import com.kredia.user.entity.User;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -13,11 +12,14 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin/kyc")
-@RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminKycController {
 
     private final KycService kycService;
+
+    public AdminKycController(KycService kycService) {
+        this.kycService = kycService;
+    }
 
     @GetMapping("/pending")
     public ResponseEntity<List<KycDocumentDTO>> getPendingDocuments() {

@@ -28,7 +28,7 @@ function checkAuth(requiredRole) {
 
 function logout() {
     localStorage.clear();
-    window.location.href = '/auth/login';
+    window.location.href = '/';
 }
 
 // Fetch helper with auth header

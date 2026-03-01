@@ -19,12 +19,15 @@ public class CreditController {
 
     private final CreditService creditService;
     private final com.kredia.service.CreditExcelExportService creditExcelExportService;
+    private final com.kredia.service.StatisticsPdfExportService statisticsPdfExportService;
 
     @Autowired
     public CreditController(CreditService creditService,
-            com.kredia.service.CreditExcelExportService creditExcelExportService) {
+            com.kredia.service.CreditExcelExportService creditExcelExportService,
+            com.kredia.service.StatisticsPdfExportService statisticsPdfExportService) {
         this.creditService = creditService;
         this.creditExcelExportService = creditExcelExportService;
+        this.statisticsPdfExportService = statisticsPdfExportService;
     }
 
     @PostMapping
@@ -73,6 +76,23 @@ public class CreditController {
             return ResponseEntity.ok()
                     .headers(headers)
                     .body(excelData);
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
+    @GetMapping("/{id}/statistics/pdf")
+    public ResponseEntity<byte[]> exportStatisticsPdf(@PathVariable Long id) {
+        try {
+            byte[] pdfData = statisticsPdfExportService.generateStatisticsPdf(id);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=statistiques_credit_" + id + ".pdf");
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(pdfData);
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         } catch (RuntimeException e) {

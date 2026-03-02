@@ -24,9 +24,7 @@ COPY main.py .
 EXPOSE 8002
 
 # Variables d'environnement par défaut
-ENV DATABASE_URL="mysql+pymysql://root:Ningen@2024@host.docker.internal:3306/kredia_db"
-ENV ALPHA_VANTAGE_API_KEY="ACH9TF7OZXXUFNH0"
-ENV MONITORING_INTERVAL="60"
+ENV DATABASE_URL="mysql+pymysql://root@host.docker.internal:3306/kredia_db"
 
 # Commande de démarrage
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8002", "--reload"]
+CMD ["python", "main.py"]

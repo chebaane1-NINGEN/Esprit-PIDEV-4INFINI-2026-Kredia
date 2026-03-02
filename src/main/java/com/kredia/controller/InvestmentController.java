@@ -94,6 +94,7 @@ public class InvestmentController {
             InvestmentOrder createdOrder = investmentService.createOrder(order);
             return new ResponseEntity<>(createdOrder, HttpStatus.CREATED);
         } catch (RuntimeException e) {
+            System.out.println("Error creating order: " + e.getMessage());
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
@@ -137,9 +138,9 @@ public class InvestmentController {
         return new ResponseEntity<>(orders, HttpStatus.OK);
     }
 
-    @GetMapping("/orders/asset/{assetId}")
-    public ResponseEntity<List<InvestmentOrder>> getOrdersByAssetId(@PathVariable Long assetId) {
-        List<InvestmentOrder> orders = investmentService.getOrdersByAssetId(assetId);
+    @GetMapping("/orders/asset/{assetSymbol}")
+    public ResponseEntity<List<InvestmentOrder>> getOrdersByAssetSymbol(@PathVariable String assetSymbol) {
+        List<InvestmentOrder> orders = investmentService.getOrdersByAssetSymbol(assetSymbol);
         return new ResponseEntity<>(orders, HttpStatus.OK);
     }
 

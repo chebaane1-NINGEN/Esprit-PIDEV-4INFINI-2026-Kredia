@@ -41,11 +41,11 @@ public class UserController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<Page<UserResponseDTO>>> search(
-            @RequestParam(required = false) String email,
-            @RequestParam(required = false) UserStatus status,
-            @RequestParam(required = false) UserRole role,
-            @RequestParam(required = false) Instant createdFrom,
-            @RequestParam(required = false) Instant createdTo,
+            @RequestParam(name = "email", required = false) String email,
+            @RequestParam(name = "status", required = false) UserStatus status,
+            @RequestParam(name = "role", required = false) UserRole role,
+            @RequestParam(name = "createdFrom", required = false) Instant createdFrom,
+            @RequestParam(name = "createdTo", required = false) Instant createdTo,
             @PageableDefault Pageable pageable
     ) {
         return ResponseEntity.ok(ApiResponse.ok(
@@ -61,49 +61,49 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<UserResponseDTO>> getById(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<UserResponseDTO>> getById(@PathVariable("id") Long id) {
         return ResponseEntity.ok(ApiResponse.ok(userService.getById(id)));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<UserResponseDTO>> update(@PathVariable Long id, @Valid @RequestBody UserRequestDTO user) {
+    public ResponseEntity<ApiResponse<UserResponseDTO>> update(@PathVariable("id") Long id, @Valid @RequestBody UserRequestDTO user) {
         return ResponseEntity.ok(ApiResponse.ok(userService.update(id, user)));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable("id") Long id) {
         userService.delete(id);
         return ResponseEntity.ok(ApiResponse.ok(null));
     }
 
     @PatchMapping("/{id}/restore")
-    public ResponseEntity<ApiResponse<UserResponseDTO>> restore(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<UserResponseDTO>> restore(@PathVariable("id") Long id) {
         return ResponseEntity.ok(ApiResponse.ok(userService.restore(id)));
     }
 
     @PatchMapping("/{id}/block")
-    public ResponseEntity<ApiResponse<UserResponseDTO>> block(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<UserResponseDTO>> block(@PathVariable("id") Long id) {
         return ResponseEntity.ok(ApiResponse.ok(userService.block(id)));
     }
 
     @PatchMapping("/{id}/suspend")
-    public ResponseEntity<ApiResponse<UserResponseDTO>> suspend(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<UserResponseDTO>> suspend(@PathVariable("id") Long id) {
         return ResponseEntity.ok(ApiResponse.ok(userService.suspend(id)));
     }
 
     @PatchMapping("/{id}/activate")
-    public ResponseEntity<ApiResponse<UserResponseDTO>> activate(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<UserResponseDTO>> activate(@PathVariable("id") Long id) {
         return ResponseEntity.ok(ApiResponse.ok(userService.activate(id)));
     }
 
     @PatchMapping("/{id}/deactivate")
-    public ResponseEntity<ApiResponse<UserResponseDTO>> deactivate(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<UserResponseDTO>> deactivate(@PathVariable("id") Long id) {
         return ResponseEntity.ok(ApiResponse.ok(userService.deactivate(id)));
     }
 
     @PatchMapping("/{id}/role")
     public ResponseEntity<ApiResponse<UserResponseDTO>> changeRole(
-            @PathVariable Long id,
+            @PathVariable("id") Long id,
             @Valid @RequestBody UserRoleChangeRequestDTO request
     ) {
         return ResponseEntity.ok(ApiResponse.ok(userService.changeRole(id, request.getRole())));
@@ -135,7 +135,7 @@ public class UserController {
     @GetMapping("/admin/audit/{userId}")
     public ResponseEntity<ApiResponse<List<UserActivityResponseDTO>>> adminAudit(
             @RequestHeader("X-Actor-Id") Long actorId,
-            @PathVariable Long userId
+            @PathVariable("userId") Long userId
     ) {
         return ResponseEntity.ok(ApiResponse.ok(userService.adminAudit(actorId, userId)));
     }
@@ -143,44 +143,44 @@ public class UserController {
     @GetMapping("/admin/activities")
     public ResponseEntity<ApiResponse<List<UserActivityResponseDTO>>> adminActivitiesByRole(
             @RequestHeader("X-Actor-Id") Long actorId,
-            @RequestParam UserRole role,
+            @RequestParam(name = "role") UserRole role,
             @PageableDefault Pageable pageable
     ) {
         return ResponseEntity.ok(ApiResponse.ok(userService.adminActivitiesByRole(actorId, role, pageable)));
     }
 
     @GetMapping("/agent/{agentId}/dashboard")
-    public ResponseEntity<ApiResponse<AgentPerformanceDTO>> agentDashboard(@PathVariable Long agentId) {
+    public ResponseEntity<ApiResponse<AgentPerformanceDTO>> agentDashboard(@PathVariable("agentId") Long agentId) {
         return ResponseEntity.ok(ApiResponse.ok(userService.agentDashboard(agentId)));
     }
 
     @GetMapping("/agent/{agentId}/performance")
-    public ResponseEntity<ApiResponse<AgentPerformanceDTO>> agentPerformance(@PathVariable Long agentId) {
+    public ResponseEntity<ApiResponse<AgentPerformanceDTO>> agentPerformance(@PathVariable("agentId") Long agentId) {
         return ResponseEntity.ok(ApiResponse.ok(userService.agentPerformance(agentId)));
     }
 
     @GetMapping("/agent/{agentId}/activities")
-    public ResponseEntity<ApiResponse<List<UserActivityResponseDTO>>> agentActivities(@PathVariable Long agentId) {
+    public ResponseEntity<ApiResponse<List<UserActivityResponseDTO>>> agentActivities(@PathVariable("agentId") Long agentId) {
         return ResponseEntity.ok(ApiResponse.ok(userService.agentActivities(agentId)));
     }
 
     @GetMapping("/client/{clientId}/profile")
-    public ResponseEntity<ApiResponse<UserResponseDTO>> clientProfile(@PathVariable Long clientId) {
+    public ResponseEntity<ApiResponse<UserResponseDTO>> clientProfile(@PathVariable("clientId") Long clientId) {
         return ResponseEntity.ok(ApiResponse.ok(userService.clientProfile(clientId)));
     }
 
     @GetMapping("/client/{clientId}/activities")
-    public ResponseEntity<ApiResponse<List<UserActivityResponseDTO>>> clientActivity(@PathVariable Long clientId) {
+    public ResponseEntity<ApiResponse<List<UserActivityResponseDTO>>> clientActivity(@PathVariable("clientId") Long clientId) {
         return ResponseEntity.ok(ApiResponse.ok(userService.clientActivity(clientId)));
     }
 
     @GetMapping("/client/{clientId}/risk-score")
-    public ResponseEntity<ApiResponse<ClientRiskScoreDTO>> clientRiskScore(@PathVariable Long clientId) {
+    public ResponseEntity<ApiResponse<ClientRiskScoreDTO>> clientRiskScore(@PathVariable("clientId") Long clientId) {
         return ResponseEntity.ok(ApiResponse.ok(userService.clientRiskScore(clientId)));
     }
 
     @GetMapping("/client/{clientId}/eligibility")
-    public ResponseEntity<ApiResponse<ClientEligibilityDTO>> clientEligibility(@PathVariable Long clientId) {
+    public ResponseEntity<ApiResponse<ClientEligibilityDTO>> clientEligibility(@PathVariable("clientId") Long clientId) {
         return ResponseEntity.ok(ApiResponse.ok(userService.clientEligibility(clientId)));
     }
 }

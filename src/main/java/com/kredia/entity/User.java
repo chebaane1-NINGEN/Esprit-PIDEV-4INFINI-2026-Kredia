@@ -77,6 +77,9 @@ public class User {
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
+    public Long getUserId() { return id; }
+    public void setUserId(Long userId) { this.id = userId; }
+
     public Long getVersion() { return version; }
     public void setVersion(Long version) { this.version = version; }
 

@@ -1,7 +1,7 @@
 package com.kredia.service;
 import com.kredia.entity.wallet.Wallet;
+import com.kredia.repository.LegacyUserRepository;
 import com.kredia.repository.WalletRepository;
-import com.kredia.repository.UserRepository;
 import com.kredia.enums.WalletStatus;
 import com.kredia.entity.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +14,8 @@ import java.time.LocalDateTime;
 public class WalletService {
     @Autowired
     private WalletRepository walletRepository;
-    private UserRepository userRepository;
-    public WalletService( UserRepository userRepository, WalletRepository walletRepository) {
+    private LegacyUserRepository userRepository;
+    public WalletService(LegacyUserRepository userRepository, WalletRepository walletRepository) {
         this.userRepository = userRepository;
         this.walletRepository = walletRepository;
     }

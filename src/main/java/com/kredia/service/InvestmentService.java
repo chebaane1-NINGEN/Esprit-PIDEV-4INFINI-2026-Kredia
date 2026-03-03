@@ -121,10 +121,8 @@ public class InvestmentService {
             order.setUser(user);
         }
         
-        if (orderDetails.getAsset() != null && orderDetails.getAsset().getAssetId() != null) {
-            InvestmentAsset asset = assetRepository.findById(orderDetails.getAsset().getAssetId())
-                    .orElseThrow(() -> new RuntimeException("Asset not found"));
-            order.setAsset(asset);
+        if (orderDetails.getAssetSymbol() != null) {
+            order.setAssetSymbol(orderDetails.getAssetSymbol());
         }
         
         order.setOrderType(orderDetails.getOrderType());
@@ -147,8 +145,8 @@ public class InvestmentService {
         return orderRepository.findByUserUserId(userId);
     }
 
-    public List<InvestmentOrder> getOrdersByAssetId(Long assetId) {
-        return orderRepository.findByAssetAssetId(assetId);
+    public List<InvestmentOrder> getOrdersByAssetSymbol(String assetSymbol) {
+        return orderRepository.findByAssetSymbol(assetSymbol);
     }
 
     public List<InvestmentOrder> getOrdersByStatus(OrderStatus status) {

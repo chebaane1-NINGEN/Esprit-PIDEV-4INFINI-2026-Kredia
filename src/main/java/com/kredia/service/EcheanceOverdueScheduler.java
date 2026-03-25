@@ -21,8 +21,8 @@ public class EcheanceOverdueScheduler {
 
     private final EcheanceRepository echeanceRepository;
 
-    // Au démarrage puis toutes les heures
-    @Scheduled(fixedRate = 3600000, initialDelay = 0)
+    // Exécution tous les jours à minuit pile (00:00:00)
+    @Scheduled(cron = "0 0 0 * * *")
     @Transactional
     public void markOverdueEcheances() {
         LocalDate today = LocalDate.now();

@@ -51,9 +51,17 @@ public class CreditService {
         } else {
             echeances = generateAmortissementConstant(credit);
         }
+        // 3. Mettre à jour immédiatement le statut si la date est déjà passée
+        LocalDate today = LocalDate.now();
+        for (Echeance e : echeances) {
+            if (e.getDueDate().isBefore(today)) {
+                e.setStatus(EcheanceStatus.OVERDUE);
+            }
+        }
+
         credit.setEcheances(echeances);
 
-        // 3. Save credit with all echeances in one transaction
+        // 4. Save credit with all echeances in one transaction
         return creditRepository.save(credit);
     }
 

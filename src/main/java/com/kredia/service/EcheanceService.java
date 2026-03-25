@@ -35,7 +35,7 @@ public class EcheanceService {
      */
     @Transactional
     public void checkAndUpdateStatus(Echeance echeance) {
-        if (echeance.getStatus() == EcheanceStatus.PENDING || echeance.getStatus() == EcheanceStatus.PARTIALLY_PAID) {
+        if (echeance.getStatus() == EcheanceStatus.PENDING || echeance.getStatus() == EcheanceStatus.PARTIALLY_PAID || echeance.getStatus() == EcheanceStatus.OVERDUE) {
             // Calculer le montant total des transactions liées à cette échéance
             java.math.BigDecimal totalPaid = echeanceRepository
                     .sumTransactionAmountsByEcheanceId(echeance.getEcheanceId());

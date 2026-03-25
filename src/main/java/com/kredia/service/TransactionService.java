@@ -23,8 +23,8 @@ public class TransactionService {
 
     @Autowired
     public TransactionService(TransactionRepository transactionRepository,
-                              WalletRepository walletRepository,
-                              TransactionAuditLogService auditLogService) {
+            WalletRepository walletRepository,
+            TransactionAuditLogService auditLogService) {
         this.transactionRepository = transactionRepository;
         this.walletRepository = walletRepository;
         this.auditLogService = auditLogService;

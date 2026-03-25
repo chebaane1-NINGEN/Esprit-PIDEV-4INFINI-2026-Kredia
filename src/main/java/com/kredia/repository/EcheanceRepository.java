@@ -14,7 +14,7 @@ public interface EcheanceRepository extends JpaRepository<Echeance, Long> {
 
     @Query(value = "SELECT e.* FROM echeance e " +
             "INNER JOIN `transaction` t ON t.echeance_id = e.echeance_id " +
-            "WHERE e.status = 'PENDING'", nativeQuery = true)
+            "WHERE e.status IN ('PENDING', 'PARTIALLY_PAID')", nativeQuery = true)
     List<Echeance> findPendingEcheancesWithTransaction();
 
     @Query(value = "SELECT COUNT(*) FROM `transaction` t WHERE t.echeance_id = :echeanceId", nativeQuery = true)

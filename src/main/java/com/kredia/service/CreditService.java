@@ -53,9 +53,14 @@ public class CreditService {
         }
         // 3. Mettre à jour immédiatement le statut si la date est déjà passée
         LocalDate today = LocalDate.now();
+        java.math.BigDecimal penaltyRate = new java.math.BigDecimal("0.05");
+
         for (Echeance e : echeances) {
             if (e.getDueDate().isBefore(today)) {
                 e.setStatus(EcheanceStatus.OVERDUE);
+                // Majoration de 5% pour pénalité de retard
+                java.math.BigDecimal penalty = e.getAmountDue().multiply(penaltyRate);
+                e.setAmountDue(e.getAmountDue().add(penalty).setScale(2, RoundingMode.HALF_EVEN));
             }
         }
 

@@ -34,7 +34,15 @@ public class EcheanceOverdueScheduler {
 
         if (late.isEmpty()) return;
 
-        late.forEach(e -> e.setStatus(EcheanceStatus.OVERDUE));
+        // Taux de pénalité de 5%
+        java.math.BigDecimal penaltyRate = new java.math.BigDecimal("0.05");
+
+        late.forEach(e -> {
+            e.setStatus(EcheanceStatus.OVERDUE);
+            // Ajout de 5% de pénalité sur le montant dû
+            java.math.BigDecimal penalty = e.getAmountDue().multiply(penaltyRate);
+            e.setAmountDue(e.getAmountDue().add(penalty).setScale(2, java.math.RoundingMode.HALF_EVEN));
+        });
         echeanceRepository.saveAll(late);
         log.info("{} échéance(s) passées en OVERDUE", late.size());
     }

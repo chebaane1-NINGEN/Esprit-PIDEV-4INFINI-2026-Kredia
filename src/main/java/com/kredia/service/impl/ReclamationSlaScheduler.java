@@ -13,11 +13,20 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
 public class ReclamationSlaScheduler {
+
+    private static final List<ReclamationStatus> SLA_TRACKED_STATUSES = List.of(
+            ReclamationStatus.OPEN,
+            ReclamationStatus.IN_PROGRESS,
+            ReclamationStatus.WAITING_CUSTOMER,
+            ReclamationStatus.REOPENED
+    );
 
     private final ReclamationRepository reclamationRepository;
     private final ReclamationHistoryRepository historyRepository;
@@ -25,31 +34,43 @@ public class ReclamationSlaScheduler {
 
     @Scheduled(fixedRate = 60000)
     @Transactional
-    public void autoEscalateOldOpenTickets() {
+    public void autoEscalateSlaBreaches() {
+        LocalDateTime now = LocalDateTime.now();
+        Set<Long> processed = new HashSet<>();
 
-        LocalDateTime limit = LocalDateTime.now().minusHours(6);
-
-        List<Reclamation> oldOpen = reclamationRepository
-                .findByStatusAndLastActivityAtBefore(ReclamationStatus.OPEN, limit);
-
-        for (Reclamation r : oldOpen) {
-
-            r.setPriority(Priority.HIGH);
-            r.setStatus(ReclamationStatus.IN_PROGRESS);
-
-            if (r.getRiskScore() == null) r.setRiskScore(75.0);
-
-            Reclamation saved = reclamationRepository.save(r);
-
-            triggerService.onEscalated(saved, saved.getRiskScore(), "SLA exceeded");
-
-            ReclamationHistory history = new ReclamationHistory();
-            history.setReclamation(saved);
-            history.setUserId(0L);
-            history.setOldStatus(ReclamationStatus.OPEN);
-            history.setNewStatus(ReclamationStatus.IN_PROGRESS);
-            history.setNote("AUTO_ESCALATED due to SLA");
-            historyRepository.save(history);
+        List<Reclamation> firstResponseOverdue = reclamationRepository
+                .findByFirstResponseDueAtBeforeAndFirstResponseAtIsNullAndStatusIn(now, SLA_TRACKED_STATUSES);
+        for (Reclamation reclamation : firstResponseOverdue) {
+            if (processed.add(reclamation.getReclamationId())) {
+                escalate(reclamation, "First response SLA exceeded");
+            }
         }
+
+        List<Reclamation> resolutionOverdue = reclamationRepository
+                .findByResolutionDueAtBeforeAndStatusIn(now, SLA_TRACKED_STATUSES);
+        for (Reclamation reclamation : resolutionOverdue) {
+            if (processed.add(reclamation.getReclamationId())) {
+                escalate(reclamation, "Resolution SLA exceeded");
+            }
+        }
+    }
+
+    private void escalate(Reclamation reclamation, String reason) {
+        ReclamationStatus oldStatus = reclamation.getStatus();
+        reclamation.setPriority(Priority.HIGH);
+        reclamation.setStatus(ReclamationStatus.ESCALATED);
+        if (reclamation.getRiskScore() == null) {
+            reclamation.setRiskScore(75.0);
+        }
+
+        Reclamation saved = reclamationRepository.save(reclamation);
+        historyRepository.save(ReclamationHistory.builder()
+                .reclamation(saved)
+                .userId(null)
+                .oldStatus(oldStatus)
+                .newStatus(ReclamationStatus.ESCALATED)
+                .note("AUTO_ESCALATED due to SLA: " + reason)
+                .build());
+        triggerService.onEscalated(saved, saved.getRiskScore(), reason);
     }
 }

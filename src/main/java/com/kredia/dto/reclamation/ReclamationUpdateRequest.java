@@ -1,6 +1,7 @@
 package com.kredia.dto.reclamation;
 
 import com.kredia.enums.Priority;
+import com.kredia.enums.ReclamationCategory;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -15,6 +16,7 @@ public record ReclamationUpdateRequest(
         String description,
 
         @NotNull(message = "priority is required")
-        Priority priority
-) {}
+        Priority priority,
 
+        ReclamationCategory category
+) {}

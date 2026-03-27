@@ -2,18 +2,12 @@ package com.kredia.entity.investment;
 
 import com.kredia.entity.User;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "investment_strategies")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class InvestmentStrategy {
 
     @Id
@@ -45,6 +39,81 @@ public class InvestmentStrategy {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    public InvestmentStrategy() {
+    }
+
+    public Long getStrategyId() {
+        return strategyId;
+    }
+
+    public void setStrategyId(Long strategyId) {
+        this.strategyId = strategyId;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public String getStrategyName() {
+        return strategyName;
+    }
+
+    public void setStrategyName(String strategyName) {
+        this.strategyName = strategyName;
+    }
+
+    public BigDecimal getMaxBudget() {
+        return maxBudget;
+    }
+
+    public void setMaxBudget(BigDecimal maxBudget) {
+        this.maxBudget = maxBudget;
+    }
+
+    public BigDecimal getStopLossPct() {
+        return stopLossPct;
+    }
+
+    public void setStopLossPct(BigDecimal stopLossPct) {
+        this.stopLossPct = stopLossPct;
+    }
+
+    public Boolean getReinvestProfits() {
+        return reinvestProfits;
+    }
+
+    public void setReinvestProfits(Boolean reinvestProfits) {
+        this.reinvestProfits = reinvestProfits;
+    }
+
+    public Boolean getIsActive() {
+        return isActive;
+    }
+
+    public void setIsActive(Boolean isActive) {
+        this.isActive = isActive;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
 
     @PrePersist
     protected void onCreate() {

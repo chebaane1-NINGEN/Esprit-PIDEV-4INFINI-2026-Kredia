@@ -8,7 +8,7 @@ import java.util.Set;
 
 public interface UserActivityRepository extends JpaRepository<UserActivity, Long> {
 
-    List<UserActivity> findByUserIdOrderByTimestampAsc(Long userId);
+    List<UserActivity> findByTargetIdOrderByTimestampAsc(Long targetId);
 
-    List<UserActivity> findByUserIdInOrderByTimestampAsc(Set<Long> userIds);
+    List<UserActivity> findByTargetIdInOrderByTimestampAsc(Set<Long> targetIds);
 }

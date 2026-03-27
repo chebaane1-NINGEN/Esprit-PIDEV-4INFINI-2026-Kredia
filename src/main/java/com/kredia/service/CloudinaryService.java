@@ -37,7 +37,7 @@ public class CloudinaryService {
             resourceType = "image";
         }
         
-        Map uploadResult = cloudinary.uploader().upload(file.getBytes(),
+        Map<?, ?> uploadResult = cloudinary.uploader().upload(file.getBytes(),
                 ObjectUtils.asMap(
                         "folder", folder,
                         "resource_type", resourceType

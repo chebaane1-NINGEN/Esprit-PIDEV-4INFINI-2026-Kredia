@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 public record NotificationResponse(
         Long id,
         Long userId,
-        Long id,
+        Long reclamationId,
         NotificationType type,
         String title,
         String message,

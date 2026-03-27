@@ -53,8 +53,8 @@ public class StatisticsPdfExportService {
         Credit credit = creditRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Credit not found for id: " + id));
 
-        List<Echeance> echeances = echeanceRepository.findByCreditId(id);
-        List<KycLoan> kycLoans = kycLoanRepository.findByCreditId(id);
+        List<Echeance> echeances = echeanceRepository.findByCredit_Id(id);
+        List<KycLoan> kycLoans = kycLoanRepository.findByCredit_Id(id);
 
         Map<EcheanceStatus, Long> echeancesByStatus = echeances.stream()
                 .collect(Collectors.groupingBy(Echeance::getStatus, Collectors.counting()));

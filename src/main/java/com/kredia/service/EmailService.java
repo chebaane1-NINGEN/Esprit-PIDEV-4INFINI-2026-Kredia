@@ -2,7 +2,8 @@ package com.kredia.service;
 
 import com.kredia.entity.investment.InvestmentOrder;
 import com.kredia.entity.User;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -18,8 +19,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 
 @Service
-@Slf4j
 public class EmailService {
+
+    private static final Logger log = LoggerFactory.getLogger(EmailService.class);
 
     private final TransactionalEmailsApi apiInstance;
 
@@ -63,7 +65,7 @@ public class EmailService {
             // Send email via Brevo API
             CreateSmtpEmail result = apiInstance.sendTransacEmail(sendSmtpEmail);
             log.info("Email d'exécution d'ordre envoyé à {} pour l'ordre {} - MessageId: {}", 
-                    user.getEmail(), order.getId(), result.getMessageId());
+                    user.getEmail(), order.getOrderId(), result.getMessageId());
         } catch (ApiException e) {
             log.error("Erreur lors de l'envoi de l'email via Brevo à {}: Code={}, Body={}", 
                     user.getEmail(), e.getCode(), e.getResponseBody(), e);
@@ -183,7 +185,7 @@ public class EmailService {
             </html>
             """,
                 userName,
-                order.getId(),
+                order.getOrderId(),
                 orderTypeColor,
                 orderTypeLabel,
                 order.getAssetSymbol(),
@@ -191,7 +193,7 @@ public class EmailService {
                 executedPriceFormatted,
                 executedAtFormatted,
                 totalAmountFormatted,
-                order.getId()
+                order.getOrderId()
         );
     }
 }

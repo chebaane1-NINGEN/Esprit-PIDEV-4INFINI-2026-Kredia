@@ -10,8 +10,6 @@ import com.kredia.dto.reclamation.ReclamationUpdateRequest;
 import com.kredia.entity.support.Reclamation;
 import com.kredia.entity.support.ReclamationHistory;
 import com.kredia.enums.Priority;
-import com.kredia.entity.credit.Echeance;
-import org.springframework.data.jpa.repository.JpaRepository;
 import com.kredia.enums.ReclamationRiskLevel;
 import com.kredia.enums.ReclamationStatus;
 import com.kredia.exception.BusinessException;
@@ -22,8 +20,8 @@ import com.kredia.service.ReclamationService;
 import com.kredia.service.ReclamationTriggerService;
 import com.kredia.service.ml.MlRiskClient;
 import com.kredia.service.ml.RiskFeatureExtractorService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -35,20 +33,29 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
-@Slf4j
-@RequiredArgsConstructor
 @Transactional
 public class ReclamationServiceImpl implements ReclamationService {
 
+    private static final Logger log = LoggerFactory.getLogger(ReclamationServiceImpl.class);
+
     private final ReclamationRepository reclamationRepository;
     private final ReclamationHistoryRepository historyRepository;
-
-    // Notifications / triggers
     private final ReclamationTriggerService triggerService;
-
-    // ML integration
     private final RiskFeatureExtractorService riskFeatureExtractorService;
     private final MlRiskClient mlRiskClient;
+
+    public ReclamationServiceImpl(
+            ReclamationRepository reclamationRepository,
+            ReclamationHistoryRepository historyRepository,
+            ReclamationTriggerService triggerService,
+            RiskFeatureExtractorService riskFeatureExtractorService,
+            MlRiskClient mlRiskClient) {
+        this.reclamationRepository = reclamationRepository;
+        this.historyRepository = historyRepository;
+        this.triggerService = triggerService;
+        this.riskFeatureExtractorService = riskFeatureExtractorService;
+        this.mlRiskClient = mlRiskClient;
+    }
 
     // ---------------- CREATE ----------------
     @Override
@@ -65,14 +72,14 @@ public class ReclamationServiceImpl implements ReclamationService {
         rec.setRiskLevel(ReclamationRiskLevel.LOW);
         rec.setAssignedTo(null);
 
-        // Build model input before insert so past/duplicate stats use historical rows
-        // only.
+        // Build model input before insert so past/duplicate stats use historical rows only.
         RiskFeaturesDto modelInput = riskFeatureExtractorService.extract(
                 request.userId(),
                 request.subject(),
                 request.description(),
                 ReclamationStatus.OPEN.name(),
-                initialPriority.name());
+                initialPriority.name()
+        );
 
         // 1) Save first to get id
         Reclamation saved = reclamationRepository.save(rec);
@@ -97,7 +104,8 @@ public class ReclamationServiceImpl implements ReclamationService {
                     modelInput.duplicate_count(),
                     modelInput.past_reclamations(),
                     modelInput.transaction_amount(),
-                    modelInput.late_credit());
+                    modelInput.late_credit()
+            );
             score = mlRiskClient.predictRiskScore(modelInput);
         } catch (Exception ignored) {
             // Fallback: app should not crash if ML service is down
@@ -128,8 +136,7 @@ public class ReclamationServiceImpl implements ReclamationService {
             triggerService.onEscalated(saved, score, "High ML risk score");
         }
 
-        // 7) Save final updated record (risk_score + risk_level + maybe
-        // status/priority)
+        // 7) Save final updated record (risk_score + risk_level + maybe status/priority)
         Reclamation finalSaved = reclamationRepository.save(saved);
         return toResponse(finalSaved, modelInput);
     }
@@ -246,11 +253,11 @@ public class ReclamationServiceImpl implements ReclamationService {
     @Override
     @Transactional(readOnly = true)
     public List<ReclamationHistoryResponse> getHistory(Long id) {
-        List<ReclamationHistory> rows = historyRepository.findByReclamation_IdOrderByChangedAtDesc(id);
+        List<ReclamationHistory> rows = historyRepository.findByReclamation_ReclamationIdOrderByChangedAtDesc(id);
 
         return rows.stream().map(h -> new ReclamationHistoryResponse(
                 h.getId(),
-                h.getId(), // can be null for SYSTEM action
+                h.getUserId(), // fixed: was using h.getId() instead of h.getUserId()
                 h.getOldStatus(),
                 h.getNewStatus(),
                 h.getChangedAt(),
@@ -269,8 +276,8 @@ public class ReclamationServiceImpl implements ReclamationService {
 
     private ReclamationResponse toResponse(Reclamation r, RiskFeaturesDto modelInput) {
         return new ReclamationResponse(
-                r.getId(),
-                r.getId(),
+                r.getReclamationId(),
+                r.getUserId(),
                 r.getSubject(),
                 r.getDescription(),
                 r.getStatus(),
@@ -279,7 +286,8 @@ public class ReclamationServiceImpl implements ReclamationService {
                 r.getRiskLevel(),
                 r.getCreatedAt(),
                 r.getResolvedAt(),
-                modelInput);
+                modelInput
+        );
     }
 
     private void validateTransition(ReclamationStatus oldS, ReclamationStatus newS) {

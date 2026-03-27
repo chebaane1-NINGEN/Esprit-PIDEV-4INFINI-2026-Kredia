@@ -502,7 +502,6 @@ public class UserServiceImpl implements UserService {
         activity.setTargetId(userId);
         activity.setActionType(type);
         activity.setDescription(description);
-        activity.setTimestamp(Instant.now());
         userActivityRepository.save(activity);
     }
 
@@ -531,7 +530,7 @@ public class UserServiceImpl implements UserService {
         for (UserActivity a : activities) {
             UserActivityResponseDTO dto = new UserActivityResponseDTO();
             dto.setId(a.getId());
-            dto.setUserId(a.getId());
+            dto.setUserId(a.getTargetId()); // fixed: was using a.getId() instead of a.getTargetId()
             dto.setActionType(a.getActionType());
             dto.setDescription(a.getDescription());
             dto.setTimestamp(a.getTimestamp());

@@ -2,7 +2,6 @@ package com.kredia.entity.support;
 
 import com.kredia.enums.ReclamationStatus;
 import jakarta.persistence.*;
-import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -11,11 +10,6 @@ import java.time.LocalDateTime;
         @Index(name = "idx_hist_reclamation", columnList = "reclamation_id"),
         @Index(name = "idx_hist_changed", columnList = "changed_at")
 })
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class ReclamationHistory {
 
     @Id
@@ -27,7 +21,7 @@ public class ReclamationHistory {
     @JoinColumn(name = "reclamation_id", nullable = false)
     private Reclamation reclamation;
 
-    @Column(name = "user_id", nullable = false)
+    @Column(name = "user_id")
     private Long userId; // who did the action (agent/admin/system)
 
     @Enumerated(EnumType.STRING)
@@ -43,6 +37,65 @@ public class ReclamationHistory {
 
     @Column(length = 500)
     private String note;
+
+    public ReclamationHistory() {
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Reclamation getReclamation() {
+        return reclamation;
+    }
+
+    public void setReclamation(Reclamation reclamation) {
+        this.reclamation = reclamation;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public ReclamationStatus getOldStatus() {
+        return oldStatus;
+    }
+
+    public void setOldStatus(ReclamationStatus oldStatus) {
+        this.oldStatus = oldStatus;
+    }
+
+    public ReclamationStatus getNewStatus() {
+        return newStatus;
+    }
+
+    public void setNewStatus(ReclamationStatus newStatus) {
+        this.newStatus = newStatus;
+    }
+
+    public LocalDateTime getChangedAt() {
+        return changedAt;
+    }
+
+    public void setChangedAt(LocalDateTime changedAt) {
+        this.changedAt = changedAt;
+    }
+
+    public String getNote() {
+        return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
+    }
 
     @PrePersist
     void onCreate() {

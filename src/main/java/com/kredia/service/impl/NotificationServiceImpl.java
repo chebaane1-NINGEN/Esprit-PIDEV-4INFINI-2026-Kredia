@@ -6,7 +6,6 @@ import com.kredia.entity.support.Notification;
 import com.kredia.exception.ResourceNotFoundException;
 import com.kredia.repository.NotificationRepository;
 import com.kredia.service.NotificationService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -15,22 +14,24 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@RequiredArgsConstructor
 @Transactional
 public class NotificationServiceImpl implements NotificationService {
 
     private final NotificationRepository notificationRepository;
 
+    public NotificationServiceImpl(NotificationRepository notificationRepository) {
+        this.notificationRepository = notificationRepository;
+    }
+
     @Override
     public NotificationResponse create(NotificationCreateRequest request) {
-        Notification n = Notification.builder()
-                .userId(request.id())
-                .id(request.id())
-                .type(request.type())
-                .title(request.title())
-                .message(request.message())
-                .isRead(false)
-                .build();
+        Notification n = new Notification();
+        n.setUserId(request.userId());
+        n.setReclamationId(request.reclamationId());
+        n.setType(request.type());
+        n.setTitle(request.title());
+        n.setMessage(request.message());
+        n.setRead(false);
 
         return toResponse(notificationRepository.save(n));
     }
@@ -66,8 +67,8 @@ public class NotificationServiceImpl implements NotificationService {
     private NotificationResponse toResponse(Notification n) {
         return new NotificationResponse(
                 n.getId(),
-                n.getId(),
-                n.getId(),
+                n.getUserId(),
+                n.getReclamationId(),
                 n.getType(),
                 n.getTitle(),
                 n.getMessage(),

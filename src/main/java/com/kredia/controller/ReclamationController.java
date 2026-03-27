@@ -4,7 +4,6 @@ import com.kredia.dto.reclamation.*;
 import com.kredia.enums.ReclamationStatus;
 import com.kredia.service.ReclamationService;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,10 +11,13 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/reclamations")
-@RequiredArgsConstructor
 public class ReclamationController {
 
     private final ReclamationService reclamationService;
+
+    public ReclamationController(ReclamationService reclamationService) {
+        this.reclamationService = reclamationService;
+    }
 
     @PostMapping
     public ReclamationResponse create(@Valid @RequestBody ReclamationCreateRequest request) {

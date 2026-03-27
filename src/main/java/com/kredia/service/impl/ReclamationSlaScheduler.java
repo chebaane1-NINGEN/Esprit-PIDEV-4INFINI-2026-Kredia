@@ -7,7 +7,6 @@ import com.kredia.enums.ReclamationStatus;
 import com.kredia.repository.ReclamationHistoryRepository;
 import com.kredia.repository.ReclamationRepository;
 import com.kredia.service.ReclamationTriggerService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,12 +15,20 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Component
-@RequiredArgsConstructor
 public class ReclamationSlaScheduler {
 
     private final ReclamationRepository reclamationRepository;
     private final ReclamationHistoryRepository historyRepository;
     private final ReclamationTriggerService triggerService;
+
+    public ReclamationSlaScheduler(
+            ReclamationRepository reclamationRepository,
+            ReclamationHistoryRepository historyRepository,
+            ReclamationTriggerService triggerService) {
+        this.reclamationRepository = reclamationRepository;
+        this.historyRepository = historyRepository;
+        this.triggerService = triggerService;
+    }
 
     @Scheduled(fixedRate = 60000)
     @Transactional

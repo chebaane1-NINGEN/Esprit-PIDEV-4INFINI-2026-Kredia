@@ -7,25 +7,27 @@ import com.kredia.enums.ReclamationStatus;
 import com.kredia.repository.NotificationRepository;
 import com.kredia.service.ReclamationTriggerService;
 import com.kredia.util.NotificationFactory;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
-@RequiredArgsConstructor
 public class ReclamationTriggerServiceImpl implements ReclamationTriggerService {
 
     private final NotificationRepository notificationRepository;
+
+    public ReclamationTriggerServiceImpl(NotificationRepository notificationRepository) {
+        this.notificationRepository = notificationRepository;
+    }
 
     private static final Long SUPERVISOR_ID = 999L;
 
     @Override
     public void onCreated(Reclamation r) {
         Notification n = NotificationFactory.forUser(
-                r.getId(),
-                r.getId(),
+                r.getUserId(),
+                r.getReclamationId(),
                 NotificationType.PUSH,
                 "Complaint received",
-                "Your complaint #" + r.getId() + " has been received."
+                "Your complaint #" + r.getReclamationId() + " has been received."
         );
         notificationRepository.save(n);
     }
@@ -33,21 +35,21 @@ public class ReclamationTriggerServiceImpl implements ReclamationTriggerService 
     @Override
     public void onStatusChanged(Reclamation r, ReclamationStatus oldStatus, ReclamationStatus newStatus, String note, Long actorUserId) {
         Notification userNotif = NotificationFactory.forUser(
-                r.getId(),
-                r.getId(),
+                r.getUserId(),
+                r.getReclamationId(),
                 NotificationType.PUSH,
                 "Complaint status updated",
-                "Your complaint #" + r.getId() + " changed to " + newStatus
+                "Your complaint #" + r.getReclamationId() + " changed to " + newStatus
         );
         notificationRepository.save(userNotif);
 
         if (r.getAssignedTo() != null) {
             Notification agentNotif = NotificationFactory.forUser(
                     r.getAssignedTo(),
-                    r.getId(),
+                    r.getReclamationId(),
                     NotificationType.PUSH,
                     "Assigned complaint update",
-                    "Complaint #" + r.getId() + " is now " + newStatus
+                    "Complaint #" + r.getReclamationId() + " is now " + newStatus
             );
             notificationRepository.save(agentNotif);
         }
@@ -57,10 +59,10 @@ public class ReclamationTriggerServiceImpl implements ReclamationTriggerService 
     public void onEscalated(Reclamation r, double riskScore, String reason) {
         Notification supervisorNotif = NotificationFactory.forUser(
                 SUPERVISOR_ID,
-                r.getId(),
+                r.getReclamationId(),
                 NotificationType.PUSH,
                 "Escalation alert",
-                "Complaint #" + r.getId() + " escalated. RiskScore=" + (int) riskScore
+                "Complaint #" + r.getReclamationId() + " escalated. RiskScore=" + (int) riskScore
         );
         notificationRepository.save(supervisorNotif);
     }

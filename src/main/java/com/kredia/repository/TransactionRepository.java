@@ -20,6 +20,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
             INNER JOIN wallet w ON w.wallet_id = t.wallet_id
             WHERE w.user_id = :userId
               AND t.status = 'COMPLETED'
+              AND t.transaction_type = 'GENERIC'
             ORDER BY t.transaction_date DESC
             LIMIT 1
             """, nativeQuery = true)

@@ -3,8 +3,8 @@ package com.kredia.integration;
 import com.kredia.dto.UserRequestDTO;
 import com.kredia.dto.UserResponseDTO;
 import com.kredia.entity.UserActivity;
-import com.kredia.entity.UserActivityActionType;
-import com.kredia.entity.UserRole;
+import com.kredia.enums.UserActivityActionType;
+import com.kredia.enums.UserRole;
 import com.kredia.exception.BusinessException;
 import com.kredia.repository.UserActivityRepository;
 import com.kredia.service.UserService;
@@ -47,12 +47,12 @@ class UserFlowIntegrationTest {
                 () -> userService.changeRole(adminId, UserRole.CLIENT));
         assertEquals("Cannot downgrade last ADMIN", downgradeLastAdmin.getMessage());
 
-        List<UserActivity> adminActs = userActivityRepository.findByUserIdOrderByTimestampAsc(adminId);
+        List<UserActivity> adminActs = userActivityRepository.findByTargetIdOrderByTimestampAsc(adminId);
         assertTrue(adminActs.stream().anyMatch(a -> a.getActionType() == UserActivityActionType.CREATED));
         assertTrue(adminActs.stream().anyMatch(a -> a.getActionType() == UserActivityActionType.STATUS_CHANGED));
         assertTrue(adminActs.stream().anyMatch(a -> a.getActionType() == UserActivityActionType.ROLE_CHANGED));
 
-        List<UserActivity> clientActs = userActivityRepository.findByUserIdOrderByTimestampAsc(client.getId());
+        List<UserActivity> clientActs = userActivityRepository.findByTargetIdOrderByTimestampAsc(client.getId());
         assertTrue(clientActs.stream().anyMatch(a -> a.getActionType() == UserActivityActionType.CREATED));
         assertTrue(clientActs.stream().anyMatch(a -> a.getActionType() == UserActivityActionType.STATUS_CHANGED));
         assertTrue(clientActs.stream().anyMatch(a -> a.getActionType() == UserActivityActionType.DELETED));

@@ -4,7 +4,6 @@ import com.kredia.enums.Priority;
 import com.kredia.enums.ReclamationRiskLevel;
 import com.kredia.enums.ReclamationStatus;
 import jakarta.persistence.*;
-import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -16,11 +15,6 @@ import java.time.LocalDateTime;
         @Index(name = "idx_rec_created", columnList = "created_at"),
         @Index(name = "idx_rec_last_activity", columnList = "last_activity_at")
 })
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class Reclamation {
 
     @Id
@@ -57,13 +51,120 @@ public class Reclamation {
     private ReclamationRiskLevel riskLevel;
 
     @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     @Column(name = "last_activity_at")
-    private LocalDateTime lastActivityAt;
+    private LocalDateTime lastActivityAt = LocalDateTime.now();
 
     @Column(name = "resolved_at")
     private LocalDateTime resolvedAt;
+
+    public Reclamation() {
+    }
+
+    public Long getReclamationId() {
+        return reclamationId;
+    }
+
+    public void setReclamationId(Long reclamationId) {
+        this.reclamationId = reclamationId;
+    }
+
+    public Long getId() {
+        return reclamationId;
+    }
+
+    public void setId(Long id) {
+        this.reclamationId = id;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public String getSubject() {
+        return subject;
+    }
+
+    public void setSubject(String subject) {
+        this.subject = subject;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public ReclamationStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(ReclamationStatus status) {
+        this.status = status;
+    }
+
+    public Priority getPriority() {
+        return priority;
+    }
+
+    public void setPriority(Priority priority) {
+        this.priority = priority;
+    }
+
+    public Long getAssignedTo() {
+        return assignedTo;
+    }
+
+    public void setAssignedTo(Long assignedTo) {
+        this.assignedTo = assignedTo;
+    }
+
+    public Double getRiskScore() {
+        return riskScore;
+    }
+
+    public void setRiskScore(Double riskScore) {
+        this.riskScore = riskScore;
+    }
+
+    public ReclamationRiskLevel getRiskLevel() {
+        return riskLevel;
+    }
+
+    public void setRiskLevel(ReclamationRiskLevel riskLevel) {
+        this.riskLevel = riskLevel;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getLastActivityAt() {
+        return lastActivityAt;
+    }
+
+    public void setLastActivityAt(LocalDateTime lastActivityAt) {
+        this.lastActivityAt = lastActivityAt;
+    }
+
+    public LocalDateTime getResolvedAt() {
+        return resolvedAt;
+    }
+
+    public void setResolvedAt(LocalDateTime resolvedAt) {
+        this.resolvedAt = resolvedAt;
+    }
 
     @PrePersist
     protected void onCreate() {

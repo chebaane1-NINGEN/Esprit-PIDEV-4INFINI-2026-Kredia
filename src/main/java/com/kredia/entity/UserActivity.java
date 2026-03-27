@@ -1,5 +1,6 @@
 package com.kredia.entity;
 
+import com.kredia.enums.UserActivityActionType;
 import jakarta.persistence.*;
 
 import java.time.Instant;
@@ -16,7 +17,7 @@ public class UserActivity {
     private Long id;
 
     @Column(name = "user_id", nullable = false)
-    private Long userId;
+    private Long targetId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "action_type", nullable = false)
@@ -26,7 +27,7 @@ public class UserActivity {
     private String description;
 
     @Column(nullable = false)
-    private Instant timestamp;
+    private Instant timestamp = Instant.now();
 
     public UserActivity() {
     }
@@ -39,12 +40,12 @@ public class UserActivity {
         this.id = id;
     }
 
-    public Long getUserId() {
-        return userId;
+    public Long getTargetId() {
+        return targetId;
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
+    public void setTargetId(Long targetId) {
+        this.targetId = targetId;
     }
 
     public UserActivityActionType getActionType() {

@@ -2,22 +2,26 @@ package com.kredia.service.ml;
 
 import com.kredia.dto.ml.RiskFeaturesDto;
 import com.kredia.dto.ml.RiskPredictionResponse;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
 
 @Service
-@Slf4j
-@RequiredArgsConstructor
 public class MlRiskClient {
+
+    private static final Logger log = LoggerFactory.getLogger(MlRiskClient.class);
+
+    private final RestClient restClient;
+
+    public MlRiskClient() {
+        this.restClient = RestClient.create();
+    }
 
     @Value("${ml.risk.service.url}")
     private String url;
-
-    private final RestClient restClient = RestClient.create();
 
     public double predictRiskScore(RiskFeaturesDto features) {
         try {

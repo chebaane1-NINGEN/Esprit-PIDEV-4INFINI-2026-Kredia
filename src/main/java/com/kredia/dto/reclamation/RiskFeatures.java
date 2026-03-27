@@ -1,7 +1,5 @@
 package com.kredia.dto.reclamation;
 
-import lombok.Builder;
-
 public record RiskFeatures(
                 Long userId,
 

@@ -23,14 +23,8 @@ public class GlobalExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-    @ExceptionHandler(ResourceResourceNotFoundException.class)
-    public ResponseEntity<ApiErrorResponse> handleNotFound(ResourceResourceNotFoundException ex,
-            HttpServletRequest request) {
-        return build(HttpStatus.NOT_FOUND, "Not Found", ex.getMessage(), request);
-    }
-
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ApiErrorResponse> handleNotFoundLegacy(ResourceNotFoundException ex,
+    public ResponseEntity<ApiErrorResponse> handleNotFound(ResourceNotFoundException ex,
             HttpServletRequest request) {
         return build(HttpStatus.NOT_FOUND, "Not Found", ex.getMessage(), request);
     }
@@ -38,11 +32,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ApiErrorResponse> handleBusiness(BusinessException ex, HttpServletRequest request) {
         return build(HttpStatus.BAD_REQUEST, "Business Error", ex.getMessage(), request);
-    }
-
-    @ExceptionHandler(BusinessException.class)
-    public ResponseEntity<ApiErrorResponse> handleBadRequestLegacy(BusinessException ex, HttpServletRequest request) {
-        return build(HttpStatus.BAD_REQUEST, "Bad Request", ex.getMessage(), request);
     }
 
     @ExceptionHandler(ForbiddenException.class)

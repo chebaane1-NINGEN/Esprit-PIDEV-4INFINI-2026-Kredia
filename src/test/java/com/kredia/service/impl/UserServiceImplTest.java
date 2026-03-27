@@ -2,8 +2,8 @@ package com.kredia.service.impl;
 
 import com.kredia.dto.UserRequestDTO;
 import com.kredia.entity.User;
-import com.kredia.entity.UserRole;
-import com.kredia.entity.UserStatus;
+import com.kredia.enums.UserRole;
+import com.kredia.enums.UserStatus;
 import com.kredia.exception.BusinessException;
 import com.kredia.mapper.UserMapper;
 import com.kredia.repository.UserActivityRepository;

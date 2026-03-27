@@ -3,16 +3,18 @@ package com.kredia.controller;
 import com.kredia.dto.notification.*;
 import com.kredia.service.NotificationService;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/notifications")
-@RequiredArgsConstructor
 public class NotificationController {
 
     private final NotificationService notificationService;
+
+    public NotificationController(NotificationService notificationService) {
+        this.notificationService = notificationService;
+    }
 
     // 1) Create notification (for now manual; later auto-trigger)
     @PostMapping

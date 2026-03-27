@@ -1,5 +1,7 @@
 package com.kredia.entity;
 
+import com.kredia.enums.UserRole;
+import com.kredia.enums.UserStatus;
 import jakarta.persistence.*;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;

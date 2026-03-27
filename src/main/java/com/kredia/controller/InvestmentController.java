@@ -12,7 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -224,9 +223,9 @@ public class InvestmentController {
     @PostMapping("/positions")
     public ResponseEntity<PortfolioPosition> createPosition(@RequestBody PortfolioPositionDTO positionDTO) {
         try {
-            System.out.println("Creating position for user ID: " + positionDTO.getId() + ", Asset Symbol: " + positionDTO.getAssetSymbol());
+            System.out.println("Creating position for user ID: " + positionDTO.getUserId() + ", Asset Symbol: " + positionDTO.getAssetSymbol());
             
-            if (positionDTO.getId() == null || positionDTO.getAssetSymbol() == null) {
+            if (positionDTO.getUserId() == null || positionDTO.getAssetSymbol() == null) {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
             

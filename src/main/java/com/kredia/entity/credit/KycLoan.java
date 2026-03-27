@@ -4,17 +4,11 @@ import com.kredia.entity.User;
 import com.kredia.enums.DocumentTypeLoan;
 import com.kredia.enums.KycStatus;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "kyc_loan")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class KycLoan {
 
     @Id
@@ -43,6 +37,65 @@ public class KycLoan {
     @Enumerated(EnumType.STRING)
     @Column(name = "verified_status", nullable = false)
     private KycStatus verifiedStatus;
+
+    public KycLoan() {
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Credit getCredit() {
+        return credit;
+    }
+
+    public void setCredit(Credit credit) {
+        this.credit = credit;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public DocumentTypeLoan getDocumentType() {
+        return documentType;
+    }
+
+    public void setDocumentType(DocumentTypeLoan documentType) {
+        this.documentType = documentType;
+    }
+
+    public String getDocumentPath() {
+        return documentPath;
+    }
+
+    public void setDocumentPath(String documentPath) {
+        this.documentPath = documentPath;
+    }
+
+    public LocalDateTime getSubmittedAt() {
+        return submittedAt;
+    }
+
+    public void setSubmittedAt(LocalDateTime submittedAt) {
+        this.submittedAt = submittedAt;
+    }
+
+    public KycStatus getVerifiedStatus() {
+        return verifiedStatus;
+    }
+
+    public void setVerifiedStatus(KycStatus verifiedStatus) {
+        this.verifiedStatus = verifiedStatus;
+    }
 
     @PrePersist
     protected void onCreate() {

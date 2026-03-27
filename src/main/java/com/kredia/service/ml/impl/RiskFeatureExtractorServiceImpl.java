@@ -5,18 +5,25 @@ import com.kredia.repository.EcheanceRepository;
 import com.kredia.repository.ReclamationRepository;
 import com.kredia.repository.TransactionRepository;
 import com.kredia.service.ml.RiskFeatureExtractorService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 
 @Service
-@RequiredArgsConstructor
 public class RiskFeatureExtractorServiceImpl implements RiskFeatureExtractorService {
 
     private final ReclamationRepository reclamationRepository;
     private final TransactionRepository transactionRepository;
     private final EcheanceRepository echeanceRepository;
+
+    public RiskFeatureExtractorServiceImpl(
+            ReclamationRepository reclamationRepository,
+            TransactionRepository transactionRepository,
+            EcheanceRepository echeanceRepository) {
+        this.reclamationRepository = reclamationRepository;
+        this.transactionRepository = transactionRepository;
+        this.echeanceRepository = echeanceRepository;
+    }
 
     @Override
     public RiskFeaturesDto extract(Long userId, String subject, String description, String status, String priority) {

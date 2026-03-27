@@ -160,7 +160,7 @@ public class KycLoanService {
     }
 
     public List<KycLoanResponse> getDocumentsByCredit(Long id) {
-        return kycLoanRepository.findByCreditId(id).stream()
+        return kycLoanRepository.findByCredit_Id(id).stream()
                 .map(kyc -> toResponse(kyc, null))
                 .collect(Collectors.toList());
     }

@@ -96,7 +96,7 @@ public class InvestmentService {
 
     public InvestmentOrder createOrder(InvestmentOrder order) {
         // Validate and fetch full User entity
-        Long userId = order.getUser().getId();
+        Long userId = order.getUser().getUserId();
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found with id " + userId));
         order.setUser(user);
@@ -116,8 +116,8 @@ public class InvestmentService {
         InvestmentOrder order = orderRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Order not found with id " + id));
 
-        if (orderDetails.getUser() != null && orderDetails.getUser().getId() != null) {
-            User user = userRepository.findById(orderDetails.getUser().getId())
+        if (orderDetails.getUser() != null && orderDetails.getUser().getUserId() != null) {
+            User user = userRepository.findById(orderDetails.getUser().getUserId())
                     .orElseThrow(() -> new RuntimeException("User not found"));
             order.setUser(user);
         }
@@ -143,7 +143,7 @@ public class InvestmentService {
     }
 
     public List<InvestmentOrder> getOrdersByUserId(Long userId) {
-        return orderRepository.findByUserUserId(userId);
+        return orderRepository.findByUser_Id(userId);
     }
 
     public List<InvestmentOrder> getOrdersByAssetSymbol(String assetSymbol) {
@@ -155,14 +155,14 @@ public class InvestmentService {
     }
 
     public List<InvestmentOrder> getOrdersByUserIdAndStatus(Long userId, OrderStatus status) {
-        return orderRepository.findByUserUserIdAndOrderStatus(userId, status);
+        return orderRepository.findByUser_IdAndOrderStatus(userId, status);
     }
 
     // ==================== InvestmentStrategy CRUD ====================
 
     public InvestmentStrategy createStrategy(InvestmentStrategy strategy) {
         // Validate and fetch full User entity
-        Long userId = strategy.getUser().getId();
+        Long userId = strategy.getUser().getUserId();
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found with id " + userId));
         strategy.setUser(user);
@@ -182,8 +182,8 @@ public class InvestmentService {
         InvestmentStrategy strategy = strategyRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Strategy not found with id " + id));
 
-        if (strategyDetails.getUser() != null && strategyDetails.getUser().getId() != null) {
-            User user = userRepository.findById(strategyDetails.getUser().getId())
+        if (strategyDetails.getUser() != null && strategyDetails.getUser().getUserId() != null) {
+            User user = userRepository.findById(strategyDetails.getUser().getUserId())
                     .orElseThrow(() -> new RuntimeException("User not found"));
             strategy.setUser(user);
         }
@@ -205,7 +205,7 @@ public class InvestmentService {
     }
 
     public List<InvestmentStrategy> getStrategiesByUserId(Long userId) {
-        return strategyRepository.findByUserUserId(userId);
+        return strategyRepository.findByUser_Id(userId);
     }
 
     public List<InvestmentStrategy> getStrategiesByActiveStatus(Boolean isActive) {
@@ -213,15 +213,15 @@ public class InvestmentService {
     }
 
     public List<InvestmentStrategy> getStrategiesByUserIdAndActiveStatus(Long userId, Boolean isActive) {
-        return strategyRepository.findByUserUserIdAndIsActive(userId, isActive);
+        return strategyRepository.findByUser_IdAndIsActive(userId, isActive);
     }
 
     // ==================== PortfolioPosition CRUD ====================
 
     public PortfolioPosition createPositionFromDTO(PortfolioPositionDTO positionDTO) {
         // Fetch and validate User
-        User user = userRepository.findById(positionDTO.getId())
-                .orElseThrow(() -> new RuntimeException("User not found with id " + positionDTO.getId()));
+        User user = userRepository.findById(positionDTO.getUserId())
+                .orElseThrow(() -> new RuntimeException("User not found with id " + positionDTO.getUserId()));
 
         // Fetch the current market price automatically from external API (Binance /
         // Alpha Vantage)
@@ -242,7 +242,7 @@ public class InvestmentService {
 
     public PortfolioPosition createPosition(PortfolioPosition position) {
         // Validate and fetch full User entity
-        Long userId = position.getUser().getId();
+        Long userId = position.getUser().getUserId();
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found with id " + userId));
         position.setUser(user);
@@ -262,8 +262,8 @@ public class InvestmentService {
         PortfolioPosition position = positionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Position not found with id " + id));
 
-        if (positionDetails.getUser() != null && positionDetails.getUser().getId() != null) {
-            User user = userRepository.findById(positionDetails.getUser().getId())
+        if (positionDetails.getUser() != null && positionDetails.getUser().getUserId() != null) {
+            User user = userRepository.findById(positionDetails.getUser().getUserId())
                     .orElseThrow(() -> new RuntimeException("User not found"));
             position.setUser(user);
         }
@@ -286,7 +286,7 @@ public class InvestmentService {
     }
 
     public List<PortfolioPosition> getPositionsByUserId(Long userId) {
-        return positionRepository.findByUserUserId(userId);
+        return positionRepository.findByUser_Id(userId);
     }
 
     public List<PortfolioPosition> getPositionsByAssetId(Long assetId) {
@@ -297,7 +297,7 @@ public class InvestmentService {
     }
 
     public Optional<PortfolioPosition> getPositionByUserIdAndAssetSymbol(Long userId, String assetSymbol) {
-        return positionRepository.findByUserUserIdAndAssetSymbol(userId, assetSymbol);
+        return positionRepository.findByUser_IdAndAssetSymbol(userId, assetSymbol);
     }
 
     // ==================== Portfolio Value Calculation ====================
@@ -330,8 +330,8 @@ public class InvestmentService {
             }
 
             return new PortfolioPositionResponseDTO(
-                    position.getId(),
-                    position.getUser().getId(),
+                    position.getPositionId(),
+                    position.getUser().getUserId(),
                     position.getAssetSymbol(),
                     position.getCurrentQuantity(),
                     position.getAvgPurchasePrice(),
@@ -342,11 +342,11 @@ public class InvestmentService {
                     position.getCreatedAt());
         } catch (Exception e) {
             System.err
-                    .println("Erreur lors de la conversion de la position " + position.getId() + ": " + e.getMessage());
+                    .println("Erreur lors de la conversion de la position " + position.getPositionId() + ": " + e.getMessage());
             // En cas d'erreur, retourner un DTO avec des valeurs null pour les calculs
             return new PortfolioPositionResponseDTO(
-                    position.getId(),
-                    position.getUser().getId(),
+                    position.getPositionId(),
+                    position.getUser().getUserId(),
                     position.getAssetSymbol(),
                     position.getCurrentQuantity(),
                     position.getAvgPurchasePrice(),
@@ -371,7 +371,7 @@ public class InvestmentService {
      * profit.
      */
     public List<PortfolioPositionResponseDTO> getPositionsWithProfitByUserId(Long userId) {
-        List<PortfolioPosition> positions = positionRepository.findByUserUserId(userId);
+        List<PortfolioPosition> positions = positionRepository.findByUser_Id(userId);
         return positions.stream()
                 .map(this::convertToResponseDTO)
                 .collect(Collectors.toList());
@@ -393,7 +393,7 @@ public class InvestmentService {
      */
     public Optional<PortfolioPositionResponseDTO> getPositionWithProfitByUserIdAndAssetSymbol(Long userId,
             String assetSymbol) {
-        return positionRepository.findByUserUserIdAndAssetSymbol(userId, assetSymbol)
+        return positionRepository.findByUser_IdAndAssetSymbol(userId, assetSymbol)
                 .map(this::convertToResponseDTO);
     }
 }

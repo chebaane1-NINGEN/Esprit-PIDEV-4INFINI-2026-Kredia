@@ -16,6 +16,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -29,6 +30,7 @@ public class InvestmentService {
     private final PortfolioPositionRepository positionRepository;
     private final UserRepository userRepository;
     private final MarketPriceService marketPriceService;
+    private final GeminiService geminiService;
 
     @Autowired
     public InvestmentService(
@@ -37,13 +39,19 @@ public class InvestmentService {
             InvestmentStrategyRepository strategyRepository,
             PortfolioPositionRepository positionRepository,
             UserRepository userRepository,
-            MarketPriceService marketPriceService) {
+            MarketPriceService marketPriceService,
+            GeminiService geminiService) {
         this.assetRepository = assetRepository;
         this.orderRepository = orderRepository;
         this.strategyRepository = strategyRepository;
         this.positionRepository = positionRepository;
         this.userRepository = userRepository;
         this.marketPriceService = marketPriceService;
+        this.geminiService = geminiService;
+    }
+
+    public Map<String, Object> generateStrategicMarketSummary(String language, String tone, String additionalContext) {
+        return geminiService.generateStrategicMarketSummaryJson(language, tone, additionalContext);
     }
 
     // ==================== InvestmentAsset CRUD ====================

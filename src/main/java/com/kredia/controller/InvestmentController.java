@@ -1,5 +1,6 @@
 package com.kredia.controller;
 
+import com.kredia.dto.investment.MarketStrategicSummaryRequest;
 import com.kredia.dto.investment.PortfolioPositionDTO;
 import com.kredia.dto.investment.PortfolioPositionResponseDTO;
 import com.kredia.entity.investment.*;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/investments")
@@ -288,5 +290,32 @@ public class InvestmentController {
         return investmentService.getPositionWithProfitByUserIdAndAssetSymbol(userId, assetSymbol)
                 .map(position -> new ResponseEntity<>(position, HttpStatus.OK))
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
+    // ==================== AI Market Insight Endpoint ====================
+
+    @PostMapping("/market-strategy-summary")
+    public ResponseEntity<Map<String, Object>> generateMarketStrategySummary(
+            @RequestBody(required = false) MarketStrategicSummaryRequest request
+    ) {
+        try {
+            String language = request != null ? request.getLanguage() : null;
+            String tone = request != null ? request.getTone() : null;
+            String additionalContext = request != null ? request.getAdditionalContext() : null;
+
+            Map<String, Object> summary = investmentService.generateStrategicMarketSummary(
+                    language,
+                    tone,
+                    additionalContext
+            );
+
+            HttpStatus status = "error".equals(summary.get("status"))
+                    ? HttpStatus.BAD_GATEWAY
+                    : HttpStatus.OK;
+
+            return new ResponseEntity<>(summary, status);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

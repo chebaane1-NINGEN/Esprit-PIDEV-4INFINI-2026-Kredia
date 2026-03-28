@@ -6,7 +6,9 @@ import com.kredia.service.ReclamationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -38,6 +40,11 @@ public class ReclamationController {
     public ReclamationResponse assign(@PathVariable Long id,
                                       @Valid @RequestBody ReclamationAssignRequest request) {
         return reclamationService.assign(id, request);
+    }
+
+    @GetMapping("/dashboard")
+    public ReclamationDashboardResponse dashboard() {
+        return reclamationService.getDashboard();
     }
 
     @GetMapping("/{id}")
@@ -76,5 +83,40 @@ public class ReclamationController {
     @GetMapping("/{id}/history")
     public List<ReclamationHistoryResponse> getHistory(@PathVariable Long id) {
         return reclamationService.getHistory(id);
+    }
+
+    @PostMapping("/{id}/messages")
+    public ReclamationMessageResponse addMessage(@PathVariable Long id,
+                                                 @Valid @RequestBody ReclamationMessageCreateRequest request) {
+        return reclamationService.addMessage(id, request);
+    }
+
+    @GetMapping("/{id}/messages")
+    public List<ReclamationMessageResponse> getMessages(@PathVariable Long id,
+                                                        @RequestParam(defaultValue = "false") boolean includeInternal) {
+        return reclamationService.getMessages(id, includeInternal);
+    }
+
+    @PostMapping(value = "/{id}/attachments", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ReclamationAttachmentResponse addAttachment(@PathVariable Long id,
+                                                       @RequestParam Long uploadedByUserId,
+                                                       @RequestPart MultipartFile file) {
+        return reclamationService.addAttachment(id, uploadedByUserId, file);
+    }
+
+    @GetMapping("/{id}/attachments")
+    public List<ReclamationAttachmentResponse> getAttachments(@PathVariable Long id) {
+        return reclamationService.getAttachments(id);
+    }
+
+    @PostMapping("/{id}/feedback")
+    public ReclamationResponse submitFeedback(@PathVariable Long id,
+                                              @Valid @RequestBody ReclamationFeedbackRequest request) {
+        return reclamationService.submitFeedback(id, request);
+    }
+
+    @GetMapping("/{id}/duplicates")
+    public List<ReclamationResponse> getDuplicateCandidates(@PathVariable Long id) {
+        return reclamationService.getDuplicateCandidates(id);
     }
 }

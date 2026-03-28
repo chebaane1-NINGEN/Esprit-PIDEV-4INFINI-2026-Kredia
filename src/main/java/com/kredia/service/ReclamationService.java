@@ -3,6 +3,7 @@ package com.kredia.service;
 import com.kredia.dto.reclamation.*;
 import com.kredia.enums.ReclamationStatus;
 import org.springframework.data.domain.Page;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -25,4 +26,18 @@ public interface ReclamationService {
     Page<ReclamationResponse> getByStatus(ReclamationStatus status, int page, int size);
 
     List<ReclamationHistoryResponse> getHistory(Long reclamationId);
+
+    ReclamationMessageResponse addMessage(Long reclamationId, ReclamationMessageCreateRequest request);
+
+    List<ReclamationMessageResponse> getMessages(Long reclamationId, boolean includeInternal);
+
+    ReclamationAttachmentResponse addAttachment(Long reclamationId, Long uploadedByUserId, MultipartFile file);
+
+    List<ReclamationAttachmentResponse> getAttachments(Long reclamationId);
+
+    ReclamationResponse submitFeedback(Long reclamationId, ReclamationFeedbackRequest request);
+
+    List<ReclamationResponse> getDuplicateCandidates(Long reclamationId);
+
+    ReclamationDashboardResponse getDashboard();
 }

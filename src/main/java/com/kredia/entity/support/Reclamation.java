@@ -1,6 +1,7 @@
 package com.kredia.entity.support;
 
 import com.kredia.enums.Priority;
+import com.kredia.enums.ReclamationCategory;
 import com.kredia.enums.ReclamationRiskLevel;
 import com.kredia.enums.ReclamationStatus;
 import jakarta.persistence.*;
@@ -15,8 +16,11 @@ import java.time.LocalDateTime;
                 @Index(name = "idx_rec_user_status", columnList = "user_id,status"),
                 @Index(name = "idx_rec_status", columnList = "status"),
                 @Index(name = "idx_rec_priority", columnList = "priority"),
+                @Index(name = "idx_rec_category", columnList = "category"),
                 @Index(name = "idx_rec_created", columnList = "created_at"),
-                @Index(name = "idx_rec_last_activity", columnList = "last_activity_at")
+                @Index(name = "idx_rec_last_activity", columnList = "last_activity_at"),
+                @Index(name = "idx_rec_first_response_due", columnList = "first_response_due_at"),
+                @Index(name = "idx_rec_resolution_due", columnList = "resolution_due_at")
         }
 )
 @Getter
@@ -49,8 +53,15 @@ public class Reclamation {
     @Column(nullable = false)
     private Priority priority;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ReclamationCategory category;
+
     @Column(name = "assigned_to")
     private Long assignedTo;
+
+    @Column(name = "duplicate_count", nullable = false)
+    private int duplicateCount;
 
     @Column(name = "risk_score")
     private Double riskScore;
@@ -65,8 +76,23 @@ public class Reclamation {
     @Column(name = "last_activity_at")
     private LocalDateTime lastActivityAt;
 
+    @Column(name = "first_response_at")
+    private LocalDateTime firstResponseAt;
+
+    @Column(name = "first_response_due_at")
+    private LocalDateTime firstResponseDueAt;
+
+    @Column(name = "resolution_due_at")
+    private LocalDateTime resolutionDueAt;
+
     @Column(name = "resolved_at")
     private LocalDateTime resolvedAt;
+
+    @Column(name = "customer_satisfaction_score")
+    private Integer customerSatisfactionScore;
+
+    @Column(name = "customer_feedback", length = 500)
+    private String customerFeedback;
 
     @PrePersist
     protected void onCreate() {
@@ -74,7 +100,9 @@ public class Reclamation {
         lastActivityAt = createdAt;
         if (status == null) status = ReclamationStatus.OPEN;
         if (priority == null) priority = Priority.MEDIUM;
+        if (category == null) category = ReclamationCategory.OTHER;
         if (riskLevel == null) riskLevel = ReclamationRiskLevel.LOW;
+        if (duplicateCount < 0) duplicateCount = 0;
     }
 
     @PreUpdate

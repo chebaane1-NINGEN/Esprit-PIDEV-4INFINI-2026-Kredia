@@ -23,11 +23,13 @@ public class EcheanceService {
 
     private final EcheanceRepository echeanceRepository;
     private final CreditRepository creditRepository;
+    private final EmailService emailService;
 
     @Autowired
-    public EcheanceService(EcheanceRepository echeanceRepository, CreditRepository creditRepository) {
+    public EcheanceService(EcheanceRepository echeanceRepository, CreditRepository creditRepository, EmailService emailService) {
         this.echeanceRepository = echeanceRepository;
         this.creditRepository = creditRepository;
+        this.emailService = emailService;
     }
 
     /**
@@ -35,7 +37,7 @@ public class EcheanceService {
      */
     @Transactional
     public void checkAndUpdateStatus(Echeance echeance) {
-        if (echeance.getStatus() == EcheanceStatus.PENDING || echeance.getStatus() == EcheanceStatus.PARTIALLY_PAID) {
+        if (echeance.getStatus() == EcheanceStatus.PENDING || echeance.getStatus() == EcheanceStatus.PARTIALLY_PAID || echeance.getStatus() == EcheanceStatus.OVERDUE) {
             // Calculer le montant total des transactions liées à cette échéance
             java.math.BigDecimal totalPaid = echeanceRepository
                     .sumTransactionAmountsByEcheanceId(echeance.getEcheanceId());
@@ -76,22 +78,29 @@ public class EcheanceService {
                             java.math.BigDecimal nextRemainingDue = nextEcheance.getAmountDue()
                                     .subtract(nextCurrentPaid);
 
-                            if (surplus.compareTo(nextRemainingDue) >= 0) {
-                                // Surplus couvre totalement cette échéance
-                                nextEcheance.setAmountPaid(nextEcheance.getAmountDue());
-                                markAsPaid(nextEcheance); // This also saves the echeance inside the method
+                            // Calcul de la remise de 5% si payée entièrement avec le surplus
+                            java.math.BigDecimal discount = nextRemainingDue.multiply(new java.math.BigDecimal("0.05"));
+                            java.math.BigDecimal discountedRemainingDue = nextRemainingDue.subtract(discount).setScale(2, java.math.RoundingMode.HALF_EVEN);
 
-                                surplus = surplus.subtract(nextRemainingDue);
-                                log.info("Surplus appliqué. Échéance {} payée complètement. Surplus restant: {}",
-                                        nextEcheance.getEcheanceId(), surplus);
+                            if (surplus.compareTo(discountedRemainingDue) >= 0) {
+                                // Surplus couvre totalement cette échéance (avec la remise de 5%)
+                                // On baisse officiellement l'amount_due pour la comptabilité
+                                nextEcheance.setAmountDue(nextEcheance.getAmountDue().subtract(discount).setScale(2, java.math.RoundingMode.HALF_EVEN));
+                                nextEcheance.setAmountPaid(nextEcheance.getAmountDue());
+                                markAsPaid(nextEcheance);
+
+                                surplus = surplus.subtract(discountedRemainingDue);
+                                log.info("Surplus appliqué avec 5% de remise (-{}). Échéance {} payée complètement. Surplus restant: {}",
+                                        discount, nextEcheance.getEcheanceId(), surplus);
                             } else {
-                                // Surplus couvre partiellement cette échéance
+                                // Surplus couvre partiellement cette échéance (AUCUNE remise)
                                 nextEcheance.setAmountPaid(nextCurrentPaid.add(surplus));
                                 nextEcheance.setStatus(EcheanceStatus.PARTIALLY_PAID);
                                 nextEcheance.setPaidAt(LocalDateTime.now());
                                 echeanceRepository.save(nextEcheance);
+                                dispatchPartiallyPaidEmailSafe(nextEcheance);
 
-                                log.info("Surplus de {} appliqué à l'échéance {}. Paiement partiel. Plus de surplus.",
+                                log.info("Surplus de {} appliqué à l'échéance {}. Paiement partiel. Aucune remise. Plus de surplus.",
                                         surplus, nextEcheance.getEcheanceId());
                                 surplus = java.math.BigDecimal.ZERO;
                             }
@@ -110,8 +119,27 @@ public class EcheanceService {
                     echeance.setStatus(EcheanceStatus.PARTIALLY_PAID);
                     echeance.setPaidAt(LocalDateTime.now());
                     echeanceRepository.save(echeance);
+                    dispatchPartiallyPaidEmailSafe(echeance);
                 }
             }
+        }
+    }
+
+    private void dispatchPartiallyPaidEmailSafe(Echeance echeance) {
+        try {
+            if (echeance.getCredit() != null && echeance.getCredit().getCreditId() != null) {
+                Long creditId = echeance.getCredit().getCreditId();
+                Credit credit = creditRepository.findById(creditId).orElse(null);
+                if (credit != null && credit.getUser() != null) {
+                    com.kredia.entity.user.User user = credit.getUser();
+                    user.getEmail();
+                    user.getFirstName();
+                    user.getLastName();
+                    emailService.sendEcheancePartiallyPaidEmail(user, echeance);
+                }
+            }
+        } catch (Exception e) {
+            log.error("Failed to prepare and send partially paid email for Echeance {}: {}", echeance.getEcheanceId(), e.getMessage());
         }
     }
 
@@ -124,6 +152,24 @@ public class EcheanceService {
         echeance.setPaidAt(LocalDateTime.now());
         echeanceRepository.save(echeance);
         log.info("Echeance {} marked as PAID with amount_paid: {}", echeance.getEcheanceId(), echeance.getAmountPaid());
+
+        // Send confirmation email safely
+        try {
+            if (echeance.getCredit() != null && echeance.getCredit().getCreditId() != null) {
+                Long creditId = echeance.getCredit().getCreditId();
+                Credit credit = creditRepository.findById(creditId).orElse(null);
+                if (credit != null && credit.getUser() != null) {
+                    com.kredia.entity.user.User user = credit.getUser();
+                    // Initialize user proxy to prevent LazyInitializationException in @Async thread
+                    user.getEmail();
+                    user.getFirstName();
+                    user.getLastName();
+                    emailService.sendEcheancePaidEmail(user, echeance);
+                }
+            }
+        } catch (Exception e) {
+            log.error("Failed to prepare and send confirmation email for Echeance {}: {}", echeance.getEcheanceId(), e.getMessage());
+        }
 
         // Check if all echeances for this credit are paid
         if (echeance.getCredit() != null) {
@@ -257,6 +303,7 @@ public class EcheanceService {
             echeance.setStatus(EcheanceStatus.PARTIALLY_PAID);
             echeance.setPaidAt(LocalDateTime.now());
             echeanceRepository.save(echeance);
+            dispatchPartiallyPaidEmailSafe(echeance);
 
             log.info("Paiement partiel pour l'echeance {}. Montant payé: {}, Total payé: {}, Reste à payer: {}",
                     echeanceId, amountPaid, newTotalPaid, remainingDue);
@@ -305,22 +352,27 @@ public class EcheanceService {
                             : java.math.BigDecimal.ZERO;
                     java.math.BigDecimal nextRemainingDue = nextEcheance.getAmountDue().subtract(nextCurrentPaid);
 
-                    if (surplus.compareTo(nextRemainingDue) >= 0) {
+                    // Calcul de la remise de 5% si payée entièrement avec le surplus
+                    java.math.BigDecimal discount = nextRemainingDue.multiply(new java.math.BigDecimal("0.05"));
+                    java.math.BigDecimal discountedRemainingDue = nextRemainingDue.subtract(discount).setScale(2, java.math.RoundingMode.HALF_EVEN);
+
+                    if (surplus.compareTo(discountedRemainingDue) >= 0) {
+                        nextEcheance.setAmountDue(nextEcheance.getAmountDue().subtract(discount).setScale(2, java.math.RoundingMode.HALF_EVEN));
                         nextEcheance.setAmountPaid(nextEcheance.getAmountDue());
                         markAsPaid(nextEcheance);
-                        surplusMessage.append("[").append(nextRemainingDue).append(" -> Échéance #")
+                        surplusMessage.append("[").append(discountedRemainingDue).append(" avec remise de 5% -> Échéance #")
                                 .append(nextEcheance.getEcheanceId()).append("] ");
-                        surplus = surplus.subtract(nextRemainingDue);
-                        log.info("Surplus appliqué. Échéance {} payée complètement. Surplus restant: {}",
+                        surplus = surplus.subtract(discountedRemainingDue);
+                        log.info("Surplus appliqué avec 5% remise. Échéance {} payée complètement. Surplus restant: {}",
                                 nextEcheance.getEcheanceId(), surplus);
                     } else {
                         nextEcheance.setAmountPaid(nextCurrentPaid.add(surplus));
                         nextEcheance.setStatus(EcheanceStatus.PARTIALLY_PAID);
                         nextEcheance.setPaidAt(LocalDateTime.now());
                         echeanceRepository.save(nextEcheance);
-                        surplusMessage.append("[").append(surplus).append(" (partiel) -> Échéance #")
+                        surplusMessage.append("[").append(surplus).append(" (partiel, sans remise) -> Échéance #")
                                 .append(nextEcheance.getEcheanceId()).append("] ");
-                        log.info("Surplus de {} appliqué à l'échéance {}. Paiement partiel. Plus de surplus.",
+                        log.info("Surplus de {} appliqué à l'échéance {}. Paiement partiel sans remise.",
                                 surplus, nextEcheance.getEcheanceId());
                         surplus = java.math.BigDecimal.ZERO;
                     }

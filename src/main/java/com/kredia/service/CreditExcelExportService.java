@@ -66,8 +66,8 @@ public class CreditExcelExportService {
                 { "Type de remboursement", credit.getRepaymentType() != null ? credit.getRepaymentType().name() : "" },
                 { "Mensualité", credit.getMonthlyPayment() != null ? credit.getMonthlyPayment().toString() : "" },
                 { "Statut", credit.getStatus() != null ? credit.getStatus().name() : "" },
-                { "Iincome", credit.getIncome() != null ? credit.getIncome().toString() : "" },
-                { "ependents", credit.getDependents() != null ? String.valueOf(credit.getDependents()) : "" },
+                { "Income", credit.getIncome() != null ? credit.getIncome().toString() : "" },
+                { "Dependents", credit.getDependents() != null ? String.valueOf(credit.getDependents()) : "" },
                 { "Date de création", credit.getCreatedAt() != null ? credit.getCreatedAt().toString() : "" }
         };
 

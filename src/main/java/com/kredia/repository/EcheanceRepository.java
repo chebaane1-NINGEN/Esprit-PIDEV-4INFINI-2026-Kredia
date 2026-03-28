@@ -14,7 +14,7 @@ public interface EcheanceRepository extends JpaRepository<Echeance, Long> {
 
     @Query(value = "SELECT e.* FROM echeance e " +
             "INNER JOIN `transaction` t ON t.echeance_id = e.echeance_id " +
-            "WHERE e.status = 'PENDING'", nativeQuery = true)
+            "WHERE e.status IN ('PENDING', 'PARTIALLY_PAID', 'OVERDUE')", nativeQuery = true)
     List<Echeance> findPendingEcheancesWithTransaction();
 
     @Query(value = "SELECT COUNT(*) FROM `transaction` t WHERE t.echeance_id = :echeanceId", nativeQuery = true)
@@ -29,10 +29,12 @@ public interface EcheanceRepository extends JpaRepository<Echeance, Long> {
     @Query("SELECT COUNT(e) FROM Echeance e WHERE e.credit.creditId = :creditId AND e.status = com.kredia.enums.EcheanceStatus.PENDING")
     long countPendingEcheancesByCreditId(@Param("creditId") Long creditId);
 
-    @Query("SELECT e FROM Echeance e WHERE e.credit.creditId = :creditId AND (e.status = com.kredia.enums.EcheanceStatus.PENDING OR e.status = com.kredia.enums.EcheanceStatus.PARTIALLY_PAID) ORDER BY e.dueDate ASC")
+    @Query("SELECT e FROM Echeance e WHERE e.credit.creditId = :creditId AND (e.status = com.kredia.enums.EcheanceStatus.PENDING OR e.status = com.kredia.enums.EcheanceStatus.PARTIALLY_PAID OR e.status = com.kredia.enums.EcheanceStatus.OVERDUE) ORDER BY e.dueDate ASC")
     List<Echeance> findNextUnpaidEcheancesByCreditId(@Param("creditId") Long creditId);
 
     List<Echeance> findByCreditCreditId(Long creditId);
+
+    List<Echeance> findByStatusInAndDueDateBefore(List<EcheanceStatus> statuses, java.time.LocalDate date);
 
     @Query(value = """
             SELECT COUNT(*)

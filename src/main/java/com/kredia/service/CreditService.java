@@ -51,9 +51,22 @@ public class CreditService {
         } else {
             echeances = generateAmortissementConstant(credit);
         }
+        // 3. Mettre à jour immédiatement le statut si la date est déjà passée
+        LocalDate today = LocalDate.now();
+        java.math.BigDecimal penaltyRate = new java.math.BigDecimal("0.05");
+
+        for (Echeance e : echeances) {
+            if (e.getDueDate().isBefore(today)) {
+                e.setStatus(EcheanceStatus.OVERDUE);
+                // Majoration de 5% pour pénalité de retard
+                java.math.BigDecimal penalty = e.getAmountDue().multiply(penaltyRate);
+                e.setAmountDue(e.getAmountDue().add(penalty).setScale(2, RoundingMode.HALF_EVEN));
+            }
+        }
+
         credit.setEcheances(echeances);
 
-        // 3. Save credit with all echeances in one transaction
+        // 4. Save credit with all echeances in one transaction
         return creditRepository.save(credit);
     }
 

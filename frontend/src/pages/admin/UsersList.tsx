@@ -139,20 +139,23 @@ const UsersList: React.FC = () => {
                     </span>
                   </td>
                   <td className="actions-cell">
-                    <Link to={`/admin/users/${user.id}`} className="btn btn-sm btn-outline">View</Link>
+                    <Link to={`/admin/users/${user.id}`} className="btn btn-sm btn-outline mr-2">View</Link>
                     
                     {user.isDeleted ? (
                       <button onClick={() => requestAction(user.id, 'restore')} className="btn btn-sm btn-outline">Restore</button>
                     ) : (
-                      <>
+                      <div className="btn-group">
                         {user.status !== 'ACTIVE' && (
                            <button onClick={() => requestAction(user.id, 'activate')} className="btn btn-sm btn-success">Activate</button>
+                        )}
+                        {user.status === 'ACTIVE' && (
+                           <button onClick={() => requestAction(user.id, 'suspend')} className="btn btn-sm btn-warning text-white">Suspend</button>
                         )}
                         {user.status !== 'BLOCKED' && (
                            <button onClick={() => requestAction(user.id, 'block')} className="btn btn-sm btn-danger">Block</button>
                         )}
-                        <button onClick={() => requestAction(user.id, 'delete')} className="btn btn-sm btn-danger">🗑</button>
-                      </>
+                        <button onClick={() => requestAction(user.id, 'delete')} className="btn btn-sm btn-danger ml-2">🗑</button>
+                      </div>
                     )}
                   </td>
                 </tr>

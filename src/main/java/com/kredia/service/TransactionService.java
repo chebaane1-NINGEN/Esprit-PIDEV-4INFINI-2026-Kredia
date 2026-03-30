@@ -27,9 +27,6 @@ public class TransactionService {
                               WalletRepository walletRepository,
                               TransactionAuditLogService auditLogService,
                               FraudDetectionService fraudDetectionService) {
-    public TransactionService(TransactionRepository transactionRepository,
-            WalletRepository walletRepository,
-            TransactionAuditLogService auditLogService) {
         this.transactionRepository = transactionRepository;
         this.walletRepository = walletRepository;
         this.auditLogService = auditLogService;

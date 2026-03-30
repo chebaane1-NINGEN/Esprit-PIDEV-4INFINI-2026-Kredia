@@ -38,8 +38,8 @@ public class HederaConfig {
                     keyStr = keyStr.substring(2);
                 }
                 
-                // Using fromString which handles both Raw Hex and DER Encoded strings automatically
-                PrivateKey pk = PrivateKey.fromString(keyStr);
+                // Using fromStringECDSA since portal now generates raw ECDSA keys
+                PrivateKey pk = PrivateKey.fromStringECDSA(keyStr);
                 
                 log.info("Loaded key type: {}", pk.getClass().getSimpleName());
                 client.setOperator(AccountId.fromString(accountId.trim()), pk);

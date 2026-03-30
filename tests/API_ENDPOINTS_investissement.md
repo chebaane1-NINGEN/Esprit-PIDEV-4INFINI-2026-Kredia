@@ -81,7 +81,7 @@ Créer un ordre d'investissement.
 ```json
 {
   "user": {
-    "id": 1
+    "userId": 1
   },
   "assetSymbol": "AAPL",
   "orderType": "BUY",
@@ -114,7 +114,7 @@ Mettre à jour un ordre.
 ```json
 {
   "user": {
-    "id": 1
+    "userId": 1
   },
   "assetSymbol": "AAPL",
   "orderType": "SELL",
@@ -160,7 +160,7 @@ Créer une stratégie d'investissement.
 ```json
 {
   "user": {
-    "id": 1
+    "userId": 1
   },
   "strategyName": "Stratégie Conservatrice",
   "maxBudget": 5000,
@@ -189,7 +189,7 @@ Mettre à jour une stratégie.
 ```json
 {
   "user": {
-    "id": 1
+    "userId": 1
   },
   "strategyName": "Stratégie Dynamique",
   "maxBudget": 10000,

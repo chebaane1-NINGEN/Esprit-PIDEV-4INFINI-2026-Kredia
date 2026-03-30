@@ -29,7 +29,6 @@ public class FraudController {
         List<Transaction> suspected = fraudDetectionService.getSuspectedTransactions();
         return new ResponseEntity<>(suspected, HttpStatus.OK);
     }
- /*
     @PostMapping("/analyze-transaction/{transactionId}")
     public ResponseEntity<?> analyzeTransactionWithAI(@PathVariable Long transactionId) {
         return transactionService.getTransaction(transactionId).map(transaction -> {
@@ -42,5 +41,4 @@ public class FraudController {
         }).orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-  */
 }

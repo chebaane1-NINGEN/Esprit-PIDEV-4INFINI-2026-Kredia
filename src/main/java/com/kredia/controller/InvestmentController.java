@@ -3,6 +3,7 @@ package com.kredia.controller;
 import com.kredia.dto.investment.MarketStrategicSummaryRequest;
 import com.kredia.dto.investment.PortfolioPositionDTO;
 import com.kredia.dto.investment.PortfolioPositionResponseDTO;
+import com.kredia.dto.investment.StrategyCreationResponseDTO;
 import com.kredia.entity.investment.*;
 import com.kredia.enums.AssetCategory;
 import com.kredia.enums.OrderStatus;
@@ -13,7 +14,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -161,9 +161,9 @@ public class InvestmentController {
     // ==================== InvestmentStrategy Endpoints ====================
     
     @PostMapping("/strategies")
-    public ResponseEntity<InvestmentStrategy> createStrategy(@RequestBody InvestmentStrategy strategy) {
+    public ResponseEntity<StrategyCreationResponseDTO> createStrategy(@RequestBody InvestmentStrategy strategy) {
         try {
-            InvestmentStrategy createdStrategy = investmentService.createStrategy(strategy);
+            StrategyCreationResponseDTO createdStrategy = investmentService.createStrategy(strategy);
             return new ResponseEntity<>(createdStrategy, HttpStatus.CREATED);
         } catch (RuntimeException e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);

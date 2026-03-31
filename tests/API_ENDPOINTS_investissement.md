@@ -189,6 +189,26 @@ Créer une stratégie d'investissement.
 - `maxDrawdown`
 - `avgVolume20d`
 
+**Réponse (exemple):**
+```json
+{
+  "strategy": {
+    "strategyId": 12,
+    "strategyName": "Stratégie Conservatrice",
+    "isActive": true
+  },
+  "createdPositions": [
+    {
+      "positionId": 41,
+      "assetSymbol": "AAPL",
+      "currentQuantity": 1.25580000,
+      "avgPurchasePrice": 198.50000000,
+      "createdAt": "2026-03-31T15:10:22"
+    }
+  ]
+}
+```
+
 ---
 
 ### GET `/api/investments/strategies/{id}`

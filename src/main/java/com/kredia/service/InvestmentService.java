@@ -2,6 +2,8 @@ package com.kredia.service;
 
 import com.kredia.dto.investment.PortfolioPositionDTO;
 import com.kredia.dto.investment.PortfolioPositionResponseDTO;
+import com.kredia.dto.investment.StrategyCreatedPositionDTO;
+import com.kredia.dto.investment.StrategyCreationResponseDTO;
 import com.kredia.entity.investment.*;
 import com.kredia.entity.user.User;
 import com.kredia.enums.AssetCategory;
@@ -177,7 +179,7 @@ public class InvestmentService {
 
     // ==================== InvestmentStrategy CRUD ====================
     
-    public InvestmentStrategy createStrategy(InvestmentStrategy strategy) {
+        public StrategyCreationResponseDTO createStrategy(InvestmentStrategy strategy) {
         // Validate and fetch full User entity
         Long userId = strategy.getUser().getUserId();
         User user = userRepository.findById(userId)
@@ -185,8 +187,19 @@ public class InvestmentService {
         strategy.setUser(user);
 
         InvestmentStrategy savedStrategy = strategyRepository.save(strategy);
-        bootstrapStrategy(savedStrategy);
-        return savedStrategy;
+        List<PortfolioPosition> createdPositions = bootstrapStrategy(savedStrategy);
+
+        List<StrategyCreatedPositionDTO> createdPositionDtos = createdPositions.stream()
+            .map(position -> new StrategyCreatedPositionDTO(
+                position.getPositionId(),
+                position.getAssetSymbol(),
+                position.getCurrentQuantity(),
+                position.getAvgPurchasePrice(),
+                position.getCreatedAt()
+            ))
+            .collect(Collectors.toList());
+
+        return new StrategyCreationResponseDTO(savedStrategy, createdPositionDtos);
     }
 
     public Optional<InvestmentStrategy> getStrategyById(Long id) {
@@ -220,14 +233,16 @@ public class InvestmentService {
         return strategyRepository.save(strategy);
     }
 
-    private void bootstrapStrategy(InvestmentStrategy strategy) {
+    private List<PortfolioPosition> bootstrapStrategy(InvestmentStrategy strategy) {
+        List<PortfolioPosition> createdPositions = new java.util.ArrayList<>();
+
         if (strategy.getIsActive() == null || !strategy.getIsActive()) {
-            return;
+            return createdPositions;
         }
 
         BigDecimal maxBudget = strategy.getMaxBudget();
         if (maxBudget == null || maxBudget.compareTo(BigDecimal.ZERO) <= 0) {
-            return;
+            return createdPositions;
         }
 
         int maxAssets = strategy.getMaxAssets() != null && strategy.getMaxAssets() > 0
@@ -236,7 +251,7 @@ public class InvestmentService {
 
         List<YahooMarketDataService.EvaluatedAsset> selectedAssets = selectAssetsByRiskAndKpi(strategy, maxAssets);
         if (selectedAssets.isEmpty()) {
-            return;
+            return createdPositions;
         }
 
         BigDecimal allocationPerAsset = maxBudget
@@ -264,9 +279,14 @@ public class InvestmentService {
             }
 
             if (Boolean.TRUE.equals(strategy.getAutoCreatePositions())) {
-                createOrUpdatePosition(strategy, asset.getSymbol(), quantity, currentPrice);
+                PositionMutationResult mutationResult = createOrUpdatePosition(strategy, asset.getSymbol(), quantity, currentPrice);
+                if (mutationResult.created()) {
+                    createdPositions.add(mutationResult.position());
+                }
             }
         }
+
+        return createdPositions;
     }
 
     private List<YahooMarketDataService.EvaluatedAsset> selectAssetsByRiskAndKpi(InvestmentStrategy strategy, int maxAssets) {
@@ -374,7 +394,7 @@ public class InvestmentService {
         orderRepository.save(order);
     }
 
-    private void createOrUpdatePosition(InvestmentStrategy strategy, String symbol, BigDecimal quantity, BigDecimal currentPrice) {
+    private PositionMutationResult createOrUpdatePosition(InvestmentStrategy strategy, String symbol, BigDecimal quantity, BigDecimal currentPrice) {
         Optional<PortfolioPosition> existingPosition = positionRepository
                 .findByUserUserIdAndAssetSymbol(strategy.getUser().getUserId(), symbol);
 
@@ -390,8 +410,8 @@ public class InvestmentService {
 
             position.setCurrentQuantity(newQuantity);
             position.setAvgPurchasePrice(newAveragePrice);
-            positionRepository.save(position);
-            return;
+            PortfolioPosition updatedPosition = positionRepository.save(position);
+            return new PositionMutationResult(updatedPosition, false);
         }
 
         PortfolioPosition newPosition = new PortfolioPosition();
@@ -399,7 +419,11 @@ public class InvestmentService {
         newPosition.setAssetSymbol(symbol);
         newPosition.setCurrentQuantity(quantity);
         newPosition.setAvgPurchasePrice(currentPrice);
-        positionRepository.save(newPosition);
+        PortfolioPosition savedPosition = positionRepository.save(newPosition);
+        return new PositionMutationResult(savedPosition, true);
+    }
+
+    private record PositionMutationResult(PortfolioPosition position, boolean created) {
     }
 
     public void deleteStrategy(Long id) {

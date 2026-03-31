@@ -156,6 +156,8 @@ Récupérer les ordres d'un utilisateur par statut. Pas de body.
 ### POST `/api/investments/strategies`
 Créer une stratégie d'investissement.
 
+⚠️ Si `isActive=true`, la création de stratégie peut déclencher automatiquement la création d'ordres (`PENDING`) et/ou de positions selon la configuration.
+
 **Body:**
 ```json
 {
@@ -165,10 +167,16 @@ Créer une stratégie d'investissement.
   "strategyName": "Stratégie Conservatrice",
   "maxBudget": 5000,
   "stopLossPct": 8.5,
+  "riskProfile": "MEDIUM",
+  "autoCreateOrders": true,
+  "autoCreatePositions": false,
+  "maxAssets": 5,
   "reinvestProfits": true,
   "isActive": true
 }
 ```
+
+**Valeurs `riskProfile` :** `LOW` | `MEDIUM` | `HIGH`
 
 ---
 
@@ -194,6 +202,10 @@ Mettre à jour une stratégie.
   "strategyName": "Stratégie Dynamique",
   "maxBudget": 10000,
   "stopLossPct": 12,
+  "riskProfile": "HIGH",
+  "autoCreateOrders": true,
+  "autoCreatePositions": true,
+  "maxAssets": 3,
   "reinvestProfits": false,
   "isActive": true
 }
@@ -328,6 +340,76 @@ Notifier l'exécution d'un ordre (envoi d'email utilisateur).
 ```text
 Email notification sent successfully
 ```
+
+---
+
+## 3. Scénario de test Postman — Stratégie auto (risk + KPI + ordres/positions)
+
+### Étape A — Créer quelques assets
+
+**POST** `/api/investments/assets`
+
+```json
+{
+  "symbol": "AAPL",
+  "assetName": "Apple Inc",
+  "category": "STOCK",
+  "riskLevel": "MEDIUM"
+}
+```
+
+```json
+{
+  "symbol": "TSLA",
+  "assetName": "Tesla Inc",
+  "category": "STOCK",
+  "riskLevel": "HIGH"
+}
+```
+
+```json
+{
+  "symbol": "JNJ",
+  "assetName": "Johnson & Johnson",
+  "category": "STOCK",
+  "riskLevel": "LOW"
+}
+```
+
+### Étape B — Créer une stratégie active avec auto création
+
+**POST** `/api/investments/strategies`
+
+```json
+{
+  "user": { "userId": 1 },
+  "strategyName": "Strat Medium Auto",
+  "maxBudget": 1000,
+  "stopLossPct": 8,
+  "riskProfile": "MEDIUM",
+  "autoCreateOrders": true,
+  "autoCreatePositions": true,
+  "maxAssets": 3,
+  "reinvestProfits": false,
+  "isActive": true
+}
+```
+
+### Étape C — Vérifier les résultats automatiques
+
+- **GET** `/api/investments/orders/user/1/status/PENDING`
+  - Attendu: ordres `BUY` générés automatiquement.
+- **GET** `/api/investments/positions/user/1`
+  - Attendu: positions créées/mises à jour automatiquement.
+- **GET** `/api/investments/strategies/user/1`
+  - Attendu: stratégie enregistrée avec `riskProfile`, `autoCreateOrders`, `autoCreatePositions`, `maxAssets`.
+
+### Cas de validation rapide
+
+- `riskProfile=LOW` → actifs `LOW` uniquement.
+- `riskProfile=HIGH` → actifs `MEDIUM`, `HIGH`, `VERY_HIGH`.
+- `isActive=false` → pas de création auto.
+- `autoCreateOrders=false` et `autoCreatePositions=true` → positions uniquement.
 
 ---
 

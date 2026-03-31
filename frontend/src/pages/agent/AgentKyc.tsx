@@ -8,7 +8,7 @@ interface KycClient extends UserResponseDTO {
   kycAction?: 'validate' | 'reject' | null;
 }
 
-const EmployeeKyc: React.FC = () => {
+const AgentKyc: React.FC = () => {
   const { addToast } = useToast();
   const [clients, setClients] = useState<KycClient[]>([]);
   const [loading, setLoading] = useState(true);
@@ -43,7 +43,7 @@ const EmployeeKyc: React.FC = () => {
   const verified = clients.filter(c => c.kycVerified);
 
   return (
-    <div className="employee-kyc wow fadeInUp">
+    <div className="agent-kyc wow fadeInUp">
       <div className="flex justify-between items-center mb-6">
         <div>
           <h2 className="text-2xl font-bold">KYC Review Center</h2>
@@ -139,4 +139,4 @@ const EmployeeKyc: React.FC = () => {
   );
 };
 
-export default EmployeeKyc;
+export default AgentKyc;

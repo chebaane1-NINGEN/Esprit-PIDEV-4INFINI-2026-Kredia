@@ -75,7 +75,9 @@ export const userApi = {
     sort?: string 
   }) => api.get<ApiResponse<Page<UserResponseDTO>>>('', { params }).then(extractData),
   
-  getById: (id: number) => api.get<ApiResponse<UserResponseDTO>>(`/${id}`).then(extractData),
+  getById: (id: number, actorIdOverride?: number) => api.get<ApiResponse<UserResponseDTO>>(`/${id}`, {
+    headers: actorIdOverride ? { 'X-Actor-Id': String(actorIdOverride) } : undefined
+  }).then(extractData),
   
   update: (id: number, user: Partial<UserRequestDTO>) => api.put<ApiResponse<UserResponseDTO>>(`/${id}`, user).then(extractData),
   

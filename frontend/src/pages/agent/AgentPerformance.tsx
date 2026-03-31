@@ -6,7 +6,7 @@ import { useToast } from '../../contexts/ToastContext';
 import { MOCK_AGENT_PERFORMANCE, MOCK_ACTIVITIES, relativeTime, getActivityIcon } from '../../utils/mockData';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTip, ResponsiveContainer, RadialBarChart, RadialBar } from 'recharts';
 
-const EmployeePerformance: React.FC = () => {
+const AgentPerformance: React.FC = () => {
   const { currentUser } = useAuth();
   const { addToast } = useToast();
   const [stats, setStats] = useState<AgentPerformanceDTO | null>(null);
@@ -76,7 +76,7 @@ const EmployeePerformance: React.FC = () => {
   const satisfactionData = [{ name: 'CSAT', value: (stats.clientSatisfactionScore / 5) * 100, fill: '#4318FF' }];
 
   return (
-    <div className="employee-performance wow fadeInUp">
+    <div className="agent-performance wow fadeInUp">
       <div className="flex justify-between items-center mb-6">
         <div>
           <h2 className="text-2xl font-bold">My Performance Dashboard</h2>
@@ -180,4 +180,4 @@ const EmployeePerformance: React.FC = () => {
   );
 };
 
-export default EmployeePerformance;
+export default AgentPerformance;

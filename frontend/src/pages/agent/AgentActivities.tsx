@@ -4,7 +4,7 @@ import { userApi } from '../../api/userApi';
 import { useAuth } from '../../contexts/AuthContext';
 import { MOCK_ACTIVITIES, relativeTime, getActivityIcon } from '../../utils/mockData';
 
-const EmployeeActivities: React.FC = () => {
+const AgentActivities: React.FC = () => {
   const { currentUser } = useAuth();
   const [logs, setLogs] = useState<UserActivityResponseDTO[]>([]);
   const [loading, setLoading] = useState(true);
@@ -22,7 +22,7 @@ const EmployeeActivities: React.FC = () => {
   const filtered = filterType === 'ALL' ? logs : logs.filter(l => l.activityType === filterType);
 
   return (
-    <div className="employee-activities wow fadeInUp">
+    <div className="agent-activities wow fadeInUp">
       <div className="flex justify-between items-center mb-6">
         <div>
           <h2 className="text-2xl font-bold">My Activity History</h2>
@@ -81,4 +81,4 @@ const EmployeeActivities: React.FC = () => {
   );
 };
 
-export default EmployeeActivities;
+export default AgentActivities;

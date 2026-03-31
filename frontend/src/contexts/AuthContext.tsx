@@ -52,7 +52,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         );
         
         const user = await Promise.race([
-          userApi.getById(Number(actorId)),
+          userApi.getById(Number(actorId), Number(actorId)),
           timeoutPromise
         ]) as UserResponseDTO;
         
@@ -84,7 +84,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       );
       
       const user = await Promise.race([
-        userApi.getById(userId),
+        userApi.getById(userId, userId),
         timeoutPromise
       ]) as UserResponseDTO;
       

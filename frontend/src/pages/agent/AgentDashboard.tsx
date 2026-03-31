@@ -1,12 +1,12 @@
 import React from 'react';
 import { Routes, Route, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import EmployeePerformance from './EmployeePerformance';
-import EmployeeActivities from './EmployeeActivities';
-import EmployeeClients from './EmployeeClients';
-import EmployeeKyc from './EmployeeKyc';
+import AgentPerformance from './AgentPerformance';
+import AgentActivities from './AgentActivities';
+import AgentClients from './AgentClients';
+import AgentKyc from './AgentKyc';
 
-const EmployeeDashboard: React.FC = () => {
+const AgentDashboard: React.FC = () => {
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -25,26 +25,26 @@ const EmployeeDashboard: React.FC = () => {
         </div>
         
         <div className="user-profile-sm">
-          <div className="avatar employee-avatar">
+          <div className="avatar agent-avatar">
             {currentUser?.firstName?.[0] || 'E'}{currentUser?.lastName?.[0] || 'U'}
           </div>
           <div className="user-info">
-            <p className="name">Hello, {currentUser?.firstName || 'Employee'}</p>
-            <p className="badge badge-employee">{currentUser?.email || 'agent@kredia.com'}</p>
+            <p className="name">Hello, {currentUser?.firstName || 'Agent'}</p>
+            <p className="badge badge-agent">{currentUser?.email || 'agent@kredia.com'}</p>
           </div>
         </div>
 
         <nav className="sidebar-nav">
-          <NavLink to="/employee" end className={({isActive}) => isActive ? 'nav-item active' : 'nav-item'}>
+          <NavLink to="/agent" end className={({isActive}) => isActive ? 'nav-item active' : 'nav-item'}>
             <span className="mr-3 text-lg">📊</span> My Performance
           </NavLink>
-          <NavLink to="/employee/clients" className={({isActive}) => isActive ? 'nav-item active' : 'nav-item'}>
+          <NavLink to="/agent/clients" className={({isActive}) => isActive ? 'nav-item active' : 'nav-item'}>
             <span className="mr-3 text-lg">👥</span> My Clients
           </NavLink>
-          <NavLink to="/employee/kyc" className={({isActive}) => isActive ? 'nav-item active' : 'nav-item'}>
+          <NavLink to="/agent/kyc" className={({isActive}) => isActive ? 'nav-item active' : 'nav-item'}>
             <span className="mr-3 text-lg">🛡️</span> KYC Review
           </NavLink>
-          <NavLink to="/employee/activities" className={({isActive}) => isActive ? 'nav-item active' : 'nav-item'}>
+          <NavLink to="/agent/activities" className={({isActive}) => isActive ? 'nav-item active' : 'nav-item'}>
             <span className="mr-3 text-lg">📋</span> My Activities
           </NavLink>
         </nav>
@@ -81,10 +81,10 @@ const EmployeeDashboard: React.FC = () => {
         
         <div className="content-area pt-6">
           <Routes>
-            <Route path="/" element={<EmployeePerformance />} />
-            <Route path="/clients" element={<EmployeeClients />} />
-            <Route path="/kyc" element={<EmployeeKyc />} />
-            <Route path="/activities" element={<EmployeeActivities />} />
+            <Route path="/" element={<AgentPerformance />} />
+            <Route path="/clients" element={<AgentClients />} />
+            <Route path="/kyc" element={<AgentKyc />} />
+            <Route path="/activities" element={<AgentActivities />} />
           </Routes>
         </div>
       </main>
@@ -92,4 +92,4 @@ const EmployeeDashboard: React.FC = () => {
   );
 };
 
-export default EmployeeDashboard;
+export default AgentDashboard;

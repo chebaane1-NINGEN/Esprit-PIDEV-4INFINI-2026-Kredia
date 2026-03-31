@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { UserRole } from '../types/user.types';
 import { RoleSelector } from '../pages/Login';
 import AdminDashboard from '../pages/admin/AdminDashboard';
-import EmployeeDashboard from '../pages/employee/EmployeeDashboard';
+import AgentDashboard from '../pages/agent/AgentDashboard';
 import ClientDashboard from '../pages/client/ClientDashboard';
 
 const ProtectedRoute = ({ children, allowedRoles }: { children: React.ReactNode, allowedRoles?: UserRole[] }) => {
@@ -25,7 +25,7 @@ const ProtectedRoute = ({ children, allowedRoles }: { children: React.ReactNode,
   if (allowedRoles && !allowedRoles.includes(currentUser.role)) {
     // Redirect to appropriate dashboard based on actual role
     if (currentUser.role === UserRole.ADMIN) return <Navigate to="/admin" replace />;
-    if (currentUser.role === UserRole.AGENT || currentUser.role === UserRole.EMPLOYEE) return <Navigate to="/employee" replace />;
+    if (currentUser.role === UserRole.AGENT || currentUser.role === UserRole.EMPLOYEE) return <Navigate to="/agent" replace />;
     if (currentUser.role === UserRole.CLIENT) return <Navigate to="/client" replace />;
     return <Navigate to="/login" replace />;
   }
@@ -41,7 +41,7 @@ const RoleRedirect = () => {
   switch (currentUser.role) {
     case UserRole.ADMIN: return <Navigate to="/admin" />;
     case UserRole.AGENT:
-    case UserRole.EMPLOYEE: return <Navigate to="/employee" />;
+    case UserRole.EMPLOYEE: return <Navigate to="/agent" />;
     case UserRole.CLIENT: return <Navigate to="/client" />;
     default: return <Navigate to="/login" />;
   }
@@ -60,10 +60,10 @@ export const AppRouter = () => {
         </ProtectedRoute>
       } />
       
-      {/* Employee Routes */}
-      <Route path="/employee/*" element={
-        <ProtectedRoute allowedRoles={[UserRole.EMPLOYEE]}>
-          <EmployeeDashboard />
+      {/* Agent Routes */}
+      <Route path="/agent/*" element={
+        <ProtectedRoute allowedRoles={[UserRole.AGENT, UserRole.EMPLOYEE]}>
+          <AgentDashboard />
         </ProtectedRoute>
       } />
       

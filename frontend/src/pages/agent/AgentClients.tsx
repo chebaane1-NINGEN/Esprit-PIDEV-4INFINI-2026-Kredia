@@ -9,7 +9,7 @@ interface EnrichedClient extends UserResponseDTO {
   eligibility?: ClientEligibilityDTO | null;
 }
 
-const EmployeeClients: React.FC = () => {
+const AgentClients: React.FC = () => {
   const { currentUser } = useAuth();
   const [clients, setClients] = useState<EnrichedClient[]>([]);
   const [loading, setLoading] = useState(true);
@@ -57,7 +57,7 @@ const EmployeeClients: React.FC = () => {
   };
 
   return (
-    <div className="employee-clients wow fadeInUp">
+    <div className="agent-clients wow fadeInUp">
       <div className="flex justify-between items-center mb-6">
         <div>
           <h2 className="text-2xl font-bold">My Clients</h2>
@@ -180,4 +180,4 @@ const EmployeeClients: React.FC = () => {
   );
 };
 
-export default EmployeeClients;
+export default AgentClients;

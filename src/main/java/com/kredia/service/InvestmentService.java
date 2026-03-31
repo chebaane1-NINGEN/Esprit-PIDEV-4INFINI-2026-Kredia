@@ -11,6 +11,7 @@ import com.kredia.enums.RiskLevel;
 import com.kredia.enums.StrategyRiskProfile;
 import com.kredia.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,7 +34,11 @@ public class InvestmentService {
     private final PortfolioPositionRepository positionRepository;
     private final UserRepository userRepository;
     private final MarketPriceService marketPriceService;
+    private final YahooMarketDataService yahooMarketDataService;
     private final GeminiService geminiService;
+
+    @Value("${investment.strategy.universe:AAPL,MSFT,GOOGL,AMZN,TSLA,NVDA,META,JNJ,JPM,V}")
+    private String strategyUniverse;
 
     @Autowired
     public InvestmentService(
@@ -43,6 +48,7 @@ public class InvestmentService {
             PortfolioPositionRepository positionRepository,
             UserRepository userRepository,
             MarketPriceService marketPriceService,
+            YahooMarketDataService yahooMarketDataService,
             GeminiService geminiService) {
         this.assetRepository = assetRepository;
         this.orderRepository = orderRepository;
@@ -50,6 +56,7 @@ public class InvestmentService {
         this.positionRepository = positionRepository;
         this.userRepository = userRepository;
         this.marketPriceService = marketPriceService;
+        this.yahooMarketDataService = yahooMarketDataService;
         this.geminiService = geminiService;
     }
 
@@ -227,7 +234,7 @@ public class InvestmentService {
                 ? strategy.getMaxAssets()
                 : 5;
 
-        List<InvestmentAsset> selectedAssets = selectAssetsByRiskAndKpi(strategy, maxAssets);
+        List<YahooMarketDataService.EvaluatedAsset> selectedAssets = selectAssetsByRiskAndKpi(strategy, maxAssets);
         if (selectedAssets.isEmpty()) {
             return;
         }
@@ -235,8 +242,8 @@ public class InvestmentService {
         BigDecimal allocationPerAsset = maxBudget
                 .divide(BigDecimal.valueOf(selectedAssets.size()), 8, RoundingMode.HALF_UP);
 
-        for (InvestmentAsset asset : selectedAssets) {
-            BigDecimal currentPrice = marketPriceService.getCurrentPrice(asset.getSymbol());
+        for (YahooMarketDataService.EvaluatedAsset asset : selectedAssets) {
+            BigDecimal currentPrice = asset.getCurrentPrice();
             if (currentPrice == null || currentPrice.compareTo(BigDecimal.ZERO) <= 0) {
                 continue;
             }
@@ -253,29 +260,31 @@ public class InvestmentService {
             }
 
             if (Boolean.TRUE.equals(strategy.getAutoCreateOrders())) {
-                createAutoBuyOrder(strategy, asset, quantity, currentPrice);
+                createAutoBuyOrder(strategy, asset.getSymbol(), quantity, currentPrice);
             }
 
             if (Boolean.TRUE.equals(strategy.getAutoCreatePositions())) {
-                createOrUpdatePosition(strategy, asset, quantity, currentPrice);
+                createOrUpdatePosition(strategy, asset.getSymbol(), quantity, currentPrice);
             }
         }
     }
 
-    private List<InvestmentAsset> selectAssetsByRiskAndKpi(InvestmentStrategy strategy, int maxAssets) {
+    private List<YahooMarketDataService.EvaluatedAsset> selectAssetsByRiskAndKpi(InvestmentStrategy strategy, int maxAssets) {
         List<RiskLevel> allowedRiskLevels = mapRiskProfileToRiskLevels(strategy.getRiskProfile());
 
-        return assetRepository.findAll().stream()
+        return parseUniverse(strategyUniverse).stream()
+                .map(yahooMarketDataService::evaluateAsset)
+                .flatMap(Optional::stream)
                 .filter(asset -> allowedRiskLevels.contains(asset.getRiskLevel()))
                 .map(asset -> Map.entry(asset, calculateAssetScore(strategy, asset)))
-                .sorted(Map.Entry.<InvestmentAsset, BigDecimal>comparingByValue(Comparator.reverseOrder()))
+                .sorted(Map.Entry.<YahooMarketDataService.EvaluatedAsset, BigDecimal>comparingByValue(Comparator.reverseOrder()))
                 .limit(maxAssets)
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
     }
 
-    private BigDecimal calculateAssetScore(InvestmentStrategy strategy, InvestmentAsset asset) {
-        BigDecimal riskScore = switch (asset.getRiskLevel()) {
+    private BigDecimal calculateAssetScore(InvestmentStrategy strategy, YahooMarketDataService.EvaluatedAsset asset) {
+        BigDecimal riskFit = switch (asset.getRiskLevel()) {
             case LOW -> new BigDecimal("1.00");
             case MEDIUM -> new BigDecimal("0.85");
             case HIGH -> new BigDecimal("0.70");
@@ -288,7 +297,50 @@ public class InvestmentService {
             case HIGH -> new BigDecimal("0.90");
         };
 
-        return riskScore.multiply(profileWeight).setScale(4, RoundingMode.HALF_UP);
+        BigDecimal momentum20Score = normalizeBounded(asset.getMomentum20d(), new BigDecimal("-0.20"), new BigDecimal("0.20"));
+        BigDecimal momentum60Score = normalizeBounded(asset.getMomentum60d(), new BigDecimal("-0.30"), new BigDecimal("0.30"));
+
+        BigDecimal volatilityScore = BigDecimal.ONE.subtract(
+                normalizeBounded(asset.getVolatilityAnn(), BigDecimal.ZERO, new BigDecimal("0.60"))
+        );
+
+        BigDecimal drawdownScore = BigDecimal.ONE.subtract(
+                normalizeBounded(asset.getMaxDrawdown(), BigDecimal.ZERO, new BigDecimal("0.50"))
+        );
+
+        BigDecimal liquidityScore = normalizeBounded(asset.getAvgVolume20d(), BigDecimal.ZERO, new BigDecimal("10000000"));
+
+        BigDecimal weightedScore = riskFit.multiply(profileWeight).multiply(new BigDecimal("0.40"))
+                .add(momentum20Score.multiply(new BigDecimal("0.20")))
+                .add(momentum60Score.multiply(new BigDecimal("0.15")))
+                .add(volatilityScore.multiply(new BigDecimal("0.15")))
+                .add(drawdownScore.multiply(new BigDecimal("0.07")))
+                .add(liquidityScore.multiply(new BigDecimal("0.03")));
+
+        return weightedScore.setScale(4, RoundingMode.HALF_UP);
+    }
+
+    private BigDecimal normalizeBounded(BigDecimal value, BigDecimal min, BigDecimal max) {
+        if (value == null || min == null || max == null || max.compareTo(min) <= 0) {
+            return BigDecimal.ZERO;
+        }
+
+        BigDecimal clipped = value.max(min).min(max);
+        return clipped.subtract(min)
+                .divide(max.subtract(min), 8, RoundingMode.HALF_UP);
+    }
+
+    private List<String> parseUniverse(String csv) {
+        if (csv == null || csv.isBlank()) {
+            return List.of();
+        }
+
+        return List.of(csv.split(",")).stream()
+                .map(String::trim)
+                .filter(symbol -> !symbol.isBlank())
+                .map(String::toUpperCase)
+                .distinct()
+                .collect(Collectors.toList());
     }
 
     private List<RiskLevel> mapRiskProfileToRiskLevels(StrategyRiskProfile profile) {
@@ -311,10 +363,10 @@ public class InvestmentService {
         return currentPrice.multiply(multiplier).setScale(8, RoundingMode.HALF_UP);
     }
 
-    private void createAutoBuyOrder(InvestmentStrategy strategy, InvestmentAsset asset, BigDecimal quantity, BigDecimal currentPrice) {
+    private void createAutoBuyOrder(InvestmentStrategy strategy, String symbol, BigDecimal quantity, BigDecimal currentPrice) {
         InvestmentOrder order = new InvestmentOrder();
         order.setUser(strategy.getUser());
-        order.setAssetSymbol(asset.getSymbol());
+        order.setAssetSymbol(symbol);
         order.setOrderType(OrderType.BUY);
         order.setQuantity(quantity);
         order.setPrice(currentPrice);
@@ -322,9 +374,9 @@ public class InvestmentService {
         orderRepository.save(order);
     }
 
-    private void createOrUpdatePosition(InvestmentStrategy strategy, InvestmentAsset asset, BigDecimal quantity, BigDecimal currentPrice) {
+    private void createOrUpdatePosition(InvestmentStrategy strategy, String symbol, BigDecimal quantity, BigDecimal currentPrice) {
         Optional<PortfolioPosition> existingPosition = positionRepository
-                .findByUserUserIdAndAssetSymbol(strategy.getUser().getUserId(), asset.getSymbol());
+                .findByUserUserIdAndAssetSymbol(strategy.getUser().getUserId(), symbol);
 
         if (existingPosition.isPresent()) {
             PortfolioPosition position = existingPosition.get();
@@ -344,7 +396,7 @@ public class InvestmentService {
 
         PortfolioPosition newPosition = new PortfolioPosition();
         newPosition.setUser(strategy.getUser());
-        newPosition.setAssetSymbol(asset.getSymbol());
+        newPosition.setAssetSymbol(symbol);
         newPosition.setCurrentQuantity(quantity);
         newPosition.setAvgPurchasePrice(currentPrice);
         positionRepository.save(newPosition);

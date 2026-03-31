@@ -1,49 +1,41 @@
-# Kredia - Projet Spring Boot
+Kredia – Projet Spring Boot
+Overview
 
-## Description
-Projet Spring Boot vierge avec Maven et Lombok.
+Ce projet a été développé dans le cadre du PIDEV – ᵉ année du cycle ingénieur à Esprit School of Engineering (Année académique 2026-2027).
+Il s'agit d'une application back-end Spring Boot complète pour la gestion de microcrédits, intégrant des fonctionnalités avancées telles que l’envoi d’emails transactionnels, le stockage cloud d’images, l’accès à des données financières externes et l’intégration d’IA via Google Gemini.
 
-## Prérequis
-- Java 17 ou supérieur
-- Maven 3.6+ (ou utiliser le wrapper Maven inclus)
+Tech Stack
+Backend : Spring Boot 3.2.2, Maven, Lombok
+Base de données : MySQL avec Spring Data JPA et Flyway pour les migrations
+Services externes : Brevo (emails transactionnels), Cloudinary (stockage d’images), Hedera SDK (blockchain), Google Gemini AI, Alpha Vantage API (données financières)
+Dev Tools : Spring DevTools
+Academic Context
 
-## Technologies utilisées
-- Spring Boot 3.2.2
-- Maven
-- Lombok
-- Spring Web
-- Spring DevTools
-- Spring Data JPA
-- MySQL
-- Flyway (migrations)
-- Brevo API (emails transactionnels)
-- Cloudinary (stockage d'images)
-- Hedera SDK (blockchain)
-- Google Gemini AI
-- Alpha Vantage API (données de marché)
+Développé à Esprit School of Engineering, ce projet vise à :
 
-## Installation
+Créer une architecture Spring Boot robuste et modulaire
+Intégrer des API externes pour enrichir l’application
+Assurer la portabilité et la maintenabilité du code
+Description
 
-### Cloner le projet
-```bash
+Projet Spring Boot vierge avec Maven et Lombok, prêt à accueillir des modules métiers (crédits, utilisateurs, transactions, notifications, etc.).
+
+Prérequis
+Java 17 ou supérieur
+Maven 3.6+ (ou wrapper Maven inclus)
+MySQL installé et configuré
+Installation
+Cloner le projet
 git clone <url-du-repo>
 cd kredia
-```
-
-### Compiler le projet
-```bash
+Compiler le projet
 mvn clean install
-```
-
-### Lancer l'application
-```bash
+Lancer l'application
 mvn spring-boot:run
-```
 
 L'application démarrera sur http://localhost:8080
 
-## Structure du projet
-```
+Structure du projet
 kredia/
 ├── src/
 │   ├── main/
@@ -58,21 +50,14 @@ kredia/
 │               └── KrediaApplicationTests.java
 ├── pom.xml
 └── README.md
-```
-
-## Configuration Lombok dans l'IDE
-
-### IntelliJ IDEA
-1. Installer le plugin Lombok (File > Settings > Plugins)
-2. Activer l'annotation processing (File > Settings > Build, Execution, Deployment > Compiler > Annotation Processors)
-
-### VS Code
-1. Installer l'extension "Language Support for Java"
-2. Lombok sera automatiquement détecté via Maven
-
-## Commandes Maven utiles
-
-```bash
+Configuration Lombok dans l'IDE
+IntelliJ IDEA
+Installer le plugin Lombok (File > Settings > Plugins)
+Activer l’annotation processing (File > Settings > Build, Execution, Deployment > Compiler > Annotation Processors)
+VS Code
+Installer l’extension Language Support for Java
+Lombok sera automatiquement détecté via Maven
+Commandes Maven utiles
 # Compiler le projet
 mvn clean compile
 
@@ -84,29 +69,31 @@ mvn clean package
 
 # Nettoyer le projet
 mvn clean
-```
+Portabilité
 
-## Portabilité
-Ce projet peut être transféré sur n'importe quel PC avec Java 17+ et Maven installés. Tous les fichiers de configuration sont inclus.
+Le projet peut être exécuté sur n’importe quel poste avec Java 17+ et Maven installés.
+Toutes les configurations nécessaires sont incluses dans le dépôt.
 
-## 📧 Configuration Email (Brevo)
+📧 Configuration Email (Brevo)
 
-Le système utilise **Brevo** (anciennement SendinBlue) pour l'envoi d'emails transactionnels.
+Le système utilise Brevo pour l’envoi d’emails transactionnels.
 
-### Guide rapide :
-1. Créez un compte sur [Brevo](https://www.brevo.com/) (300 emails/jour gratuits)
-2. Obtenez votre clé API dans Settings → SMTP & API
-3. Configurez les variables d'environnement :
-   ```bash
-   export BREVO_API_KEY="votre-clé-api-brevo"
-   export MAIL_FROM="noreply@kredia.com"
-   ```
+Guide rapide
+Créez un compte sur Brevo
+ (300 emails/jour gratuits)
+Obtenez votre clé API dans Settings → SMTP & API
+Configurez les variables d’environnement :
+export BREVO_API_KEY="votre-clé-api-brevo"
+export MAIL_FROM="noreply@kredia.com"
 
-📖 Documentation complète : [BREVO_SETUP_GUIDE.md](BREVO_SETUP_GUIDE.md)
+📖 Documentation complète : BREVO_SETUP_GUIDE.md
 
-## 📚 Documentation supplémentaire
-
-- [EMAIL_NOTIFICATION_SETUP.md](EMAIL_NOTIFICATION_SETUP.md) - Configuration des notifications email
-- [BREVO_SETUP_GUIDE.md](BREVO_SETUP_GUIDE.md) - Guide de démarrage Brevo
-- [DATABASE_SETUP.md](DATABASE_SETUP.md) - Configuration de la base de données
-- [MIGRATIONS_GUIDE.md](MIGRATIONS_GUIDE.md) - Guide des migrations Flyway
+📚 Documentation supplémentaire
+EMAIL_NOTIFICATION_SETUP.md
+ - Configuration des notifications email
+BREVO_SETUP_GUIDE.md
+ - Guide de démarrage Brevo
+DATABASE_SETUP.md
+ - Configuration de la base de données
+MIGRATIONS_GUIDE.md
+ - Guide des migrations Flyway

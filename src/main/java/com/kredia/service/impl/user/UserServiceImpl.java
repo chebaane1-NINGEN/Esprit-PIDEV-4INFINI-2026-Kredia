@@ -652,14 +652,6 @@ public class UserServiceImpl implements UserService {
         throw new ForbiddenException("Access denied");
     }
 
-    private List<UserActivityResponseDTO> mapActivities(List<UserActivity> activities) {
-        List<UserActivityResponseDTO> out = new ArrayList<>();
-        for (UserActivity a : activities) {
-            out.add(mapActivity(a));
-        }
-        return out;
-    }
-
     private UserActivityResponseDTO mapActivity(UserActivity a) {
         UserActivityResponseDTO dto = new UserActivityResponseDTO();
         dto.setId(a.getId());

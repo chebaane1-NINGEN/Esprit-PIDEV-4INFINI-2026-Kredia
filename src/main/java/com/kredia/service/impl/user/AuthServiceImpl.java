@@ -61,7 +61,7 @@ public class AuthServiceImpl implements AuthService {
 
         User saved = userRepository.save(user);
         
-        // TODO: Send Email with verification token in a real app
+        // NOTE: Send Email with verification token in a real app
         
         return userMapper.toResponse(saved);
     }

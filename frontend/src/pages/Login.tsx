@@ -96,6 +96,10 @@ const Login: React.FC = () => {
     e.preventDefault();
     clearAuthError();
     
+    // Debug: Log form data
+    console.log("=== LOGIN DEBUG ===");
+    console.log("Form Data:", { email: formData.email, password: formData.password });
+    
     // Mark all fields as touched
     setTouched({ email: true, password: true });
     
@@ -104,14 +108,25 @@ const Login: React.FC = () => {
     const passwordValid = validateField('password', formData.password);
     
     if (!emailValid || !passwordValid) {
+      console.log("Validation failed:", { emailValid, passwordValid });
       return;
     }
 
     try {
       setIsLoading(true);
       setErrors({});
+      
+      // Debug: Log API call
+      console.log("Calling login API with:", { 
+        email: formData.email, 
+        passwordLength: formData.password.length 
+      });
+      
       await loginWithEmail(formData.email, formData.password);
+      
+      console.log("Login successful!");
     } catch (err: any) {
+      console.log("Login error:", err);
       setErrors({ general: getAuthErrorMessage(err, 'login') });
     } finally {
       setIsLoading(false);

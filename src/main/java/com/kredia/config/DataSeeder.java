@@ -88,27 +88,61 @@ public class DataSeeder {
                              jakarta.persistence.EntityManager entityManager) {
             // Create Admin
             User admin = createUser("Admin", "System", "admin@kredia.com", "+21690000001",
-                    UserRole.ADMIN, UserStatus.ACTIVE, passwordEncoder, null);
+                    UserRole.ADMIN, UserStatus.ACTIVE, passwordEncoder, null, "Admin@123");
             User savedAdmin = userRepository.save(admin);
             updateCreatedAt(savedAdmin.getId(), 180, entityManager);
             log.info("Created Admin: {} (ID: {})", savedAdmin.getEmail(), savedAdmin.getId());
             createUserActivities(savedAdmin.getId(), userActivityRepository, UserRole.ADMIN, 180);
 
+            // Create Additional Admins
+            String[] adminEmails = {"admin2@kredia.com", "admin3@kredia.com", "admin4@kredia.com", "admin5@kredia.com"};
+            for (int i = 0; i < adminEmails.length; i++) {
+                User additionalAdmin = createUser("Admin", "User" + (i + 2), adminEmails[i], "+2169000000" + (i + 2),
+                        UserRole.ADMIN, UserStatus.ACTIVE, passwordEncoder, null, "Admin@123");
+                User savedAdditionalAdmin = userRepository.save(additionalAdmin);
+                updateCreatedAt(savedAdditionalAdmin.getId(), 180 - (i + 1), entityManager);
+                log.info("Created Additional Admin: {} (ID: {})", savedAdditionalAdmin.getEmail(), savedAdditionalAdmin.getId());
+                createUserActivities(savedAdditionalAdmin.getId(), userActivityRepository, UserRole.ADMIN, 180 - (i + 1));
+            }
+
             // Create Primary Agent for testing
             User testAgent = createUser("Test", "Agent", "agent1@kredia.com", "+21691000000",
-                    UserRole.AGENT, UserStatus.ACTIVE, passwordEncoder, null);
+                    UserRole.AGENT, UserStatus.ACTIVE, passwordEncoder, null, "Agent@123");
             User savedTestAgent = userRepository.save(testAgent);
             updateCreatedAt(savedTestAgent.getId(), 160, entityManager);
             log.info("Created Test Agent: {} (ID: {})", savedTestAgent.getEmail(), savedTestAgent.getId());
             createUserActivities(savedTestAgent.getId(), userActivityRepository, UserRole.AGENT, 160);
 
+            // Create Additional Agents
+            String[] agentEmails = {"agent2@kredia.com", "agent3@kredia.com", "agent4@kredia.com", "agent5@kredia.com"};
+            for (int i = 0; i < agentEmails.length; i++) {
+                User additionalAgent = createUser("Agent", "User" + (i + 2), agentEmails[i], "+2169100000" + (i + 1),
+                        UserRole.AGENT, UserStatus.ACTIVE, passwordEncoder, null, "Agent@123");
+                User savedAdditionalAgent = userRepository.save(additionalAgent);
+                updateCreatedAt(savedAdditionalAgent.getId(), 160 - (i + 1), entityManager);
+                log.info("Created Additional Agent: {} (ID: {})", savedAdditionalAgent.getEmail(), savedAdditionalAgent.getId());
+                createUserActivities(savedAdditionalAgent.getId(), userActivityRepository, UserRole.AGENT, 160 - (i + 1));
+            }
+
             // Create Primary Client for testing
-            User testClient = createUser("Test", "Client", "client1@email.com", "+21620000000",
-                    UserRole.CLIENT, UserStatus.ACTIVE, passwordEncoder, savedTestAgent);
+            User testClient = createUser("Test", "Client", "client1@kredia.com", "+21620000000",
+                    UserRole.CLIENT, UserStatus.ACTIVE, passwordEncoder, savedTestAgent, "Client@123");
             User savedTestClient = userRepository.save(testClient);
             updateCreatedAt(savedTestClient.getId(), 170, entityManager);
             log.info("Created Test Client: {} (ID: {})", savedTestClient.getEmail(), savedTestClient.getId());
             createUserActivities(savedTestClient.getId(), userActivityRepository, UserRole.CLIENT, 170);
+
+            // Create Additional Clients
+            String[] clientEmails = {"client2@kredia.com", "client3@kredia.com", "client4@kredia.com", "client5@kredia.com", 
+                                    "client6@kredia.com", "client7@kredia.com", "client8@kredia.com", "client9@kredia.com", "client10@kredia.com"};
+            for (int i = 0; i < clientEmails.length; i++) {
+                User additionalClient = createUser("Client", "User" + (i + 2), clientEmails[i], "+2162000000" + (i + 1),
+                        UserRole.CLIENT, UserStatus.ACTIVE, passwordEncoder, savedTestAgent, "Client@123");
+                User savedAdditionalClient = userRepository.save(additionalClient);
+                updateCreatedAt(savedAdditionalClient.getId(), 170 - (i + 1), entityManager);
+                log.info("Created Additional Client: {} (ID: {})", savedAdditionalClient.getEmail(), savedAdditionalClient.getId());
+                createUserActivities(savedAdditionalClient.getId(), userActivityRepository, UserRole.CLIENT, 170 - (i + 1));
+            }
 
             // Create more Agents
             String[] agentFirstNames = {"Karim", "Samira", "Mehdi", "Ines", "Hassen"};
@@ -121,8 +155,9 @@ public class DataSeeder {
                 String lName = agentLastNames[i];
                 String email = fName.toLowerCase() + "." + lName.toLowerCase().replace(" ", "") + "@kredia.com";
                 String phone = "+2169100000" + (i + 1);
+                String password = "Agent@" + String.format("%03d", i + 1);
                 
-                User agent = createUser(fName, lName, email, phone, UserRole.AGENT, UserStatus.ACTIVE, passwordEncoder, null);
+                User agent = createUser(fName, lName, email, phone, UserRole.AGENT, UserStatus.ACTIVE, passwordEncoder, null, password);
                 User savedAgent = userRepository.save(agent);
                 updateCreatedAt(savedAgent.getId(), 150 - (i * 10), entityManager);
                 log.info("Created Agent: {} (ID: {})", savedAgent.getEmail(), savedAgent.getId());
@@ -139,8 +174,9 @@ public class DataSeeder {
             for (int i = 0; i < 60; i++) {
                 String fName = firstNames[random.nextInt(firstNames.length)];
                 String lName = lastNames[random.nextInt(lastNames.length)];
-                String email = fName.toLowerCase() + "." + lName.toLowerCase().replace(" ", "") + (i + 1) + "@email.com";
+                String email = fName.toLowerCase() + "." + lName.toLowerCase().replace(" ", "") + (i + 1) + "@kredia.com";
                 String phone = "+216" + (20000001 + i); // Start from 20000001 to avoid conflict with testClient
+                String password = "Client@" + String.format("%03d", i + 1);
                 
                 UserStatus status;
                 int statusRand = random.nextInt(10);
@@ -151,7 +187,7 @@ public class DataSeeder {
 
                 User assignedAgent = agents.get(random.nextInt(agents.size()));
                 
-                User client = createUser(fName, lName, email, phone, UserRole.CLIENT, status, passwordEncoder, assignedAgent);
+                User client = createUser(fName, lName, email, phone, UserRole.CLIENT, status, passwordEncoder, assignedAgent, password);
                 User savedClient = userRepository.save(client);
                 
                 // Random creation date over the last 6 months
@@ -161,7 +197,7 @@ public class DataSeeder {
                 createUserActivities(savedClient.getId(), userActivityRepository, UserRole.CLIENT, daysAgo);
             }
 
-            log.info("Data seeding completed successfully! Created 1 Admin, 5 Agents, 60 Clients.");
+            log.info("Data seeding completed successfully! Created 5 Admins, 5 Agents, 10 Clients (test accounts) + 5 Agents + 60 Clients (random) = 85 total users.");
         }
 
         private void updateCreatedAt(Long userId, int daysAgo, jakarta.persistence.EntityManager em) {
@@ -174,13 +210,13 @@ public class DataSeeder {
 
         private User createUser(String firstName, String lastName, String email, String phone,
                                 UserRole role, UserStatus status, PasswordEncoder encoder,
-                                User assignedAgent) {
+                                User assignedAgent, String password) {
             User user = new User();
             user.setFirstName(firstName);
             user.setLastName(lastName);
             user.setEmail(email);
             user.setPhoneNumber(phone);
-            user.setPasswordHash(encoder.encode("password"));
+            user.setPasswordHash(encoder.encode(password));
             user.setRole(role);
             user.setStatus(status);
             user.setDeleted(false);

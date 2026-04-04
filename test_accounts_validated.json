@@ -1,0 +1,172 @@
+{
+  "test_accounts": {
+    "admins": [
+      {
+        "fullName": "Jean-Marc Dubois",
+        "email": "jeanmarc.dubois@gmail.com",
+        "password": "Admin@123",
+        "phoneNumber": "+15142345678",
+        "role": "ADMIN"
+      },
+      {
+        "fullName": "Marie Laurent",
+        "email": "marie.laurent@gmail.com", 
+        "password": "Admin@456",
+        "phoneNumber": "+15142345679",
+        "role": "ADMIN"
+      },
+      {
+        "fullName": "Pierre Bernard",
+        "email": "pierre.bernard@gmail.com",
+        "password": "Admin@789",
+        "phoneNumber": "+15142345680",
+        "role": "ADMIN"
+      },
+      {
+        "fullName": "Sophie Martin",
+        "email": "sophie.martin@gmail.com",
+        "password": "Admin@012",
+        "phoneNumber": "+15142345681",
+        "role": "ADMIN"
+      },
+      {
+        "fullName": "Thomas Petit",
+        "email": "thomas.petit@gmail.com",
+        "password": "Admin@345",
+        "phoneNumber": "+15142345682",
+        "role": "ADMIN"
+      }
+    ],
+    "agents": [
+      {
+        "fullName": "Isabelle Rodriguez",
+        "email": "isabelle.rodriguez@gmail.com",
+        "password": "Agent@123",
+        "phoneNumber": "+15142345683",
+        "role": "AGENT"
+      },
+      {
+        "fullName": "Nicolas Chen",
+        "email": "nicolas.chen@gmail.com",
+        "password": "Agent@456",
+        "phoneNumber": "+15142345684",
+        "role": "AGENT"
+      },
+      {
+        "fullName": "Camille Silva",
+        "email": "camille.silva@gmail.com",
+        "password": "Agent@789",
+        "phoneNumber": "+15142345685",
+        "role": "AGENT"
+      },
+      {
+        "fullName": "François Kumar",
+        "email": "francois.kumar@gmail.com",
+        "password": "Agent@012",
+        "phoneNumber": "+15142345686",
+        "role": "AGENT"
+      },
+      {
+        "fullName": "Élodie Wang",
+        "email": "elodie.wang@gmail.com",
+        "password": "Agent@345",
+        "phoneNumber": "+15142345687",
+        "role": "AGENT"
+      }
+    ],
+    "clients": [
+      {
+        "fullName": "Alexandre Tremblay",
+        "email": "alexandre.tremblay@gmail.com",
+        "password": "Client@123",
+        "phoneNumber": "+15142345688",
+        "role": "CLIENT"
+      },
+      {
+        "fullName": "Julie Gauthier",
+        "email": "julie.gauthier@gmail.com",
+        "password": "Client@456",
+        "phoneNumber": "+15142345689",
+        "role": "CLIENT"
+      },
+      {
+        "fullName": "Michel Robert",
+        "email": "michel.robert@gmail.com",
+        "password": "Client@789",
+        "phoneNumber": "+15142345690",
+        "role": "CLIENT"
+      },
+      {
+        "fullName": "Louise Bouchard",
+        "email": "louise.bouchard@gmail.com",
+        "password": "Client@012",
+        "phoneNumber": "+15142345691",
+        "role": "CLIENT"
+      },
+      {
+        "fullName": "Philippe Morin",
+        "email": "philippe.morin@gmail.com",
+        "password": "Client@345",
+        "phoneNumber": "+15142345692",
+        "role": "CLIENT"
+      },
+      {
+        "fullName": "Anne Lévesque",
+        "email": "anne.levesque@gmail.com",
+        "password": "Client@567",
+        "phoneNumber": "+15142345693",
+        "role": "CLIENT"
+      },
+      {
+        "fullName": "David Gagnon",
+        "email": "david.gagnon@gmail.com",
+        "password": "Client@890",
+        "phoneNumber": "+15142345694",
+        "role": "CLIENT"
+      },
+      {
+        "fullName": "Marie-Claude Roy",
+        "email": "marie-claude.roy@gmail.com",
+        "password": "Client@234",
+        "phoneNumber": "+15142345695",
+        "role": "CLIENT"
+      },
+      {
+        "fullName": "Stéphane Bélanger",
+        "email": "stephane.belanger@gmail.com",
+        "password": "Client@567",
+        "phoneNumber": "+15142345696",
+        "role": "CLIENT"
+      },
+      {
+        "fullName": "Catherine Lambert",
+        "email": "catherine.lambert@gmail.com",
+        "password": "Client@890",
+        "phoneNumber": "+15142345697",
+        "role": "CLIENT"
+      }
+    ]
+  },
+  "validation_rules": {
+    "email_domains": ["gmail.com", "outlook.com", "yahoo.com"],
+    "password_requirements": {
+      "min_length": 6,
+      "requires_uppercase": false,
+      "requires_lowercase": false,
+      "requires_number": false,
+      "requires_special": false,
+      "example": "Test@123"
+    },
+    "phone_format": "+{country_code}{number}",
+    "phone_example": "+15142345678"
+  },
+  "summary": {
+    "total_accounts": 20,
+    "admins": 5,
+    "agents": 5,
+    "clients": 10,
+    "email_domain": "gmail.com",
+    "password_pattern": "{Role}@123/456/789/012/345/567/890/234/567/890",
+    "phone_base": "+151423456"
+  }
+}

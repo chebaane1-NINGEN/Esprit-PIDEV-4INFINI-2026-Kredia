@@ -23,6 +23,8 @@ public class JwtTokenProvider {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtExpirationMs);
 
+        // Récupérer l'utilisateur pour inclure email et rôle dans le token
+        // Note: Dans une vraie application, vous pourriez vouloir inclure plus d'infos
         return Jwts.builder()
                 .setSubject(Long.toString(actorId))
                 .setIssuedAt(now)

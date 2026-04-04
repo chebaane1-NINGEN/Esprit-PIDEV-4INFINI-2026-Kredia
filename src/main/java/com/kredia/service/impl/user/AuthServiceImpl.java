@@ -109,4 +109,42 @@ public class AuthServiceImpl implements AuthService {
         user.setVerificationToken(UUID.randomUUID().toString());
         userRepository.save(user);
     }
+
+    @Override
+    @Transactional
+    public void activateUser(String email) {
+        User user = userRepository.findByEmailAndDeletedFalse(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        
+        user.setEmailVerified(true);
+        user.setVerificationToken(null);
+        user.setStatus(UserStatus.ACTIVE);
+        userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public void createAdmin(String email) {
+        User user = userRepository.findByEmailAndDeletedFalse(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        
+        user.setEmailVerified(true);
+        user.setVerificationToken(null);
+        user.setStatus(UserStatus.ACTIVE);
+        user.setRole(UserRole.ADMIN);
+        userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public void createAgent(String email) {
+        User user = userRepository.findByEmailAndDeletedFalse(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        user.setEmailVerified(true);
+        user.setVerificationToken(null);
+        user.setStatus(UserStatus.ACTIVE);
+        user.setRole(UserRole.AGENT);
+        userRepository.save(user);
+    }
 }

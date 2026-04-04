@@ -9,4 +9,7 @@ public interface AuthService {
     String login(LoginRequestDTO request);
     void verifyEmail(String token);
     void forgotPassword(String email);
+    void activateUser(String email);
+    void createAdmin(String email);
+    void createAgent(String email);
 }

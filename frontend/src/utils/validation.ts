@@ -4,28 +4,16 @@ export interface ValidationResult {
   error?: string;
 }
 
-// Email validation with domain checking
+// Email validation with standard format only
 export const validateEmail = (email: string): ValidationResult => {
   if (!email || email.trim().length === 0) {
     return { isValid: false, error: 'Email is required' };
   }
 
-  // Basic email format validation
+  // Standard email format validation only
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email.trim())) {
     return { isValid: false, error: 'Invalid email format' };
-  }
-
-  // Check for valid domains
-  const validDomains = [
-    'gmail.com', 'yahoo.com', 'outlook.com', 'hotmail.com', 'icloud.com',
-    'protonmail.com', 'tutanota.com', 'aol.com', 'mail.com',
-    'example.com', 'test.com' // For testing
-  ];
-
-  const domain = email.trim().split('@')[1]?.toLowerCase();
-  if (!domain || !validDomains.includes(domain)) {
-    return { isValid: false, error: 'Unsupported email domain' };
   }
 
   return { isValid: true };

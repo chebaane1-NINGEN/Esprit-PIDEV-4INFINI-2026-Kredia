@@ -157,6 +157,7 @@ Récupérer les ordres d'un utilisateur par statut. Pas de body.
 Créer une stratégie d'investissement.
 
 ⚠️ Si `isActive=true`, la création de stratégie peut déclencher automatiquement la création d'ordres (`PENDING`) et/ou de positions selon la configuration.
+⚠️ La sélection des actifs pour l'exécution auto est faite depuis Yahoo Finance (univers de symboles côté backend), et ne dépend pas de la table `investment_assets`.
 
 **Body:**
 ```json
@@ -177,6 +178,50 @@ Créer une stratégie d'investissement.
 ```
 
 **Valeurs `riskProfile` :** `LOW` | `MEDIUM` | `HIGH`
+
+**Config backend utilisée pour l'univers des symboles :**
+`investment.strategy.universe=AAPL,MSFT,GOOGL,AMZN,TSLA,NVDA,META,JNJ,JPM,V`
+
+**KPI pris en compte pour scorer les actifs (Yahoo) :**
+- `momentum20d`
+- `momentum60d`
+- `volatilityAnn`
+- `maxDrawdown`
+- `avgVolume20d`
+
+**Réponse (exemple):**
+```json
+{
+  "strategy": {
+    "strategyId": 12,
+    "strategyName": "Stratégie Conservatrice",
+    "isActive": true
+  },
+  "createdPositions": [
+    {
+      "positionId": 41,
+      "assetSymbol": "AAPL",
+      "currentQuantity": 1.25580000,
+      "avgPurchasePrice": 198.50000000,
+      "createdAt": "2026-03-31T15:10:22"
+    }
+  ],
+  "message": "1 position(s) créée(s) avec succès."
+}
+```
+
+**Réponse possible si aucune position créée :**
+```json
+{
+  "strategy": {
+    "strategyId": 13,
+    "strategyName": "Stratégie test",
+    "isActive": true
+  },
+  "createdPositions": [],
+  "message": "Aucune position créée lors de l'exécution de la stratégie. Détails: Création de positions désactivée (autoCreatePositions=false)."
+}
+```
 
 ---
 
@@ -241,7 +286,7 @@ Créer une position portefeuille (prix récupéré automatiquement via API de ma
 **Body:**
 ```json
 {
-  "userId": 1,
+  "userId": 3,
   "assetSymbol": "AAPL",
   "quantity": 3.5
 }
@@ -343,38 +388,15 @@ Email notification sent successfully
 
 ---
 
-## 3. Scénario de test Postman — Stratégie auto (risk + KPI + ordres/positions)
+## 3. Scénario de test Postman — Stratégie auto (Yahoo risk + KPI + ordres/positions)
 
-### Étape A — Créer quelques assets
+### Étape A — Vérifier la configuration de l'univers (backend)
 
-**POST** `/api/investments/assets`
+Dans `application.properties`, vérifier par exemple:
 
-```json
-{
-  "symbol": "AAPL",
-  "assetName": "Apple Inc",
-  "category": "STOCK",
-  "riskLevel": "MEDIUM"
-}
-```
+`investment.strategy.universe=AAPL,MSFT,GOOGL,AMZN,TSLA,NVDA,META,JNJ,JPM,V`
 
-```json
-{
-  "symbol": "TSLA",
-  "assetName": "Tesla Inc",
-  "category": "STOCK",
-  "riskLevel": "HIGH"
-}
-```
-
-```json
-{
-  "symbol": "JNJ",
-  "assetName": "Johnson & Johnson",
-  "category": "STOCK",
-  "riskLevel": "LOW"
-}
-```
+> Aucun insert préalable dans `/api/investments/assets` n'est requis pour l'exécution automatique de stratégie.
 
 ### Étape B — Créer une stratégie active avec auto création
 
@@ -406,8 +428,8 @@ Email notification sent successfully
 
 ### Cas de validation rapide
 
-- `riskProfile=LOW` → actifs `LOW` uniquement.
-- `riskProfile=HIGH` → actifs `MEDIUM`, `HIGH`, `VERY_HIGH`.
+- `riskProfile=LOW` → priorité aux actifs Yahoo classés `LOW`.
+- `riskProfile=HIGH` → actifs Yahoo `MEDIUM`, `HIGH`, `VERY_HIGH` possibles.
 - `isActive=false` → pas de création auto.
 - `autoCreateOrders=false` et `autoCreatePositions=true` → positions uniquement.
 

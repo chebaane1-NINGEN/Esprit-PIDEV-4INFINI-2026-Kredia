@@ -115,4 +115,5 @@ export interface ApiResponse<T> {
 export interface AuthResponseDTO {
   token: string;
   type: string;
+  user?: UserResponseDTO;
 }

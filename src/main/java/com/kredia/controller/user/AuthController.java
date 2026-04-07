@@ -4,6 +4,8 @@ import com.kredia.dto.ApiResponse;
 import com.kredia.dto.auth.AuthResponseDTO;
 import com.kredia.dto.auth.LoginRequestDTO;
 import com.kredia.dto.auth.RegisterRequestDTO;
+import com.kredia.dto.auth.ForgotPasswordRequestDTO;
+import com.kredia.dto.auth.ResetPasswordRequestDTO;
 import com.kredia.dto.user.UserResponseDTO;
 import com.kredia.service.user.AuthService;
 import jakarta.validation.Valid;
@@ -51,26 +53,32 @@ public class AuthController {
     }
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<ApiResponse<String>> forgotPassword(@RequestParam String email) {
-        authService.forgotPassword(email);
+    public ResponseEntity<ApiResponse<String>> forgotPassword(@Valid @RequestBody ForgotPasswordRequestDTO request) {
+        authService.forgotPassword(request.getEmail());
         return ResponseEntity.ok(ApiResponse.ok("Password reset link sent if email exists"));
     }
 
+    @PostMapping("/reset-password")
+    public ResponseEntity<ApiResponse<String>> resetPassword(@Valid @RequestBody ResetPasswordRequestDTO request) {
+        authService.resetPassword(request.getToken(), request.getPassword());
+        return ResponseEntity.ok(ApiResponse.ok("Password reset successfully"));
+    }
+
     @PostMapping("/activate-user")
-    public ResponseEntity<ApiResponse<String>> activateUser(@RequestParam String email) {
-        authService.activateUser(email);
+    public ResponseEntity<ApiResponse<String>> activateUser(@RequestBody ForgotPasswordRequestDTO request) {
+        authService.activateUser(request.getEmail());
         return ResponseEntity.ok(ApiResponse.ok("User activated successfully"));
     }
 
     @PostMapping("/create-admin")
-    public ResponseEntity<ApiResponse<String>> createAdmin(@RequestParam String email) {
-        authService.createAdmin(email);
+    public ResponseEntity<ApiResponse<String>> createAdmin(@RequestBody ForgotPasswordRequestDTO request) {
+        authService.createAdmin(request.getEmail());
         return ResponseEntity.ok(ApiResponse.ok("Admin created successfully"));
     }
 
     @PostMapping("/create-agent")
-    public ResponseEntity<ApiResponse<String>> createAgent(@RequestParam String email) {
-        authService.createAgent(email);
+    public ResponseEntity<ApiResponse<String>> createAgent(@RequestBody ForgotPasswordRequestDTO request) {
+        authService.createAgent(request.getEmail());
         return ResponseEntity.ok(ApiResponse.ok("Agent created successfully"));
     }
 

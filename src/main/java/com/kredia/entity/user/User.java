@@ -73,6 +73,9 @@ public class User {
     @Column(name = "verification_token")
     private String verificationToken;
 
+    @Column(name = "failed_login_attempts", nullable = false)
+    private int failedLoginAttempts = 0;
+
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
@@ -142,6 +145,9 @@ public class User {
 
     public User getAssignedAgent() { return assignedAgent; }
     public void setAssignedAgent(User assignedAgent) { this.assignedAgent = assignedAgent; }
+
+    public int getFailedLoginAttempts() { return failedLoginAttempts; }
+    public void setFailedLoginAttempts(int failedLoginAttempts) { this.failedLoginAttempts = failedLoginAttempts; }
 
     public String getPasswordHash() { return passwordHash; }
     public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }

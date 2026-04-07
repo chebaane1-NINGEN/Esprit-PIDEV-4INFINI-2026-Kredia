@@ -83,6 +83,15 @@ export const userApi = {
     
   register: (user: any) =>
     axios.post<ApiResponse<UserResponseDTO>>('http://localhost:8086/api/auth/register', user).then(res => res.data.data),
+
+  verifyEmail: (token: string) =>
+    axios.post<ApiResponse<void>>('http://localhost:8086/api/auth/verify-email', null, { params: { token } }).then(res => res.data.data),
+
+  forgotPassword: (email: string) =>
+    axios.post<ApiResponse<void>>('http://localhost:8086/api/auth/forgot-password', { email }).then(res => res.data.data),
+
+  resetPassword: (token: string, password: string) =>
+    axios.post<ApiResponse<void>>('http://localhost:8086/api/auth/reset-password', { token, password }).then(res => res.data.data),
     
   // ---- CRUD ----
   create: (user: UserRequestDTO) => api.post<ApiResponse<UserResponseDTO>>('', user).then(extractData),
@@ -112,6 +121,11 @@ export const userApi = {
   activate: (id: number) => api.patch<ApiResponse<UserResponseDTO>>(`/${id}/activate`).then(extractData),
   deactivate: (id: number) => api.patch<ApiResponse<UserResponseDTO>>(`/${id}/deactivate`).then(extractData),
   changeRole: (id: number, role: UserRole) => api.patch<ApiResponse<UserResponseDTO>>(`/${id}/role`, { role }).then(extractData),
+
+  // ---- Bulk Actions ----
+  bulkDelete: (ids: number[]) => api.delete<ApiResponse<void>>('/admin/bulk-delete', { data: ids }).then(extractData),
+  bulkUpdateStatus: (ids: number[], status: UserStatus) => 
+    api.patch<ApiResponse<void>>('/admin/bulk-status', ids, { params: { status } }).then(extractData),
 
   // ---- Admin Endpoints ----
   getAdminStats: () => api.get<ApiResponse<AdminStatsDTO>>('/admin/stats').then(extractData),

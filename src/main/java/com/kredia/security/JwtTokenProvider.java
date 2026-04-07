@@ -19,14 +19,14 @@ public class JwtTokenProvider {
     // 24 hours
     private final int jwtExpirationMs = 86400000;
 
-    public String generateToken(Long actorId) {
+    public String generateToken(Long actorId, String email, String role) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtExpirationMs);
 
-        // Récupérer l'utilisateur pour inclure email et rôle dans le token
-        // Note: Dans une vraie application, vous pourriez vouloir inclure plus d'infos
         return Jwts.builder()
                 .setSubject(Long.toString(actorId))
+                .claim("email", email)
+                .claim("role", role)
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
                 .signWith(jwtSecret)

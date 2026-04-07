@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
+import { userApi } from '../api/userApi';
 import { 
-  Mail, 
+  Lock, 
+  Eye, 
+  EyeOff, 
   ArrowRight, 
   ChevronLeft,
   Loader2,
@@ -9,28 +12,45 @@ import {
   CheckCircle2,
   ShieldCheck
 } from 'lucide-react';
-import { userApi } from '../api/userApi';
 
-const ForgotPassword: React.FC = () => {
-  const [email, setEmail] = useState('');
+const ResetPassword: React.FC = () => {
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState('');
+  
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email) {
-      setError('Please enter your email address');
+    const params = new URLSearchParams(location.search);
+    const token = params.get('token');
+
+    if (!token) {
+      setError('Missing or invalid reset token.');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters long');
       return;
     }
 
     try {
       setIsLoading(true);
       setError('');
-      await userApi.forgotPassword(email);
+      await userApi.resetPassword(token, password);
       setIsSuccess(true);
     } catch (err: any) {
-      setError(err.message || 'Failed to send reset link. Please try again.');
+      setError(err.message || 'Failed to reset password. The link may be expired.');
     } finally {
       setIsLoading(false);
     }
@@ -38,7 +58,6 @@ const ForgotPassword: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center p-6 font-sans relative overflow-hidden">
-      {/* Background elements */}
       <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-600/5 blur-[120px] rounded-full"></div>
       <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-emerald-500/5 blur-[120px] rounded-full"></div>
 
@@ -50,11 +69,11 @@ const ForgotPassword: React.FC = () => {
 
         <div className="mb-10 text-center md:text-left">
           <div className="w-14 h-14 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600 mb-6 mx-auto md:mx-0 shadow-inner">
-            <ShieldCheck size={28} />
+            <Lock size={28} />
           </div>
-          <h2 className="text-3xl font-bold text-slate-900 mb-3 tracking-tight">Recover Password</h2>
+          <h2 className="text-3xl font-bold text-slate-900 mb-3 tracking-tight">Reset Password</h2>
           <p className="text-slate-500 font-medium leading-relaxed">
-            Institutional recovery process. Enter your work email to receive reset instructions.
+            Create a new strong password for your Kredia account.
           </p>
         </div>
 
@@ -63,15 +82,15 @@ const ForgotPassword: React.FC = () => {
             <div className="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-500 mx-auto mb-6 shadow-inner">
               <CheckCircle2 size={32} />
             </div>
-            <h3 className="text-xl font-bold text-slate-900 mb-3">Check your inbox</h3>
+            <h3 className="text-xl font-bold text-slate-900 mb-3">Password updated!</h3>
             <p className="text-slate-500 mb-8 leading-relaxed">
-              We've sent a secure recovery link to <span className="text-slate-900 font-bold">{email}</span>. Please follow the instructions provided.
+              Your password has been successfully reset. You can now log in with your new credentials.
             </p>
             <Link 
               to="/login" 
               className="w-full inline-block bg-indigo-600 text-white font-bold py-4 rounded-2xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100"
             >
-              Return to Login
+              Log In Now
             </Link>
           </div>
         ) : (
@@ -84,17 +103,41 @@ const ForgotPassword: React.FC = () => {
             )}
 
             <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Work Email</label>
+              <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">New Password</label>
               <div className="relative group">
                 <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors">
-                  <Mail size={18} />
+                  <Lock size={18} />
                 </div>
                 <input
-                  type="email"
+                  type={showPassword ? 'text' : 'password'}
+                  className="w-full bg-slate-50 border border-slate-200 focus:border-indigo-600 focus:bg-white rounded-xl py-4 pl-12 pr-12 text-slate-900 font-semibold transition-all outline-none text-sm shadow-sm"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Confirm Password</label>
+              <div className="relative group">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors">
+                  <ShieldCheck size={18} />
+                </div>
+                <input
+                  type={showPassword ? 'text' : 'password'}
                   className="w-full bg-slate-50 border border-slate-200 focus:border-indigo-600 focus:bg-white rounded-xl py-4 pl-12 pr-4 text-slate-900 font-semibold transition-all outline-none text-sm shadow-sm"
-                  placeholder="name@company.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="••••••••"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
                   required
                 />
               </div>
@@ -103,28 +146,16 @@ const ForgotPassword: React.FC = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-indigo-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-indigo-100 hover:bg-indigo-700 active:scale-[0.98] transition-all flex items-center justify-center gap-3 group disabled:opacity-70"
+              className="w-full bg-indigo-600 text-white font-bold py-4 rounded-2xl hover:bg-indigo-700 transition-all flex items-center justify-center gap-3 shadow-lg shadow-indigo-100 disabled:opacity-50"
             >
-              {isLoading ? (
-                <Loader2 className="animate-spin" size={20} />
-              ) : (
-                <>
-                  <span>Send Recovery Link</span>
-                  <ArrowRight className="group-hover:translate-x-1 transition-transform" size={20} />
-                </>
-              )}
+              {isLoading ? <Loader2 size={20} className="animate-spin" /> : 'Reset Password'}
+              {!isLoading && <ArrowRight size={20} />}
             </button>
           </form>
         )}
-
-        <div className="mt-10 pt-8 border-t border-slate-100 text-center">
-          <p className="text-slate-400 text-xs font-bold tracking-widest uppercase">
-            Finova Recovery Service
-          </p>
-        </div>
       </div>
     </div>
   );
 };
 
-export default ForgotPassword;
+export default ResetPassword;

@@ -398,6 +398,41 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
+    public void bulkDelete(Long actorId, List<Long> ids) {
+        User actor = loadActor(actorId);
+        validateRole(actor, UserRole.ADMIN);
+        
+        for (Long id : ids) {
+            try {
+                delete(actorId, id);
+            } catch (Exception e) {
+                log.error("Failed to delete user {} during bulk operation: {}", id, e.getMessage());
+            }
+        }
+    }
+
+    @Override
+    @Transactional
+    public void bulkUpdateStatus(Long actorId, List<Long> ids, UserStatus status) {
+        User actor = loadActor(actorId);
+        validateRole(actor, UserRole.ADMIN);
+        
+        for (Long id : ids) {
+            try {
+                switch (status) {
+                    case ACTIVE -> activate(actorId, id);
+                    case BLOCKED -> block(actorId, id);
+                    case SUSPENDED -> suspend(actorId, id);
+                    case INACTIVE -> deactivate(actorId, id);
+                }
+            } catch (Exception e) {
+                log.error("Failed to update status of user {} to {} during bulk operation: {}", id, status, e.getMessage());
+            }
+        }
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public AdminStatsDTO adminStats(Long actorId) {
         User actor = loadActor(actorId);

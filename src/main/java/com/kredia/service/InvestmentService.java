@@ -7,7 +7,7 @@ import com.kredia.entity.user.User;
 import com.kredia.enums.AssetCategory;
 import com.kredia.enums.OrderStatus;
 import com.kredia.enums.RiskLevel;
-import com.kredia.repository.user.LegacyUserRepository;
+import com.kredia.repository.user.UserRepository;
 import com.kredia.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,7 +32,7 @@ public class InvestmentService {
     private final InvestmentOrderRepository orderRepository;
     private final InvestmentStrategyRepository strategyRepository;
     private final PortfolioPositionRepository positionRepository;
-    private final LegacyUserRepository userRepository;
+    private final UserRepository userRepository;
     private final MarketPriceService marketPriceService;
 
     @Autowired
@@ -41,7 +41,7 @@ public class InvestmentService {
             InvestmentOrderRepository orderRepository,
             InvestmentStrategyRepository strategyRepository,
             PortfolioPositionRepository positionRepository,
-            LegacyUserRepository userRepository,
+            UserRepository userRepository,
             MarketPriceService marketPriceService) {
         this.assetRepository = assetRepository;
         this.orderRepository = orderRepository;

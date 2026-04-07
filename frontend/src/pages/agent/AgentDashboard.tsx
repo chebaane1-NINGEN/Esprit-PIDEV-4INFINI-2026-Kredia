@@ -1,194 +1,413 @@
 import React, { useState, useEffect } from 'react';
-import { Routes, Route, NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
-import { 
-  LayoutDashboard, 
-  Users, 
-  ShieldCheck, 
-  ClipboardList, 
-  LogOut, 
-  Search, 
-  Bell, 
-  Menu, 
-  X,
-  User,
-  Settings,
-  HelpCircle,
-  ChevronRight
+import {
+  Users,
+  TrendingUp,
+  TrendingDown,
+  Clock,
+  CheckCircle2,
+  XCircle,
+  BarChart3,
+  PieChart,
+  Calendar,
+  Award,
+  Target,
+  Activity,
+  Eye,
+  MessageSquare,
+  Bell,
+  Star,
+  Zap,
+  AlertTriangle,
+  UserPlus,
+  FileText,
+  Settings
 } from 'lucide-react';
-import AgentPerformance from './AgentPerformance';
-import AgentActivities from './AgentActivities';
-import AgentClients from './AgentClients';
-import AgentKyc from './AgentKyc';
+import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../contexts/ToastContext';
+import { agentApiService, AgentPerformanceDTO } from '../../services/agentApiService';
+import { Link, useNavigate } from 'react-router-dom';
+
+interface AgentStats {
+  totalClients: number;
+  activeClients: number;
+  pendingApplications: number;
+  approvalsToday: number;
+  rejectionsToday: number;
+  avgProcessingTime: number;
+  performanceScore: number;
+  weeklyTrend: number;
+}
+
+interface ClientNote {
+  id: string;
+  clientId: number;
+  clientName: string;
+  content: string;
+  type: 'risk' | 'performance' | 'general';
+  createdAt: string;
+}
+
+interface Notification {
+  id: string;
+  type: 'new_client' | 'status_change' | 'deadline' | 'system' | 'password_blocked';
+  title: string;
+  message: string;
+  timestamp: string;
+  read: boolean;
+  priority: 'low' | 'medium' | 'high';
+}
 
 const AgentDashboard: React.FC = () => {
-  const { currentUser, logout } = useAuth();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { currentUser } = useAuth();
+  const { addToast } = useToast();
   const navigate = useNavigate();
-  const location = useLocation();
+  
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState<AgentStats | null>(null);
+  const [performance, setPerformance] = useState<AgentPerformanceDTO | null>(null);
+  const [recentNotes, setRecentNotes] = useState<ClientNote[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month' | 'year'>('week');
 
-  // Close sidebar on route change (mobile)
   useEffect(() => {
-    setSidebarOpen(false);
-  }, [location.pathname]);
+    fetchDashboardData();
+  }, [selectedPeriod]);
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      
+      // Fetch performance data
+      const performanceData = await agentApiService.getAgentPerformance();
+      setPerformance(performanceData);
+      
+      // Calculate stats from performance data
+      const calculatedStats: AgentStats = {
+        totalClients: performanceData.totalClients,
+        activeClients: performanceData.activeClients,
+        pendingApplications: 5,
+        approvalsToday: 3,
+        rejectionsToday: 1,
+        avgProcessingTime: performanceData.averageProcessingTime,
+        performanceScore: performanceData.performanceScore,
+        weeklyTrend: 12.5
+      };
+      
+      setStats(calculatedStats);
+      
+      // Mock recent notes
+      setRecentNotes([
+        {
+          id: '1',
+          clientId: 1,
+          clientName: 'Mohamed Ben Ali',
+          content: 'High-value client, expedite processing',
+          type: 'performance',
+          createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
+        }
+      ]);
+      
+      // Mock comprehensive notifications
+      setNotifications([
+        {
+          id: '1',
+          type: 'new_client',
+          title: 'New Client Assigned',
+          message: 'Ahmed Gharbi has been assigned to you',
+          timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
+          read: false,
+          priority: 'medium'
+        },
+        {
+          id: '3',
+          type: 'password_blocked',
+          title: 'Password Blocked Alert',
+          message: 'Client Karim Tounsi account blocked after 3 failed login attempts',
+          timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
+          read: false,
+          priority: 'high'
+        }
+      ]);
+      
+    } catch (error) {
+      addToast('Failed to fetch dashboard data', 'error');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const navItems = [
-    { to: '/agent', icon: LayoutDashboard, label: 'Overview', end: true },
-    { to: '/agent/clients', icon: Users, label: 'My Clients' },
-    { to: '/agent/kyc', icon: ShieldCheck, label: 'KYC Reviews' },
-    { to: '/agent/activities', icon: ClipboardList, label: 'Activity Log' },
-  ];
+  const getPerformanceColor = (score: number) => {
+    if (score >= 80) return 'text-green-600';
+    if (score >= 60) return 'text-yellow-600';
+    return 'text-red-600';
+  };
+
+  const getPerformanceBadge = (score: number) => {
+    if (score >= 90) return { text: 'Excellent', color: 'bg-green-100 text-green-800' };
+    if (score >= 75) return { text: 'Good', color: 'bg-blue-100 text-blue-800' };
+    if (score >= 60) return { text: 'Average', color: 'bg-yellow-100 text-yellow-800' };
+    return { text: 'Needs Improvement', color: 'bg-red-100 text-red-800' };
+  };
+
+  const getNoteIcon = (type: string) => {
+    switch (type) {
+      case 'risk': return <AlertTriangle className="w-4 h-4 text-red-500" />;
+      case 'performance': return <Star className="w-4 h-4 text-yellow-500" />;
+      default: return <MessageSquare className="w-4 h-4 text-gray-500" />;
+    }
+  };
+
+  const getNotificationIcon = (type: string) => {
+    switch (type) {
+      case 'new_client': return <UserPlus className="w-4 h-4 text-blue-500" />;
+      case 'status_change': return <CheckCircle2 className="w-4 h-4 text-green-500" />;
+      case 'password_blocked': return <AlertTriangle className="w-4 h-4 text-red-500" />;
+      case 'deadline': return <Clock className="w-4 h-4 text-yellow-500" />;
+      default: return <Bell className="w-4 h-4 text-gray-500" />;
+    }
+  };
+
+  const getNotificationPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'high': return 'border-red-200 bg-red-50';
+      case 'medium': return 'border-yellow-200 bg-yellow-50';
+      default: return 'border-gray-200 bg-gray-50';
+    }
+  };
+
+  const markNotificationAsRead = (notificationId: string) => {
+    setNotifications(prev => 
+      prev.map(n => n.id === notificationId ? { ...n, read: true } : n)
+    );
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
+
+  if (!stats || !performance) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-gray-600">Unable to load dashboard data</p>
+      </div>
+    );
+  }
+
+  const performanceBadge = getPerformanceBadge(stats.performanceScore);
+  const unreadNotifications = notifications.filter(n => !n.read);
 
   return (
-    <div className="flex min-h-screen bg-[#F8FAFC]">
-      {/* Sidebar Overlay for Mobile */}
-      {sidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Agent Dashboard</h1>
+          <p className="text-gray-600">Welcome back, {currentUser?.firstName}! Here's your performance overview.</p>
+        </div>
+        <div className="flex items-center space-x-3">
+          <select
+            value={selectedPeriod}
+            onChange={(e) => setSelectedPeriod(e.target.value as any)}
+            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+          >
+            <option value="week">This Week</option>
+            <option value="month">This Month</option>
+            <option value="year">This Year</option>
+          </select>
+          <button className="relative p-2 text-gray-600 hover:text-gray-900">
+            <Bell size={20} />
+            {unreadNotifications.length > 0 && (
+              <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
+            )}
+          </button>
+        </div>
+      </div>
 
-      {/* Sidebar */}
-      <aside className={`
-        fixed inset-y-0 left-0 z-50 w-72 bg-white border-r border-slate-200 transform transition-transform duration-300 ease-in-out lg:relative lg:transform-none
-        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-      `}>
-        <div className="flex flex-col h-full">
-          {/* Logo */}
-          <div className="h-20 flex items-center justify-between px-8 border-b border-slate-100">
-            <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
-              <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-200">
-                <span className="text-white text-xl font-bold italic">F</span>
-              </div>
-              <span className="text-xl font-bold tracking-tight text-slate-900">FINOVA</span>
+      {/* Performance Overview */}
+      <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg p-6 text-white">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-xl font-bold mb-2">Performance Score</h2>
+            <div className="flex items-baseline">
+              <span className="text-4xl font-bold">{stats.performanceScore}</span>
+              <span className="text-xl ml-2">/100</span>
             </div>
-            <button className="lg:hidden p-2 text-slate-400 hover:text-slate-600" onClick={() => setSidebarOpen(false)}>
-              <X size={20} />
-            </button>
+            <div className="flex items-center mt-2">
+              {stats.weeklyTrend > 0 ? (
+                <TrendingUp className="w-4 h-4 mr-1" />
+              ) : (
+                <TrendingDown className="w-4 h-4 mr-1" />
+              )}
+              <span className="text-sm">
+                {Math.abs(stats.weeklyTrend)}% from last {selectedPeriod}
+              </span>
+            </div>
           </div>
+          <div className="text-right">
+            <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${performanceBadge.color}`}>
+              {performanceBadge.text}
+            </div>
+            <div className="mt-4">
+              <Award className="w-12 h-12 opacity-50" />
+            </div>
+          </div>
+        </div>
+      </div>
 
-          {/* Navigation */}
-          <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
-            <div className="px-4 mb-4 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Main Menu</div>
-            {navItems.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                end={item.end}
-                className={({ isActive }) => `
-                  flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all group
-                  ${isActive 
-                    ? 'bg-indigo-50 text-indigo-600' 
-                    : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'}
-                `}
-              >
-                <item.icon size={20} className={location.pathname === item.to || (item.end && location.pathname === '/agent') ? 'text-indigo-600' : 'text-slate-400 group-hover:text-slate-600'} />
-                <span>{item.label}</span>
-                {(location.pathname === item.to || (item.end && location.pathname === '/agent')) && (
-                  <ChevronRight size={14} className="ml-auto" />
-                )}
-              </NavLink>
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white p-6 rounded-lg border border-gray-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600">Total Clients</p>
+              <p className="text-2xl font-bold text-gray-900">{stats.totalClients}</p>
+            </div>
+            <Users className="w-8 h-8 text-blue-500" />
+          </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg border border-gray-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600">Active Clients</p>
+              <p className="text-2xl font-bold text-green-600">{stats.activeClients}</p>
+            </div>
+            <CheckCircle2 className="w-8 h-8 text-green-500" />
+          </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg border border-gray-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600">Pending</p>
+              <p className="text-2xl font-bold text-yellow-600">{stats.pendingApplications}</p>
+            </div>
+            <Clock className="w-8 h-8 text-yellow-500" />
+          </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg border border-gray-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600">Avg Processing</p>
+              <p className="text-2xl font-bold text-gray-900">{stats.avgProcessingTime}h</p>
+            </div>
+            <Activity className="w-8 h-8 text-purple-500" />
+          </div>
+        </div>
+      </div>
+
+      {/* Charts Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Weekly Activity Chart */}
+        <div className="bg-white p-6 rounded-lg border border-gray-200">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Weekly Activity</h3>
+          <div className="space-y-3">
+            {performance.last7DaysActivity?.map((day, index) => (
+              <div key={index} className="flex items-center">
+                <div className="w-12 text-sm text-gray-600">{day.date}</div>
+                <div className="flex-1 mx-4">
+                  <div className="flex space-x-1">
+                    <div
+                      className="bg-green-500 rounded"
+                      style={{
+                        height: '8px',
+                        width: `${(day.approvals / (Math.max(...performance.last7DaysActivity.map(d => d.approvals)) || 1)) * 100}%`
+                      }}
+                    ></div>
+                    <div
+                      className="bg-red-500 rounded"
+                      style={{
+                        height: '8px',
+                        width: `${(day.rejections / (Math.max(...performance.last7DaysActivity.map(d => d.rejections)) || 1)) * 100}%`
+                      }}
+                    ></div>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2 text-xs">
+                  <span className="text-green-600">{day.approvals}</span>
+                  <span className="text-red-600">{day.rejections}</span>
+                </div>
+              </div>
             ))}
-
-            <div className="px-4 mt-8 mb-4 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Support</div>
-            <button className="w-full flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-50 hover:text-slate-900 rounded-xl transition-all">
-              <HelpCircle size={20} className="text-slate-400" />
-              <span>Help Center</span>
-            </button>
-            <button className="w-full flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-50 hover:text-slate-900 rounded-xl transition-all">
-              <Settings size={20} className="text-slate-400" />
-              <span>Settings</span>
-            </button>
-          </nav>
-
-          {/* User Profile */}
-          <div className="p-4 border-t border-slate-100">
-            <div className="bg-slate-50 rounded-2xl p-4">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold shadow-sm">
-                  {currentUser?.firstName?.[0] || 'A'}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-slate-900 truncate">{currentUser?.firstName} {currentUser?.lastName}</p>
-                  <p className="text-xs text-slate-500 truncate capitalize">{currentUser?.role?.toLowerCase()} Agent</p>
-                </div>
-              </div>
-              <button 
-                onClick={handleLogout}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-600 rounded-xl text-sm font-semibold hover:bg-slate-50 hover:border-slate-300 transition-all active:scale-95"
-              >
-                <LogOut size={16} /> Logout
-              </button>
-            </div>
           </div>
         </div>
-      </aside>
 
-      {/* Main Content */}
-      <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        {/* Topbar */}
-        <header className="h-20 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-8 sticky top-0 z-30">
-          <div className="flex items-center gap-4">
-            <button 
-              className="lg:hidden p-2 text-slate-500 hover:bg-slate-100 rounded-xl transition-all"
-              onClick={() => setSidebarOpen(true)}
-            >
-              <Menu size={24} />
-            </button>
-            <div className="hidden md:flex items-center gap-2 text-sm text-slate-500">
-              <span className="font-medium text-slate-900">Agent Portal</span>
-              <ChevronRight size={14} />
-              <span className="capitalize">{location.pathname.split('/').pop() || 'Overview'}</span>
+        {/* Performance Distribution */}
+        <div className="bg-white p-6 rounded-lg border border-gray-200">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Performance Distribution</h3>
+          <div className="space-y-3">
+            <div>
+              <div className="flex justify-between text-sm mb-1">
+                <span>Approvals</span>
+                <span className="font-medium">{performance.totalApprovals}</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div
+                  className="bg-green-500 h-2 rounded-full"
+                  style={{
+                    width: `${(performance.totalApprovals / ((performance.totalApprovals + performance.totalRejections) || 1)) * 100}%`
+                  }}
+                ></div>
+              </div>
             </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <div className="hidden sm:flex items-center relative group">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors" size={18} />
-              <input 
-                type="text" 
-                placeholder="Search clients..." 
-                className="pl-10 pr-4 py-2 bg-slate-100 border-none rounded-xl text-sm w-64 focus:ring-2 focus:ring-indigo-600 focus:bg-white transition-all"
-              />
-            </div>
-            <button className="p-2.5 text-slate-500 hover:bg-slate-100 rounded-xl transition-all relative">
-              <Bell size={20} />
-              <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-indigo-600 border-2 border-white rounded-full"></span>
-            </button>
-            <div 
-              className="flex items-center gap-3 pl-3 border-l border-slate-200 cursor-pointer group"
-              onClick={() => navigate('/agent/profile')}
-            >
-              <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-600 font-bold group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-all overflow-hidden shadow-sm">
-                {currentUser?.profilePictureUrl ? (
-                  <img src={currentUser.profilePictureUrl} alt="Profile" className="w-full h-full object-cover" />
-                ) : (
-                  <User size={20} />
-                )}
+            <div>
+              <div className="flex justify-between text-sm mb-1">
+                <span>Rejections</span>
+                <span className="font-medium">{performance.totalRejections}</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div
+                  className="bg-red-500 h-2 rounded-full"
+                  style={{
+                    width: `${(performance.totalRejections / ((performance.totalApprovals + performance.totalRejections) || 1)) * 100}%`
+                  }}
+                ></div>
               </div>
             </div>
           </div>
-        </header>
-
-        {/* Content Area */}
-        <div className="flex-1 overflow-y-auto p-4 md:p-8">
-          <div className="max-w-7xl mx-auto animate-fade-in">
-            <Routes>
-              <Route path="/" element={<AgentPerformance />} />
-              <Route path="/clients" element={<AgentClients />} />
-              <Route path="/kyc" element={<AgentKyc />} />
-              <Route path="/activities" element={<AgentActivities />} />
-              <Route path="/profile" element={<div>Profile Page Placeholder</div>} />
-            </Routes>
+          <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-600">Approval Rate</span>
+              <span className={`text-lg font-bold ${getPerformanceColor(stats.performanceScore)}`}>
+                {Math.round((performance.totalApprovals / ((performance.totalApprovals + performance.totalRejections) || 1)) * 100)}%
+              </span>
+            </div>
           </div>
         </div>
-      </main>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="bg-white p-6 rounded-lg border border-gray-200">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Link 
+            to="/agent/clients/new"
+            className="flex items-center justify-center px-4 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+          >
+            <UserPlus className="w-4 h-4 mr-2" />
+            Add New Client
+          </Link>
+          <Link 
+            to="/agent/clients"
+            className="flex items-center justify-center px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700"
+          >
+            <FileText className="w-4 h-4 mr-2" />
+            View All Clients
+          </Link>
+          <Link 
+            to="/agent/performance"
+            className="flex items-center justify-center px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+          >
+            <BarChart3 className="w-4 h-4 mr-2" />
+            Performance Report
+          </Link>
+        </div>
+      </div>
     </div>
   );
 };

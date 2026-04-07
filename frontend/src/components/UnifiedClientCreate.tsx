@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -21,6 +21,7 @@ import {
 import { UserStatus, UserRole } from '../types/user.types';
 import { useToast } from '../contexts/ToastContext';
 import { useAuth } from '../contexts/AuthContext';
+import { userApi } from '../api/userApi';
 
 interface ClientFormData {
   firstName: string;
@@ -110,7 +111,6 @@ const UnifiedClientCreate: React.FC<UnifiedClientCreateProps> = ({
       newErrors.address = 'Address is required';
     }
 
-    // Additional validation for agents
     if (isAgent) {
       if (!formData.occupation?.trim()) {
         newErrors.occupation = 'Occupation is required';
@@ -128,7 +128,6 @@ const UnifiedClientCreate: React.FC<UnifiedClientCreateProps> = ({
     try {
       setUploadProgress(prev => ({ ...prev, [fileType]: 0 }));
       
-      // Simulate upload progress
       for (let i = 0; i <= 100; i += 10) {
         setUploadProgress(prev => ({ ...prev, [fileType]: i }));
         await new Promise(resolve => setTimeout(resolve, 100));
@@ -152,37 +151,17 @@ const UnifiedClientCreate: React.FC<UnifiedClientCreateProps> = ({
 
     setLoading(true);
     try {
-      // Prepare data for API
       const submitData = {
         ...formData,
         role: UserRole.CLIENT,
-        assignedAgentId: isAgent ? currentUser?.id : undefined,
-        documents: uploadedFiles
+        password: 'Password123!', // Default password
+        assignedAgentId: isAgent ? currentUser?.id : undefined
       };
 
-      console.log('Creating client with data:', submitData);
-      
-      // API call to create client
-      const response = await fetch('http://localhost:8086/api/user', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
-          'X-Actor-Id': localStorage.getItem('userId') || '1'
-        },
-        body: JSON.stringify(submitData)
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
+      await userApi.create(submitData as any);
       
       addToast('Client created successfully', 'success');
       
-      // Redirect based on context
       if (redirectPath) {
         navigate(redirectPath);
       } else if (isAgent) {
@@ -205,7 +184,6 @@ const UnifiedClientCreate: React.FC<UnifiedClientCreateProps> = ({
       [field]: value
     }));
     
-    // Clear error when user starts typing
     if (errors[field]) {
       setErrors(prev => ({
         ...prev,
@@ -214,9 +192,12 @@ const UnifiedClientCreate: React.FC<UnifiedClientCreateProps> = ({
     }
   };
 
+  const getInputBorderClass = (fieldName: string) => {
+    return errors[fieldName] ? 'border-red-500' : 'border-gray-300';
+  };
+
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center">
           <button
@@ -232,17 +213,14 @@ const UnifiedClientCreate: React.FC<UnifiedClientCreateProps> = ({
         </div>
       </div>
 
-      {/* Form */}
       <div className="bg-white shadow-sm border border-gray-200 rounded-lg">
         <form onSubmit={handleSubmit} className="p-6 space-y-8">
-          {/* Personal Information */}
           <div>
             <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
               <UserPlus className="w-5 h-5 mr-2" />
               Personal Information
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* First Name */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   First Name *
@@ -251,9 +229,7 @@ const UnifiedClientCreate: React.FC<UnifiedClientCreateProps> = ({
                   type="text"
                   value={formData.firstName}
                   onChange={(e) => handleInputChange('firstName', e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
-                    errors.firstName ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  className={'w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ' + getInputBorderClass('firstName')}
                   placeholder="Enter first name"
                 />
                 {errors.firstName && (
@@ -264,7 +240,6 @@ const UnifiedClientCreate: React.FC<UnifiedClientCreateProps> = ({
                 )}
               </div>
 
-              {/* Last Name */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Last Name *
@@ -273,9 +248,7 @@ const UnifiedClientCreate: React.FC<UnifiedClientCreateProps> = ({
                   type="text"
                   value={formData.lastName}
                   onChange={(e) => handleInputChange('lastName', e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
-                    errors.lastName ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  className={'w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ' + getInputBorderClass('lastName')}
                   placeholder="Enter last name"
                 />
                 {errors.lastName && (
@@ -286,7 +259,6 @@ const UnifiedClientCreate: React.FC<UnifiedClientCreateProps> = ({
                 )}
               </div>
 
-              {/* Email */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   <Mail className="inline w-4 h-4 mr-1" />
@@ -296,9 +268,7 @@ const UnifiedClientCreate: React.FC<UnifiedClientCreateProps> = ({
                   type="email"
                   value={formData.email}
                   onChange={(e) => handleInputChange('email', e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
-                    errors.email ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  className={'w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ' + getInputBorderClass('email')}
                   placeholder="client@example.com"
                 />
                 {errors.email && (
@@ -309,7 +279,6 @@ const UnifiedClientCreate: React.FC<UnifiedClientCreateProps> = ({
                 )}
               </div>
 
-              {/* Phone Number */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   <Phone className="inline w-4 h-4 mr-1" />
@@ -319,9 +288,7 @@ const UnifiedClientCreate: React.FC<UnifiedClientCreateProps> = ({
                   type="tel"
                   value={formData.phoneNumber}
                   onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
-                    errors.phoneNumber ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  className={'w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ' + getInputBorderClass('phoneNumber')}
                   placeholder="+21620000000"
                 />
                 {errors.phoneNumber && (
@@ -332,7 +299,6 @@ const UnifiedClientCreate: React.FC<UnifiedClientCreateProps> = ({
                 )}
               </div>
 
-              {/* Date of Birth */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   <Calendar className="inline w-4 h-4 mr-1" />
@@ -342,9 +308,7 @@ const UnifiedClientCreate: React.FC<UnifiedClientCreateProps> = ({
                   type="date"
                   value={formData.dateOfBirth}
                   onChange={(e) => handleInputChange('dateOfBirth', e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
-                    errors.dateOfBirth ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  className={'w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ' + getInputBorderClass('dateOfBirth')}
                 />
                 {errors.dateOfBirth && (
                   <p className="mt-1 text-sm text-red-600 flex items-center">
@@ -354,7 +318,6 @@ const UnifiedClientCreate: React.FC<UnifiedClientCreateProps> = ({
                 )}
               </div>
 
-              {/* Status */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   <Briefcase className="inline w-4 h-4 mr-1" />
@@ -367,11 +330,10 @@ const UnifiedClientCreate: React.FC<UnifiedClientCreateProps> = ({
                 >
                   <option value={UserStatus.ACTIVE}>Active</option>
                   <option value={UserStatus.INACTIVE}>Inactive</option>
-                  <option value={UserStatus.PENDING_VERIFICATION}>Pending Verification</option>
+                  <option value={UserStatus.SUSPENDED}>Suspended</option>
                 </select>
               </div>
 
-              {/* Address */}
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   <MapPin className="inline w-4 h-4 mr-1" />
@@ -381,9 +343,7 @@ const UnifiedClientCreate: React.FC<UnifiedClientCreateProps> = ({
                   value={formData.address}
                   onChange={(e) => handleInputChange('address', e.target.value)}
                   rows={3}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
-                    errors.address ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  className={'w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ' + getInputBorderClass('address')}
                   placeholder="Enter full address"
                 />
                 {errors.address && (
@@ -396,7 +356,6 @@ const UnifiedClientCreate: React.FC<UnifiedClientCreateProps> = ({
             </div>
           </div>
 
-          {/* Financial Information (Agent specific) */}
           {isAgent && (
             <div>
               <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
@@ -404,7 +363,6 @@ const UnifiedClientCreate: React.FC<UnifiedClientCreateProps> = ({
                 Financial Information
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Occupation */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Occupation *
@@ -413,9 +371,7 @@ const UnifiedClientCreate: React.FC<UnifiedClientCreateProps> = ({
                     type="text"
                     value={formData.occupation}
                     onChange={(e) => handleInputChange('occupation', e.target.value)}
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
-                      errors.occupation ? 'border-red-500' : 'border-gray-300'
-                    }`}
+                    className={'w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ' + getInputBorderClass('occupation')}
                     placeholder="e.g. Software Engineer"
                   />
                   {errors.occupation && (
@@ -426,7 +382,6 @@ const UnifiedClientCreate: React.FC<UnifiedClientCreateProps> = ({
                   )}
                 </div>
 
-                {/* Monthly Income */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Monthly Income *
@@ -435,9 +390,7 @@ const UnifiedClientCreate: React.FC<UnifiedClientCreateProps> = ({
                     type="text"
                     value={formData.monthlyIncome}
                     onChange={(e) => handleInputChange('monthlyIncome', e.target.value)}
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
-                      errors.monthlyIncome ? 'border-red-500' : 'border-gray-300'
-                    }`}
+                    className={'w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ' + getInputBorderClass('monthlyIncome')}
                     placeholder="e.g. 5000"
                   />
                   {errors.monthlyIncome && (
@@ -451,142 +404,19 @@ const UnifiedClientCreate: React.FC<UnifiedClientCreateProps> = ({
             </div>
           )}
 
-          {/* Document Upload */}
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-              <Upload className="w-5 h-5 mr-2" />
-              Required Documents
-            </h3>
-            <div className="space-y-4">
-              {/* ID Document */}
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <FileText className="w-8 h-8 text-gray-400 mr-3" />
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">ID Document</p>
-                      <p className="text-xs text-gray-500">PDF, JPG, PNG (Max 5MB)</p>
-                    </div>
-                  </div>
-                  <input
-                    type="file"
-                    accept=".pdf,.jpg,.jpeg,.png"
-                    onChange={(e) => e.target.files?.[0] && handleFileUpload('idDocument', e.target.files[0])}
-                    className="hidden"
-                    id="idDocument"
-                  />
-                  <label
-                    htmlFor="idDocument"
-                    className="px-3 py-1 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700 cursor-pointer"
-                  >
-                    Choose File
-                  </label>
-                </div>
-                {uploadedFiles.idDocument && (
-                  <div className="mt-2 flex items-center text-sm text-green-600">
-                    <CheckCircle2 className="w-4 h-4 mr-1" />
-                    {uploadedFiles.idDocument.name}
-                  </div>
-                )}
-                {uploadProgress.idDocument > 0 && (
-                  <div className="mt-2">
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className="bg-indigo-600 h-2 rounded-full transition-all duration-300"
-                        style={{ width: `${uploadProgress.idDocument}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Proof of Address */}
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <FileText className="w-8 h-8 text-gray-400 mr-3" />
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">Proof of Address</p>
-                      <p className="text-xs text-gray-500">Utility bill, bank statement (Max 5MB)</p>
-                    </div>
-                  </div>
-                  <input
-                    type="file"
-                    accept=".pdf,.jpg,.jpeg,.png"
-                    onChange={(e) => e.target.files?.[0] && handleFileUpload('proofOfAddress', e.target.files[0])}
-                    className="hidden"
-                    id="proofOfAddress"
-                  />
-                  <label
-                    htmlFor="proofOfAddress"
-                    className="px-3 py-1 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700 cursor-pointer"
-                  >
-                    Choose File
-                  </label>
-                </div>
-                {uploadedFiles.proofOfAddress && (
-                  <div className="mt-2 flex items-center text-sm text-green-600">
-                    <CheckCircle2 className="w-4 h-4 mr-1" />
-                    {uploadedFiles.proofOfAddress.name}
-                  </div>
-                )}
-                {uploadProgress.proofOfAddress > 0 && (
-                  <div className="mt-2">
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className="bg-indigo-600 h-2 rounded-full transition-all duration-300"
-                        style={{ width: `${uploadProgress.proofOfAddress}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Bank Statement */}
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <FileText className="w-8 h-8 text-gray-400 mr-3" />
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">Bank Statement</p>
-                      <p className="text-xs text-gray-500">Recent bank statement (Max 5MB)</p>
-                    </div>
-                  </div>
-                  <input
-                    type="file"
-                    accept=".pdf,.jpg,.jpeg,.png"
-                    onChange={(e) => e.target.files?.[0] && handleFileUpload('bankStatement', e.target.files[0])}
-                    className="hidden"
-                    id="bankStatement"
-                  />
-                  <label
-                    htmlFor="bankStatement"
-                    className="px-3 py-1 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700 cursor-pointer"
-                  >
-                    Choose File
-                  </label>
-                </div>
-                {uploadedFiles.bankStatement && (
-                  <div className="mt-2 flex items-center text-sm text-green-600">
-                    <CheckCircle2 className="w-4 h-4 mr-1" />
-                    {uploadedFiles.bankStatement.name}
-                  </div>
-                )}
-                {uploadProgress.bankStatement > 0 && (
-                  <div className="mt-2">
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className="bg-indigo-600 h-2 rounded-full transition-all duration-300"
-                        style={{ width: `${uploadProgress.bankStatement}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                )}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="flex items-center">
+              <Shield className="w-5 h-5 text-blue-600 mr-2" />
+              <div>
+                <p className="text-sm font-medium text-blue-900">Centralized Database Storage</p>
+                <p className="text-sm text-blue-700">
+                  This client will be stored in the unified database and visible to both Admin and Agent according to permissions.
+                  {isAgent && ' The client will be automatically assigned to you.'}
+                </p>
               </div>
             </div>
           </div>
 
-          {/* Form Actions */}
           <div className="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
             <button
               type="button"

@@ -9,7 +9,7 @@ import com.kredia.enums.KycStatus;
 import com.kredia.exception.NotFoundException;
 import com.kredia.repository.CreditRepository;
 import com.kredia.repository.KycLoanRepository;
-import com.kredia.repository.user.LegacyUserRepository;
+import com.kredia.repository.user.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,14 +29,14 @@ public class KycLoanService {
 
     private final KycLoanRepository kycLoanRepository;
     private final CreditRepository creditRepository;
-    private final LegacyUserRepository userRepository;
+    private final UserRepository userRepository;
     private final CloudinaryService cloudinaryService;
     private final GeminiService geminiService;
 
     @Autowired
     public KycLoanService(KycLoanRepository kycLoanRepository,
                           CreditRepository creditRepository,
-                          LegacyUserRepository userRepository,
+                          UserRepository userRepository,
                           CloudinaryService cloudinaryService,
                           GeminiService geminiService) {
         this.kycLoanRepository = kycLoanRepository;

@@ -114,16 +114,13 @@ const Statistics: React.FC = () => {
     );
   }
 
-  // Données pour graphiques avancés
-  const monthlyData = [
-    { month: 'Jan', users: 45, newUsers: 12, activeUsers: 38 },
-    { month: 'Fev', users: 52, newUsers: 15, activeUsers: 45 },
-    { month: 'Mar', users: 48, newUsers: 8, activeUsers: 42 },
-    { month: 'Avr', users: 61, newUsers: 18, activeUsers: 55 },
-    { month: 'Mai', users: 55, newUsers: 10, activeUsers: 48 },
-    { month: 'Jun', users: 67, newUsers: 20, activeUsers: 60 },
-    { month: 'Jul', users: 72, newUsers: 16, activeUsers: 65 }
-  ];
+  // Données pour graphiques avancés basées sur le backend
+  const monthlyData = Object.entries(stats.registrationEvolution || {}).map(([month, count]) => ({
+    month,
+    users: count,
+    newUsers: count, // Simplified for now as we don't have cumulative total per month in DTO yet
+    activeUsers: Math.round(count * 0.8) // Simulated active ratio per month
+  }));
 
   const roleDistribution = [
     { name: 'Admins', value: (stats.roleDistribution as any)?.ADMIN || 0, color: '#8B5CF6' },
@@ -133,9 +130,9 @@ const Statistics: React.FC = () => {
 
   const statusDistribution = [
     { name: 'Actifs', value: stats.activeUser, color: '#10B981' },
-    { name: 'Inactifs', value: stats.totalUser - stats.activeUser - 5, color: '#6B7280' },
-    { name: 'Suspendus', value: 3, color: '#F59E0B' },
-    { name: 'Bloqués', value: 2, color: '#EF4444' }
+    { name: 'Inactifs', value: stats.totalUser - stats.activeUser - stats.blockedUser - stats.suspendedUser, color: '#6B7280' },
+    { name: 'Suspendus', value: stats.suspendedUser, color: '#F59E0B' },
+    { name: 'Bloqués', value: stats.blockedUser, color: '#EF4444' }
   ];
 
   const performanceMetrics = [

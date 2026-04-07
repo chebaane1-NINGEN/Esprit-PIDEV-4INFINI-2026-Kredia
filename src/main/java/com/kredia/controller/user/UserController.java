@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -169,6 +170,25 @@ public class UserController {
             @RequestParam Long clientId
     ) {
         return ResponseEntity.ok(ApiResponse.ok(userService.unassignClient(actorId, clientId)));
+    }
+
+    @DeleteMapping("/admin/bulk-delete")
+    public ResponseEntity<ApiResponse<Void>> bulkDelete(
+            @RequestHeader("X-Actor-Id") Long actorId,
+            @RequestBody List<Long> ids
+    ) {
+        userService.bulkDelete(actorId, ids);
+        return ResponseEntity.ok(ApiResponse.ok(null));
+    }
+
+    @PatchMapping("/admin/bulk-status")
+    public ResponseEntity<ApiResponse<Void>> bulkUpdateStatus(
+            @RequestHeader("X-Actor-Id") Long actorId,
+            @RequestParam UserStatus status,
+            @RequestBody List<Long> ids
+    ) {
+        userService.bulkUpdateStatus(actorId, ids, status);
+        return ResponseEntity.ok(ApiResponse.ok(null));
     }
 
     @GetMapping("/admin/stats")

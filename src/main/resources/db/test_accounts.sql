@@ -2,18 +2,18 @@
 -- These are the accounts mentioned in the requirements
 
 INSERT INTO `user` (
-    user_id, first_name, last_name, email, phone_number, phone, password_hash, 
+    user_id, first_name, last_name, email, phone, password_hash, 
     role, status, deleted, email_verified, created_at, updated_at, version
 ) VALUES 
 -- Main Admin (already exists as ID 1, but ensure password is correct)
 
 -- Agent test accounts
-(49, 'Agent', 'One', 'agent1@kredia.com', '+33611111111', '+33611111111', '$2a$10$N9qo8uLOickgx2ZMRZoMy.MqrqQzBZN0UfGNEKj3QGz3v9R3I0kQm', 'AGENT', 'ACTIVE', false, true, DATE_SUB(NOW(), INTERVAL 90 DAY), NOW(), 0),
-(50, 'Agent', 'Two', 'agent2@kredia.com', '+33622222222', '+33622222222', '$2a$10$N9qo8uLOickgx2ZMRZoMy.MqrqQzBZN0UfGNEKj3QGz3v9R3I0kQm', 'AGENT', 'ACTIVE', false, true, DATE_SUB(NOW(), INTERVAL 85 DAY), NOW(), 0),
+(49, 'Agent', 'One', 'agent1@kredia.com', '+33611111111', '$2a$10$N9qo8uLOickgx2ZMRZoMy.MqrqQzBZN0UfGNEKj3QGz3v9R3I0kQm', 'AGENT', 'ACTIVE', false, true, DATE_SUB(NOW(), INTERVAL 90 DAY), NOW(), 0),
+(50, 'Agent', 'Two', 'agent2@kredia.com', '+33622222222', '$2a$10$N9qo8uLOickgx2ZMRZoMy.MqrqQzBZN0UfGNEKj3QGz3v9R3I0kQm', 'AGENT', 'ACTIVE', false, true, DATE_SUB(NOW(), INTERVAL 85 DAY), NOW(), 0),
 
 -- Client test accounts  
-(51, 'Client', 'One', 'client1@email.com', '+33633333333', '+33633333333', '$2a$10$N9qo8uLOickgx2ZMRZoMy.MqrqQzBZN0UfGNEKj3QGz3v9R3I0kQm', 'CLIENT', 'ACTIVE', false, true, DATE_SUB(NOW(), INTERVAL 60 DAY), NOW(), 0),
-(52, 'Client', 'Two', 'client2@email.com', '+33644444444', '+33644444444', '$2a$10$N9qo8uLOickgx2ZMRZoMy.MqrqQzBZN0UfGNEKj3QGz3v9R3I0kQm', 'CLIENT', 'ACTIVE', false, true, DATE_SUB(NOW(), INTERVAL 55 DAY), NOW(), 0)
+(51, 'Client', 'One', 'client1@email.com', '+33633333333', '$2a$10$N9qo8uLOickgx2ZMRZoMy.MqrqQzBZN0UfGNEKj3QGz3v9R3I0kQm', 'CLIENT', 'ACTIVE', false, true, DATE_SUB(NOW(), INTERVAL 60 DAY), NOW(), 0),
+(52, 'Client', 'Two', 'client2@email.com', '+33644444444', '$2a$10$N9qo8uLOickgx2ZMRZoMy.MqrqQzBZN0UfGNEKj3QGz3v9R3I0kQm', 'CLIENT', 'ACTIVE', false, true, DATE_SUB(NOW(), INTERVAL 55 DAY), NOW(), 0)
 ON DUPLICATE KEY UPDATE user_id=user_id;
 
 -- Assign clients to agents

@@ -10,14 +10,14 @@ DELETE FROM `user` WHERE user_id > 8;
 
 -- Insert realistic users
 INSERT INTO `user` (
-    user_id, first_name, last_name, email, phone_number, phone, password_hash, 
+    user_id, first_name, last_name, email, phone, password_hash, 
     role, status, deleted, email_verified, created_at, updated_at, version
 ) VALUES 
 
 -- ADMIN USERS (3)
-(9, 'Thomas', 'Dubois', 'thomas.dubois@kredia.com', '+33612345609', '+33612345609', '$2a$10$N9qo8uLOickgx2ZMRZoMy.MqrqQzBZN0UfGNEKj3QGz3v9R3I0kQm', 'ADMIN', 'ACTIVE', false, true, DATE_SUB(NOW(), INTERVAL 365 DAY), NOW(), 0),
-(10, 'Marie', 'Leroy', 'marie.leroy@kredia.com', '+33612345610', '+33612345610', '$2a$10$N9qo8uLOickgx2ZMRZoMy.MqrqQzBZN0UfGNEKj3QGz3v9R3I0kQm', 'ADMIN', 'ACTIVE', false, true, DATE_SUB(NOW(), INTERVAL 280 DAY), NOW(), 0),
-(11, 'Pierre', 'Martin', 'pierre.martin@kredia.com', '+33612345611', '+33612345611', '$2a$10$N9qo8uLOickgx2ZMRZoMy.MqrqQzBZN0UfGNEKj3QGz3v9R3I0kQm', 'ADMIN', 'SUSPENDED', false, true, DATE_SUB(NOW(), INTERVAL 180 DAY), NOW(), 0),
+(9, 'Thomas', 'Dubois', 'thomas.dubois@kredia.com', '+33612345609', '$2a$10$N9qo8uLOickgx2ZMRZoMy.MqrqQzBZN0UfGNEKj3QGz3v9R3I0kQm', 'ADMIN', 'ACTIVE', false, true, DATE_SUB(NOW(), INTERVAL 365 DAY), NOW(), 0),
+(10, 'Marie', 'Leroy', 'marie.leroy@kredia.com', '+33612345610', '$2a$10$N9qo8uLOickgx2ZMRZoMy.MqrqQzBZN0UfGNEKj3QGz3v9R3I0kQm', 'ADMIN', 'ACTIVE', false, true, DATE_SUB(NOW(), INTERVAL 280 DAY), NOW(), 0),
+(11, 'Pierre', 'Martin', 'pierre.martin@kredia.com', '+33612345611', '$2a$10$N9qo8uLOickgx2ZMRZoMy.MqrqQzBZN0UfGNEKj3QGz3v9R3I0kQm', 'ADMIN', 'SUSPENDED', false, true, DATE_SUB(NOW(), INTERVAL 180 DAY), NOW(), 0),
 
 -- AGENT USERS (15)
 (12, 'Sophie', 'Bernard', 'sophie.bernard@kredia.com', '+33612345612', '+33612345612', '$2a$10$N9qo8uLOickgx2ZMRZoMy.MqrqQzBZN0UfGNEKj3QGz3v9R3I0kQm', 'AGENT', 'ACTIVE', false, true, DATE_SUB(NOW(), INTERVAL 240 DAY), NOW(), 0),

@@ -5,32 +5,32 @@
 -- $2a$10$N9qo8uLOickgx2ZMRZoMy.MqrqQzBZN0UfGNEKj3QGz3v9R3I0kQm
 
 INSERT INTO `user` (
-    user_id, first_name, last_name, email, phone, phone_number, password_hash, 
+    user_id, first_name, last_name, email, phone, password_hash, 
     role, status, deleted, email_verified, created_at, updated_at, version
 ) VALUES 
 -- Admin (ID: 1)
-(1, 'Admin', 'Kredia', 'admin@kredia.com', '+21690000001', '+21690000001', '$2a$10$N9qo8uLOickgx2ZMRZoMy.MqrqQzBZN0UfGNEKj3QGz3v9R3I0kQm', 'ADMIN', 'ACTIVE', false, true, NOW(), NOW(), 0),
+(1, 'Admin', 'Kredia', 'admin@kredia.com', '+21690000001', '$2a$10$N9qo8uLOickgx2ZMRZoMy.MqrqQzBZN0UfGNEKj3QGz3v9R3I0kQm', 'ADMIN', 'ACTIVE', false, true, NOW(), NOW(), 0),
 
 -- Agent 1 (ID: 2)
-(2, 'Karim', 'Ben Ali', 'karim.agent@kredia.com', '+21690000002', '+21690000002', '$2a$10$N9qo8uLOickgx2ZMRZoMy.MqrqQzBZN0UfGNEKj3QGz3v9R3I0kQm', 'AGENT', 'ACTIVE', false, true, NOW(), NOW(), 0),
+(2, 'Karim', 'Ben Ali', 'karim.agent@kredia.com', '+21690000002', '$2a$10$N9qo8uLOickgx2ZMRZoMy.MqrqQzBZN0UfGNEKj3QGz3v9R3I0kQm', 'AGENT', 'ACTIVE', false, true, NOW(), NOW(), 0),
 
 -- Agent 2 (ID: 3)
-(3, 'Samira', 'Trabelsi', 'samira.agent@kredia.com', '+21690000003', '+21690000003', '$2a$10$N9qo8uLOickgx2ZMRZoMy.MqrqQzBZN0UfGNEKj3QGz3v9R3I0kQm', 'AGENT', 'ACTIVE', false, true, NOW(), NOW(), 0),
+(3, 'Samira', 'Trabelsi', 'samira.agent@kredia.com', '+21690000003', '$2a$10$N9qo8uLOickgx2ZMRZoMy.MqrqQzBZN0UfGNEKj3QGz3v9R3I0kQm', 'AGENT', 'ACTIVE', false, true, NOW(), NOW(), 0),
 
 -- Client 1 (ID: 4) - assigned to Agent 1
-(4, 'Mohamed', 'Hassan', 'mohamed.client@email.com', '+21690000004', '+21690000004', '$2a$10$N9qo8uLOickgx2ZMRZoMy.MqrqQzBZN0UfGNEKj3QGz3v9R3I0kQm', 'CLIENT', 'ACTIVE', false, true, NOW(), NOW(), 0),
+(4, 'Mohamed', 'Hassan', 'mohamed.client@email.com', '+21690000004', '$2a$10$N9qo8uLOickgx2ZMRZoMy.MqrqQzBZN0UfGNEKj3QGz3v9R3I0kQm', 'CLIENT', 'ACTIVE', false, true, NOW(), NOW(), 0),
 
 -- Client 2 (ID: 5) - assigned to Agent 1
-(5, 'Fatima', 'Zahra', 'fatima.client@email.com', '+21690000005', '+21690000005', '$2a$10$N9qo8uLOickgx2ZMRZoMy.MqrqQzBZN0UfGNEKj3QGz3v9R3I0kQm', 'CLIENT', 'ACTIVE', false, true, NOW(), NOW(), 0),
+(5, 'Fatima', 'Zahra', 'fatima.client@email.com', '+21690000005', '$2a$10$N9qo8uLOickgx2ZMRZoMy.MqrqQzBZN0UfGNEKj3QGz3v9R3I0kQm', 'CLIENT', 'ACTIVE', false, true, NOW(), NOW(), 0),
 
 -- Client 3 (ID: 6) - assigned to Agent 2, pending
-(6, 'Ahmed', 'Bouazizi', 'ahmed.client@email.com', '+21690000006', '+21690000006', '$2a$10$N9qo8uLOickgx2ZMRZoMy.MqrqQzBZN0UfGNEKj3QGz3v9R3I0kQm', 'CLIENT', 'PENDING_VERIFICATION', false, false, NOW(), NOW(), 0),
+(6, 'Ahmed', 'Bouazizi', 'ahmed.client@email.com', '+21690000006', '$2a$10$N9qo8uLOickgx2ZMRZoMy.MqrqQzBZN0UfGNEKj3QGz3v9R3I0kQm', 'CLIENT', 'PENDING_VERIFICATION', false, false, NOW(), NOW(), 0),
 
 -- Client 4 (ID: 7) - suspended
-(7, 'Nadia', 'Saidi', 'nadia.client@email.com', '+21690000007', '+21690000007', '$2a$10$N9qo8uLOickgx2ZMRZoMy.MqrqQzBZN0UfGNEKj3QGz3v9R3I0kQm', 'CLIENT', 'SUSPENDED', false, false, NOW(), NOW(), 0),
+(7, 'Nadia', 'Saidi', 'nadia.client@email.com', '+21690000007', '$2a$10$N9qo8uLOickgx2ZMRZoMy.MqrqQzBZN0UfGNEKj3QGz3v9R3I0kQm', 'CLIENT', 'SUSPENDED', false, false, NOW(), NOW(), 0),
 
 -- Client 5 (ID: 8) - blocked
-(8, 'Ali', 'Gharbi', 'ali.client@email.com', '+21690000008', '+21690000008', '$2a$10$N9qo8uLOickgx2ZMRZoMy.MqrqQzBZN0UfGNEKj3QGz3v9R3I0kQm', 'CLIENT', 'BLOCKED', false, false, NOW(), NOW(), 0)
+(8, 'Ali', 'Gharbi', 'ali.client@email.com', '+21690000008', '$2a$10$N9qo8uLOickgx2ZMRZoMy.MqrqQzBZN0UfGNEKj3QGz3v9R3I0kQm', 'CLIENT', 'BLOCKED', false, false, NOW(), NOW(), 0)
 ON DUPLICATE KEY UPDATE user_id=user_id;
 
 -- Update client assignments

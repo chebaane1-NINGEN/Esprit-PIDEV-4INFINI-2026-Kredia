@@ -36,8 +36,8 @@ class UserFlowIntegrationTest {
     @Test
     @Transactional
     void fullFlow_shouldPersistActivities_andEnforceInvariants() {
-        // Create first user
-        UserResponseDTO firstUser = userService.create(build("admin@kredia.com", "Admin", "One", "0600001111"));
+        // Create first user (no actorId for initial creation)
+        UserResponseDTO firstUser = userService.create(null, build("admin@kredia.com", "Admin", "One", "0600001111"));
         Long adminId = firstUser.getId();
         
         // Bootstrap: Manual promotion to ADMIN for testing
@@ -47,7 +47,7 @@ class UserFlowIntegrationTest {
         userRepository.save(adminEntity);
 
         // Subsequent calls use adminId as actorId
-        UserResponseDTO client = userService.create(build("client@kredia.com", "Client", "One", "0600002222"));
+        UserResponseDTO client = userService.create(adminId, build("client@kredia.com", "Client", "One", "0600002222"));
         Long clientId = client.getId();
         
         userService.activate(adminId, clientId);

@@ -297,7 +297,6 @@ public class DataSeeder {
         public void fixSchema() {
             try {
                 entityManager.createNativeQuery("ALTER TABLE `user` MODIFY COLUMN `phone` VARCHAR(20) NULL").executeUpdate();
-                entityManager.createNativeQuery("ALTER TABLE `user` MODIFY COLUMN `phone_number` VARCHAR(20) NULL").executeUpdate();
                 // Ensure action_type can hold our enum values
                 entityManager.createNativeQuery("ALTER TABLE `user_activity` MODIFY COLUMN `action_type` VARCHAR(50) NOT NULL").executeUpdate();
             } catch (Exception e) {

@@ -10,7 +10,7 @@ import com.kredia.exception.BusinessException;
 import com.kredia.mapper.user.UserMapper;
 import com.kredia.repository.user.KycDocumentRepository;
 import com.kredia.repository.user.UserActivityRepository;
-import com.kredia.repository.user.UserRepository;
+import com.kredia.service.user.EmailService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -48,10 +48,13 @@ class UserServiceImplTest {
 
     private UserServiceImpl userService;
 
+    @Mock
+    private EmailService emailService;
+
     @BeforeEach
     void setUp() {
         UserMapper realMapper = new UserMapper();
-        userService = new UserServiceImpl(userRepository, realMapper, userActivityRepository, kycDocumentRepository, passwordEncoder);
+        userService = new UserServiceImpl(userRepository, realMapper, userActivityRepository, kycDocumentRepository, passwordEncoder, emailService);
     }
 
     @Test
@@ -164,7 +167,7 @@ class UserServiceImplTest {
 
         when(userRepository.existsByEmailAndDeletedFalse("dup@kredia.com")).thenReturn(true);
 
-        BusinessException ex = assertThrows(BusinessException.class, () -> userService.create(dto));
+        BusinessException ex = assertThrows(BusinessException.class, () -> userService.create(1L, dto));
         assertEquals("Email already exists", ex.getMessage());
     }
 }

@@ -18,9 +18,9 @@ public class FraudDetectionService {
     private final WalletService walletService;
     private final ChatClient chatClient;
 
-    private static final BigDecimal LARGE_AMOUNT_THRESHOLD = new BigDecimal("10000.00");
-    private static final long HIGH_FREQUENCY_THRESHOLD = 10;
-    private static final int DETECTION_WINDOW_HOURS = 24;
+    private static final BigDecimal LARGE_AMOUNT_THRESHOLD = new BigDecimal("8000.00");
+    private static final long HIGH_FREQUENCY_THRESHOLD = 3;
+    private static final int DETECTION_WINDOW_HOURS = 2;
 
     @Autowired
     public FraudDetectionService(TransactionRepository transactionRepository, 
@@ -38,7 +38,7 @@ public class FraudDetectionService {
         // Rule 1: Large amount check
         if (transaction.getAmount().compareTo(LARGE_AMOUNT_THRESHOLD) > 0) {
             isFraudulent = true;
-            fraudReason.append("Amount exceeds large transaction threshold ($10,000). ");
+            fraudReason.append("Amount exceeds large transaction threshold . ");
         }
 
         // Rule 2: High frequency check (Velocity attack)
@@ -70,9 +70,7 @@ public class FraudDetectionService {
         return transactionRepository.findByStatus(TransactionStatus.SUSPECTED_FRAUD);
     }
 
-    /**
-     * Uses Gemini AI to analyze a transaction and provide a natural language summary and risk assessment.
-     */
+
     public String generateTransactionDescriptionWithGemini(Transaction transaction) {
         String prompt = String.format("Analyze the following transaction in a financial application and provide a clear, user-friendly description of its purpose and risk level. \n" +
                 "Transaction ID: %d\n" +

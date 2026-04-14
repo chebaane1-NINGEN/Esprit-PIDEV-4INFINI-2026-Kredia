@@ -27,7 +27,7 @@ public class StatisticsController {
         stats.put("totalWallets", walletRepository.count());
         stats.put("totalTransactions", transactionRepository.count());
         
-        // Advanced metrics via stream processing (for prototype scale)
+
         var allTransactions = transactionRepository.findAll();
         
         var transactionsByStatus = allTransactions.stream()

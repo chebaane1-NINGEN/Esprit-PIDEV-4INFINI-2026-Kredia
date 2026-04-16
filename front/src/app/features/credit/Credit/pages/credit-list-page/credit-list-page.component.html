@@ -13,20 +13,13 @@
         </button>
       </div>
 
-      <div class="alert error" *ngIf="error">
-        ⚠️ {{ error }}
-      </div>
+      <div class="alert error" *ngIf="error">⚠️ {{ error }}</div>
 
       <div class="table-responsive" *ngIf="!loading || credits.length > 0">
         <table class="credit-table">
           <thead>
             <tr>
-              <th>ID</th>
-              <th>Montant</th>
-              <th>Taux</th>
-              <th>Durée</th>
-              <th>Statut</th>
-              <th>Actions</th>
+              <th>ID</th><th>Montant</th><th>Taux</th><th>Durée</th><th>Statut</th><th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -47,7 +40,7 @@
                 <button class="action-btn pdf" (click)="downloadPdf(c.creditId!)" title="Télécharger PDF">
                   📄 <span>PDF</span>
                 </button>
-                <a class="action-btn risk" [routerLink]="['/credit/risk']" [queryParams]="{id: c.creditId}" title="Analyse de Risque">
+                <a class="action-btn risk" [routerLink]="['/credit/risk']" [queryParams]="{id: c.creditId}">
                   🔍 <span>Risque</span>
                 </a>
               </td>

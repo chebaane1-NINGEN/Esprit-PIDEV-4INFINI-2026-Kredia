@@ -10,13 +10,8 @@
     <table>
       <thead>
         <tr>
-          <th>ID</th>
-          <th>N°</th>
-          <th>Échéance</th>
-          <th>Montant dû</th>
-          <th>Reste à payer</th>
-          <th>Statut</th>
-          <th>Payer</th>
+          <th>ID</th><th>N°</th><th>Échéance</th><th>Montant dû</th>
+          <th>Reste à payer</th><th>Statut</th><th>Payer</th>
         </tr>
       </thead>
       <tbody>
@@ -32,18 +27,13 @@
             </span>
           </td>
           <td class="pay-cell">
-            <input
-              type="number"
-              min="0"
+            <input type="number" min="0"
               [value]="payAmounts[item.echeance.echeanceId] || ''"
               (input)="payAmounts[item.echeance.echeanceId] = $any($event.target).valueAsNumber"
-              placeholder="Montant"
-            />
-            <button
-              class="btn primary"
+              placeholder="Montant" />
+            <button class="btn primary"
               [disabled]="payingId === item.echeance.echeanceId"
-              (click)="pay(item.echeance.echeanceId)"
-            >
+              (click)="pay(item.echeance.echeanceId)">
               {{ payingId === item.echeance.echeanceId ? 'Envoi...' : 'Payer' }}
             </button>
           </td>
@@ -55,7 +45,5 @@
     </table>
   </div>
 
-  <ng-template #loadingTpl>
-    <p>Chargement...</p>
-  </ng-template>
+  <ng-template #loadingTpl><p>Chargement...</p></ng-template>
 </section>

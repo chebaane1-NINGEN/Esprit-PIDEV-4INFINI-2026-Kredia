@@ -1,10 +1,16 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
-import { CreditApi } from '../../data-access/credit.api';
+import { CreditVm } from '../../vm/credit.vm';
 import { Credit } from '../../models/credit.model';
+import { downloadBlob } from '../../../../../core/utils/download.util';
 
+/**
+ * Component = ViewModel
+ * État UI, logique de présentation, actions.
+ * Délègue les appels données à CreditVm (service).
+ */
 @Component({
   standalone: true,
   imports: [CommonModule, RouterLink],
@@ -13,65 +19,48 @@ import { Credit } from '../../models/credit.model';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CreditListPageComponent implements OnInit {
-  private readonly api = inject(CreditApi);
+  private readonly vm  = inject(CreditVm);
   private readonly cdr = inject(ChangeDetectorRef);
 
+  // ── État UI ────────────────────────────────────────────
   credits: Credit[] = [];
-  loading = true;
+  loading = false;
   error: string | null = null;
 
   ngOnInit(): void {
     this.loadCredits();
   }
 
+  // ── Actions ────────────────────────────────────────────
   loadCredits(): void {
     this.loading = true;
-    this.error = null;
+    this.error   = null;
     this.cdr.markForCheck();
 
-    this.api.findAll()
-      .pipe(finalize(() => {
-        this.loading = false;
-        this.cdr.markForCheck();
-      }))
+    this.vm.findAll()
+      .pipe(finalize(() => { this.loading = false; this.cdr.markForCheck(); }))
       .subscribe({
-        next: (data) => {
-          this.credits = data || [];
-          this.cdr.markForCheck();
-        },
-        error: (err) => {
-          console.error('Failed to load credits', err);
-          this.error = 'Impossible de charger la liste des crédits.';
-          this.cdr.markForCheck();
-        }
+        next:  (data) => { this.credits = data ?? []; this.cdr.markForCheck(); },
+        error: ()     => { this.error = 'Impossible de charger la liste des crédits.'; this.cdr.markForCheck(); }
       });
   }
 
   downloadExcel(id: number): void {
-    this.api.exportExcel(id).subscribe({
-      next: (blob) => this.saveFile(blob, `credit_${id}.xlsx`),
-      error: (err) => console.error('Excel download failed', err)
+    this.vm.exportExcel(id).subscribe({
+      next:  (blob) => downloadBlob(blob, `credit_${id}.xlsx`),
+      error: ()     => { this.error = `Échec de l'export Excel pour le crédit #${id}.`; this.cdr.markForCheck(); }
     });
   }
 
   downloadPdf(id: number): void {
-    this.api.exportPdf(id).subscribe({
-      next: (blob) => this.saveFile(blob, `statistiques_credit_${id}.pdf`),
-      error: (err) => console.error('PDF download failed', err)
+    this.vm.exportPdf(id).subscribe({
+      next:  (blob) => downloadBlob(blob, `statistiques_credit_${id}.pdf`),
+      error: ()     => { this.error = `Échec de l'export PDF pour le crédit #${id}.`; this.cdr.markForCheck(); }
     });
   }
 
-  private saveFile(blob: Blob, filename: string): void {
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = filename;
-    link.click();
-    window.URL.revokeObjectURL(url);
-  }
-
+  // ── Helpers de présentation ────────────────────────────
   getStatusClass(status: string | undefined): string {
-    if (!status) return '';
-    return `status--${status.toLowerCase()}`;
+    return status ? `status--${status.toLowerCase()}` : '';
   }
 }

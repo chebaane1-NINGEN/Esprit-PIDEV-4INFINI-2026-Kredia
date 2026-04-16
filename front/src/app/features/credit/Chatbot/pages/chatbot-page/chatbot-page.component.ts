@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject } from '@
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize } from 'rxjs';
-import { ChatbotApi } from '../../data-access/chatbot.api';
+import { ChatbotVm } from '../../vm/chatbot.vm';
 import { ChatbotRecommendation } from '../../models/chatbot.model';
 
 @Component({
@@ -13,10 +13,11 @@ import { ChatbotRecommendation } from '../../models/chatbot.model';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ChatbotPageComponent {
-  private readonly fb = inject(FormBuilder);
-  private readonly api = inject(ChatbotApi);
+  private readonly vm  = inject(ChatbotVm);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly fb  = inject(FormBuilder);
 
+  // ── État UI ────────────────────────────────────────────
   loading = false;
   error: string | null = null;
   response: ChatbotRecommendation | null = null;
@@ -25,49 +26,32 @@ export class ChatbotPageComponent {
     description: ['', [Validators.required, Validators.minLength(10)]]
   });
 
+  // ── Actions ────────────────────────────────────────────
   submit(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
-      this.error = 'Ajoutez une description plus detaillee.';
+      this.error = 'Ajoutez une description plus détaillée.';
       this.cdr.markForCheck();
       return;
     }
 
-    this.error = null;
+    this.error    = null;
     this.response = null;
-    this.loading = true;
+    this.loading  = true;
     this.cdr.markForCheck();
 
     const { description } = this.form.getRawValue();
 
-    const timeoutId = setTimeout(() => {
-      if (this.loading) {
-        this.loading = false;
-        this.error = 'Aucune reponse du serveur. Verifiez que le backend est bien lance.';
-        this.cdr.markForCheck();
-      }
-    }, 12000);
-
-    this.api
-      .recommendRepayment(description)
-      .pipe(
-        finalize(() => {
-          clearTimeout(timeoutId);
-          this.loading = false;
-          this.cdr.markForCheck();
-        })
-      )
+    this.vm.recommendRepayment(description)
+      .pipe(finalize(() => { this.loading = false; this.cdr.markForCheck(); }))
       .subscribe({
         next: (res) => {
-          if (res?.error) {
-            this.error = res.error;
-          } else {
-            this.response = res;
-          }
+          if (res?.error) { this.error = res.error; }
+          else            { this.response = res;    }
           this.cdr.markForCheck();
         },
         error: () => {
-          this.error = 'Erreur lors de la demande. Verifiez le backend et le CORS.';
+          this.error = 'Erreur lors de la demande. Vérifiez le backend et le CORS.';
           this.cdr.markForCheck();
         }
       });

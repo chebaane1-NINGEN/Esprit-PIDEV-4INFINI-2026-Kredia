@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { finalize } from 'rxjs';
-import { PortfolioPositionVm } from '../../vm/portfolio-position.vm';
+import { PortfolioPositionService } from '../../services/portfolio-position.service';
 import { PortfolioPosition } from '../../models/portfolio-position.model';
 
 @Component({
@@ -12,7 +12,7 @@ import { PortfolioPosition } from '../../models/portfolio-position.model';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PortfolioPositionPageComponent implements OnInit {
-  private readonly vm  = inject(PortfolioPositionVm);
+  private readonly vm  = inject(PortfolioPositionService);
   private readonly cdr = inject(ChangeDetectorRef);
 
   positions: PortfolioPosition[] = [];

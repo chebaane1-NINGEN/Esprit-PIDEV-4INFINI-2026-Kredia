@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { finalize } from 'rxjs';
-import { TransactionAuditLogVm } from '../../vm/transaction-audit-log.vm';
+import { TransactionAuditLogService } from '../../services/transaction-audit-log.service';
 import { TransactionAuditLog } from '../../models/transaction-audit-log.model';
 
 @Component({
@@ -12,7 +12,7 @@ import { TransactionAuditLog } from '../../models/transaction-audit-log.model';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TransactionAuditLogPageComponent implements OnInit {
-  private readonly vm  = inject(TransactionAuditLogVm);
+  private readonly vm  = inject(TransactionAuditLogService);
   private readonly cdr = inject(ChangeDetectorRef);
 
   logs: TransactionAuditLog[] = [];

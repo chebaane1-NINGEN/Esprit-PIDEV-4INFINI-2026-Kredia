@@ -9,7 +9,7 @@ import { DocumentTypeLoan, KycLoanResponse } from '../models/kyc-loan.model';
  * Aucun état UI ici.
  */
 @Injectable({ providedIn: 'root' })
-export class KycLoanVm {
+export class KycLoanService {
   private readonly api = inject(KycLoanApi);
 
   upload(

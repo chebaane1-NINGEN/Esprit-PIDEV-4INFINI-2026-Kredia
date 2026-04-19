@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { finalize } from 'rxjs';
-import { VirtualCardVm } from '../../vm/virtual-card.vm';
+import { VirtualCardService } from '../../services/virtual-card.service';
 import { VirtualCard } from '../../models/virtual-card.model';
 
 @Component({
@@ -12,7 +12,7 @@ import { VirtualCard } from '../../models/virtual-card.model';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class VirtualCardPageComponent implements OnInit {
-  private readonly vm  = inject(VirtualCardVm);
+  private readonly vm  = inject(VirtualCardService);
   private readonly cdr = inject(ChangeDetectorRef);
 
   cards: VirtualCard[] = [];

@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { finalize } from 'rxjs';
-import { UserVm } from '../../vm/user.vm';
+import { UserService } from '../../services/user.service';
 import { User } from '../../models/user.model';
 
 @Component({
@@ -12,7 +12,7 @@ import { User } from '../../models/user.model';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class UserPageComponent implements OnInit {
-  private readonly vm  = inject(UserVm);
+  private readonly vm  = inject(UserService);
   private readonly cdr = inject(ChangeDetectorRef);
 
   users: User[] = [];

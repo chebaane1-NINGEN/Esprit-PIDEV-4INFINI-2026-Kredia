@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { finalize } from 'rxjs';
-import { TransactionLoanVm } from '../../vm/transaction-loan.vm';
+import { TransactionLoanService } from '../../services/transaction-loan.service';
 import { TransactionLoan } from '../../models/transaction-loan.model';
 
 @Component({
@@ -12,7 +12,7 @@ import { TransactionLoan } from '../../models/transaction-loan.model';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TransactionLoanPageComponent implements OnInit {
-  private readonly vm  = inject(TransactionLoanVm);
+  private readonly vm  = inject(TransactionLoanService);
   private readonly cdr = inject(ChangeDetectorRef);
 
   transactions: TransactionLoan[] = [];

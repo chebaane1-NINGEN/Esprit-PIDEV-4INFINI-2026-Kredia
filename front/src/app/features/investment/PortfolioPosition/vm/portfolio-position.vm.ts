@@ -4,7 +4,7 @@ import { PortfolioPositionApi } from '../data-access/portfolio-position.api';
 import { PortfolioPosition } from '../models/portfolio-position.model';
 
 @Injectable({ providedIn: 'root' })
-export class PortfolioPositionVm {
+export class PortfolioPositionService {
   private readonly api = inject(PortfolioPositionApi);
 
   findAll(): Observable<PortfolioPosition[]> {

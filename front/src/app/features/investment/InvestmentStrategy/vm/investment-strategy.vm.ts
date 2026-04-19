@@ -4,7 +4,7 @@ import { InvestmentStrategyApi } from '../data-access/investment-strategy.api';
 import { InvestmentStrategy } from '../models/investment-strategy.model';
 
 @Injectable({ providedIn: 'root' })
-export class InvestmentStrategyVm {
+export class InvestmentStrategyService {
   private readonly api = inject(InvestmentStrategyApi);
 
   findAll(): Observable<InvestmentStrategy[]> {

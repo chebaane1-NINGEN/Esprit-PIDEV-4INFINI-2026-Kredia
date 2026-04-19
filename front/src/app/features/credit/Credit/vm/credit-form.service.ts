@@ -5,7 +5,7 @@ import { CreditApi } from '../data-access/credit.api';
 import { Credit } from '../models/credit.model';
 
 @Injectable()
-export class CreditFormVm {
+export class CreditFormService {
   private readonly api = inject(CreditApi);
   private readonly fb  = inject(FormBuilder);
 

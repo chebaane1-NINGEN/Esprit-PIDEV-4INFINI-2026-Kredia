@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { finalize } from 'rxjs';
-import { InvestmentAssetVm } from '../../vm/investment-asset.vm';
+import { InvestmentAssetService } from '../../services/investment-asset.service';
 import { InvestmentAsset } from '../../models/investment-asset.model';
 
 @Component({
@@ -12,7 +12,7 @@ import { InvestmentAsset } from '../../models/investment-asset.model';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class InvestmentAssetPageComponent implements OnInit {
-  private readonly vm  = inject(InvestmentAssetVm);
+  private readonly vm  = inject(InvestmentAssetService);
   private readonly cdr = inject(ChangeDetectorRef);
 
   assets: InvestmentAsset[] = [];

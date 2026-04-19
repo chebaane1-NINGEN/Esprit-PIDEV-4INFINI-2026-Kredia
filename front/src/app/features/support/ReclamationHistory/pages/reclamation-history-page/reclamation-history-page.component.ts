@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { finalize } from 'rxjs';
-import { ReclamationHistoryVm } from '../../vm/reclamation-history.vm';
+import { ReclamationHistoryService } from '../../services/reclamation-history.service';
 import { ReclamationHistory } from '../../models/reclamation-history.model';
 
 @Component({
@@ -12,7 +12,7 @@ import { ReclamationHistory } from '../../models/reclamation-history.model';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ReclamationHistoryPageComponent implements OnInit {
-  private readonly vm  = inject(ReclamationHistoryVm);
+  private readonly vm  = inject(ReclamationHistoryService);
   private readonly cdr = inject(ChangeDetectorRef);
 
   history: ReclamationHistory[] = [];

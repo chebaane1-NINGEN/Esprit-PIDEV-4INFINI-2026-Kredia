@@ -4,7 +4,7 @@ import { KycDocumentApi } from '../data-access/kyc-document.api';
 import { KycDocument } from '../models/kyc-document.model';
 
 @Injectable({ providedIn: 'root' })
-export class KycDocumentVm {
+export class KycDocumentService {
   private readonly api = inject(KycDocumentApi);
 
   findAll(): Observable<KycDocument[]> {

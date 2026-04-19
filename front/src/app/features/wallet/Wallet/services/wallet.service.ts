@@ -4,7 +4,7 @@ import { WalletApi } from '../data-access/wallet.api';
 import { Wallet } from '../models/wallet.model';
 
 @Injectable({ providedIn: 'root' })
-export class WalletVm {
+export class WalletService {
   private readonly api = inject(WalletApi);
 
   findAll(): Observable<Wallet[]> {

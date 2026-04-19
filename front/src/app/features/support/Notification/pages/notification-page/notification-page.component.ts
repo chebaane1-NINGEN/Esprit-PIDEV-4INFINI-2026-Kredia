@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { finalize } from 'rxjs';
-import { NotificationVm } from '../../vm/notification.vm';
+import { NotificationService } from '../../services/notification.service';
 import { Notification } from '../../models/notification.model';
 
 @Component({
@@ -12,7 +12,7 @@ import { Notification } from '../../models/notification.model';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class NotificationPageComponent implements OnInit {
-  private readonly vm  = inject(NotificationVm);
+  private readonly vm  = inject(NotificationService);
   private readonly cdr = inject(ChangeDetectorRef);
 
   notifications: Notification[] = [];

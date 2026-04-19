@@ -8,7 +8,7 @@ import { ChatbotRecommendation } from '../models/chatbot.model';
  * Expose des Observables. Aucun état UI.
  */
 @Injectable({ providedIn: 'root' })
-export class ChatbotVm {
+export class ChatbotService {
   private readonly api = inject(ChatbotApi);
 
   recommendRepayment(description: string): Observable<ChatbotRecommendation> {

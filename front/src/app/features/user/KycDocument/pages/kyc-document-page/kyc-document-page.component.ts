@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { finalize } from 'rxjs';
-import { KycDocumentVm } from '../../vm/kyc-document.vm';
+import { KycDocumentService } from '../../services/kyc-document.service';
 import { KycDocument } from '../../models/kyc-document.model';
 
 @Component({
@@ -12,7 +12,7 @@ import { KycDocument } from '../../models/kyc-document.model';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class KycDocumentPageComponent implements OnInit {
-  private readonly vm  = inject(KycDocumentVm);
+  private readonly vm  = inject(KycDocumentService);
   private readonly cdr = inject(ChangeDetectorRef);
 
   docs: KycDocument[] = [];

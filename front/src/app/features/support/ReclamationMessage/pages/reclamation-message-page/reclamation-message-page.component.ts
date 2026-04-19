@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { finalize } from 'rxjs';
-import { ReclamationMessageVm } from '../../vm/reclamation-message.vm';
+import { ReclamationMessageService } from '../../services/reclamation-message.service';
 import { ReclamationMessage } from '../../models/reclamation-message.model';
 
 @Component({
@@ -12,7 +12,7 @@ import { ReclamationMessage } from '../../models/reclamation-message.model';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ReclamationMessagePageComponent implements OnInit {
-  private readonly vm  = inject(ReclamationMessageVm);
+  private readonly vm  = inject(ReclamationMessageService);
   private readonly cdr = inject(ChangeDetectorRef);
 
   messages: ReclamationMessage[] = [];

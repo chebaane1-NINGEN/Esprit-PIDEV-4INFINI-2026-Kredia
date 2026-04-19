@@ -8,7 +8,7 @@ import { Credit, DefaultPredictionResponse } from '../models/credit.model';
  * Expose des Observables. Aucun état UI.
  */
 @Injectable({ providedIn: 'root' })
-export class CreditVm {
+export class CreditService {
   private readonly api = inject(CreditApi);
 
   findAll(): Observable<Credit[]> {

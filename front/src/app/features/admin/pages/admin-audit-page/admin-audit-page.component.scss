@@ -1,0 +1,86 @@
+.admin-audit-page {
+  display: grid;
+  gap: 24px;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.page-header h1 {
+  margin-bottom: 8px;
+  font-size: 2rem;
+}
+
+.filters-panel {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(180px, 1fr));
+  gap: 16px;
+  padding: 20px;
+  border-radius: 20px;
+  background: var(--bg-secondary);
+  box-shadow: 0 18px 42px rgba(34, 51, 68, 0.08);
+}
+
+.filter-field {
+  display: grid;
+  gap: 8px;
+}
+
+.filter-field label {
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.filter-field input,
+.filter-field select {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-primary);
+}
+
+.table-container {
+  overflow-x: auto;
+  border-radius: 20px;
+  background: var(--bg-secondary);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 1000px;
+}
+
+th, td {
+  padding: 16px 14px;
+  border-bottom: 1px solid var(--border-color);
+  text-align: left;
+}
+
+thead {
+  background: var(--bg-primary);
+}
+
+.empty-state {
+  color: var(--text-secondary);
+  padding: 24px;
+}
+
+.pagination {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  align-items: center;
+}
+
+.alert.error {
+  padding: 14px 18px;
+  border-radius: 14px;
+  background: rgba(208, 71, 75, 0.12);
+  color: #852929;
+}

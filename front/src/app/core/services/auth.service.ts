@@ -9,7 +9,25 @@ export interface LoginRequest {
   password: string;
 }
 
-// Typage explicite — correspond à { success, data: { token }, timestamp }
+export interface RegisterRequest {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  phoneNumber: string;
+}
+
+export interface ResetPasswordRequest {
+  token: string;
+  password: string;
+}
+
+export interface ApiResponse<T> {
+  success?: boolean;
+  message?: string;
+  data?: T;
+}
+
 export interface LoginResponse {
   success?: boolean;
   timestamp?: string;
@@ -39,20 +57,31 @@ export interface JwtPayload {
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly http   = inject(HttpClient);
+  private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
 
   private readonly TOKEN_KEY = 'token';
 
   login(credentials: LoginRequest): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(
-      `${API_BASE_URL}/api/auth/login`,
-      credentials
-    );
+    return this.http.post<LoginResponse>(`${API_BASE_URL}/api/auth/login`, credentials);
+  }
+
+  register(credentials: RegisterRequest): Observable<ApiResponse<any>> {
+    return this.http.post<ApiResponse<any>>(`${API_BASE_URL}/api/auth/register`, credentials);
+  }
+
+  forgotPassword(email: string): Observable<ApiResponse<string>> {
+    return this.http.post<ApiResponse<string>>(`${API_BASE_URL}/api/auth/forgot-password`, { email });
+  }
+
+  resetPassword(token: string, password: string): Observable<ApiResponse<string>> {
+    return this.http.post<ApiResponse<string>>(`${API_BASE_URL}/api/auth/reset-password`, {
+      token,
+      password
+    });
   }
 
   saveToken(response: LoginResponse): boolean {
-    // Cherche dans response.data d'abord, puis à la racine
     const token =
       response?.data?.token ??
       response?.data?.accessToken ??
@@ -63,11 +92,15 @@ export class AuthService {
       response?.access_token ??
       response?.jwt;
 
-    if (token) {
-      localStorage.setItem(this.TOKEN_KEY, token);
-      return true;
+    return this.saveTokenFromString(token ?? '');
+  }
+
+  saveTokenFromString(token: string): boolean {
+    if (!token) {
+      return false;
     }
-    return false;
+    localStorage.setItem(this.TOKEN_KEY, token);
+    return true;
   }
 
   logout(): void {
@@ -83,14 +116,12 @@ export class AuthService {
     return !!this.getToken();
   }
 
-  // ── Décodage JWT (natif, sans librairie) ───────────────
   decodeToken(): JwtPayload | null {
     const token = this.getToken();
     if (!token) return null;
     try {
       const parts = token.split('.');
       if (parts.length !== 3) return null;
-      // Décodage Base64url → JSON
       const payload = parts[1].replace(/-/g, '+').replace(/_/g, '/');
       const json = atob(payload);
       return JSON.parse(json) as JwtPayload;
@@ -124,6 +155,10 @@ export class AuthService {
 
   isClient(): boolean {
     return this.getCurrentUserRole() === 'CLIENT';
+  }
+
+  isAgent(): boolean {
+    return this.getCurrentUserRole() === 'AGENT';
   }
 
   isAdmin(): boolean {

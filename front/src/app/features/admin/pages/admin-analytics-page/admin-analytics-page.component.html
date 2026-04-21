@@ -1,0 +1,92 @@
+<section class="admin-analytics-page">
+  <header class="page-header">
+    <div>
+      <h1>Analytics & Reporting</h1>
+      <p>Vue d’ensemble du système et des tendances d’activité avec mesures réelles.</p>
+    </div>
+    <div class="range-actions">
+      <button class="btn outline" type="button" (click)="selectedRange = 'last7'">7j</button>
+      <button class="btn outline" type="button" (click)="selectedRange = 'last30'">30j</button>
+      <button class="btn outline" type="button" (click)="selectedRange = 'last90'">90j</button>
+    </div>
+  </header>
+
+  <div class="alert error" *ngIf="error">{{ error }}</div>
+
+  <div class="stats-grid" *ngIf="stats">
+    <article class="stat-card">
+      <span class="stat-title">Utilisateurs totaux</span>
+      <strong>{{ stats.totalUser }}</strong>
+    </article>
+    <article class="stat-card">
+      <span class="stat-title">Utilisateurs actifs</span>
+      <strong>{{ stats.activeUser }}</strong>
+    </article>
+    <article class="stat-card">
+      <span class="stat-title">Nouveaux en 24h</span>
+      <strong>{{ stats.last24hRegistrations }}</strong>
+    </article>
+    <article class="stat-card">
+      <span class="stat-title">Indice santé système</span>
+      <strong>{{ stats.systemHealthIndex | number:'1.1-1' }}</strong>
+    </article>
+  </div>
+
+  <div class="panel charts-panel" *ngIf="stats">
+    <div class="chart-block">
+      <div class="chart-title">Évolution des inscriptions</div>
+      <div *ngIf="getFilteredEvolution().length > 0; else noEvolution">
+        <div class="chart-bars">
+          <div *ngFor="let item of getFilteredEvolution()" class="bar-group">
+            <span class="bar-label">{{ item.label }}</span>
+            <div class="bar-track">
+              <div class="bar-fill" [style.width.%]="item.value ? Math.max(10, item.value) : 3"></div>
+            </div>
+            <span class="bar-value">{{ item.value }}</span>
+          </div>
+        </div>
+      </div>
+      <ng-template #noEvolution>
+        <p class="empty-state">Pas assez de données pour afficher l’évolution.</p>
+      </ng-template>
+    </div>
+
+    <div class="chart-block">
+      <div class="chart-title">Répartition des rôles</div>
+      <div *ngIf="roleDistribution.length > 0; else noRoles">
+        <div *ngFor="let item of roleDistribution" class="role-row">
+          <span>{{ item.role }}</span>
+          <div class="role-track">
+            <div class="role-fill" [style.width.%]="item.ratio"></div>
+          </div>
+          <span>{{ item.count }}</span>
+        </div>
+      </div>
+      <ng-template #noRoles>
+        <p class="empty-state">Aucune distribution de rôle disponible.</p>
+      </ng-template>
+    </div>
+  </div>
+
+  <div class="panel system-panel" *ngIf="systemStats">
+    <h2>Statistiques système</h2>
+    <div class="system-grid">
+      <div>
+        <span>Portefeuilles</span>
+        <strong>{{ systemStats.totalWallets ?? 0 }}</strong>
+      </div>
+      <div>
+        <span>Transactions totales</span>
+        <strong>{{ systemStats.totalTransactions ?? 0 }}</strong>
+      </div>
+      <div>
+        <span>Volume terminé</span>
+        <strong>{{ systemStats.totalCompletedTransactionVolume ?? 0 }}</strong>
+      </div>
+      <div>
+        <span>Transactions suspectes</span>
+        <strong>{{ systemStats.totalFraudulentTransactions ?? 0 }}</strong>
+      </div>
+    </div>
+  </div>
+</section>

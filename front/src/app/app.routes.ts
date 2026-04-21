@@ -1,14 +1,30 @@
 import { Routes } from '@angular/router';
 import { HomeComponent } from './pages/home/home.component';
 import { LoginComponent } from './pages/login/login.component';
+import { RegisterComponent } from './pages/register/register.component';
+import { ForgotPasswordComponent } from './pages/forgot-password/forgot-password.component';
+import { ResetPasswordComponent } from './pages/reset-password/reset-password.component';
+import { FeaturesComponent } from './pages/features/features.component';
+import { Oauth2RedirectComponent } from './pages/oauth2-redirect/oauth2-redirect.component';
 import { authGuard, authChildGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
-
   // ── Public ─────────────────────────────────────────────
-  { path: '',      component: HomeComponent, pathMatch: 'full' },
-  { path: 'home',  component: HomeComponent },
+  { path: '', component: HomeComponent, pathMatch: 'full' },
+  { path: 'home', component: HomeComponent },
+  { path: 'features', component: FeaturesComponent },
   { path: 'login', component: LoginComponent },
+  { path: 'signup', redirectTo: 'register', pathMatch: 'full' },
+  { path: 'register', component: RegisterComponent },
+  { path: 'forgot-password', component: ForgotPasswordComponent },
+  { path: 'reset-password', component: ResetPasswordComponent },
+  { path: 'oauth2/redirect', component: Oauth2RedirectComponent },
+  {
+    path: 'admin',
+    canActivate: [authGuard],
+    canActivateChild: [authGuard],
+    loadChildren: () => import('./features/admin/admin.routes').then(m => m.routes)
+  },
 
   // ── Credit ─────────────────────────────────────────────
   {

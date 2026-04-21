@@ -1,0 +1,64 @@
+<div class="auth-page">
+  <div class="auth-panel">
+    <div class="auth-header">
+      <div class="brand">KREDIA</div>
+      <p>Créez votre compte et démarrez votre parcours de financement intelligent.</p>
+    </div>
+
+    <div class="status-block">
+      <div class="pill">Inscription</div>
+      <p>Accédez aux prêts intelligents, au suivi en temps réel et au coach de remboursement.</p>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" class="auth-form">
+      <div class="alert error" *ngIf="error">{{ error }}</div>
+      <div class="alert success" *ngIf="success">{{ success }}</div>
+
+      <div class="grid-two">
+        <label>
+          Prénom
+          <input formControlName="firstName" placeholder="Alice" />
+          <small *ngIf="hasFieldError('firstName', 'required')">Le prénom est requis.</small>
+        </label>
+        <label>
+          Nom
+          <input formControlName="lastName" placeholder="Dupont" />
+          <small *ngIf="hasFieldError('lastName', 'required')">Le nom est requis.</small>
+        </label>
+      </div>
+
+      <label>
+        Email
+        <input type="email" formControlName="email" placeholder="alice@example.com" />
+        <small *ngIf="hasFieldError('email', 'required')">Email requis.</small>
+        <small *ngIf="hasFieldError('email', 'email')">Email invalide.</small>
+      </label>
+
+      <label>
+        Téléphone
+        <input formControlName="phoneNumber" placeholder="+33 6 12 34 56 78" />
+        <small *ngIf="hasFieldError('phoneNumber', 'required')">Téléphone requis.</small>
+        <small *ngIf="hasFieldError('phoneNumber', 'minlength')">Au moins 6 caractères.</small>
+      </label>
+
+      <label>
+        Mot de passe
+        <input type="password" formControlName="password" placeholder="••••••••" />
+        <small *ngIf="hasFieldError('password', 'required')">Mot de passe requis.</small>
+        <small *ngIf="hasFieldError('password', 'minlength')">Minimum 6 caractères.</small>
+      </label>
+
+      <label>
+        Confirmer le mot de passe
+        <input type="password" formControlName="confirmPassword" placeholder="••••••••" />
+        <small *ngIf="form.errors?.['passwordMismatch'] && form.touched">Les mots de passe ne correspondent pas.</small>
+      </label>
+
+      <button type="submit" class="btn primary" [disabled]="loading">{{ loading ? 'Création...' : 'Créer un compte' }}</button>
+    </form>
+
+    <p class="footer-copy">
+      Déjà inscrit ? <a routerLink="/login">Connectez-vous</a>
+    </p>
+  </div>
+</div>

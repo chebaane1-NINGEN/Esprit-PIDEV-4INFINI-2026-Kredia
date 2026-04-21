@@ -1,0 +1,75 @@
+<section class="admin-audit-page">
+  <header class="page-header">
+    <div>
+      <h1>System Audit Trail</h1>
+      <p>Journal des actions système avec filtrage et recherche par utilisateur, type et période.</p>
+    </div>
+    <button class="btn primary" type="button" (click)="loadActivities()">Rafraîchir</button>
+  </header>
+
+  <div class="panel filters-panel">
+    <div class="filter-field">
+      <label>Filtrer par rôle</label>
+      <select [(ngModel)]="roleFilter" (change)="loadActivities()">
+        <option value="">Tous</option>
+        <option value="ADMIN">ADMIN</option>
+        <option value="AGENT">AGENT</option>
+        <option value="CLIENT">CLIENT</option>
+      </select>
+    </div>
+    <div class="filter-field">
+      <label>Utilisateur (ID)</label>
+      <input type="text" [(ngModel)]="searchUserId" (input)="applyFilters()" placeholder="Entrez un ID utilisateur" />
+    </div>
+    <div class="filter-field">
+      <label>Type d’action</label>
+      <select [(ngModel)]="actionType" (change)="applyFilters()">
+        <option value="">Tous</option>
+        <option *ngFor="let action of actionTypes" [value]="action">{{ action }}</option>
+      </select>
+    </div>
+    <div class="filter-field">
+      <label>Date de début</label>
+      <input type="date" [(ngModel)]="fromDate" (change)="applyFilters()" />
+    </div>
+    <div class="filter-field">
+      <label>Date de fin</label>
+      <input type="date" [(ngModel)]="toDate" (change)="applyFilters()" />
+    </div>
+  </div>
+
+  <div class="alert error" *ngIf="error">{{ error }}</div>
+
+  <div class="table-container" *ngIf="filteredActivities.length > 0">
+    <table>
+      <thead>
+        <tr>
+          <th>Type d’événement</th>
+          <th>Utilisateur</th>
+          <th>Description</th>
+          <th>IP / Device</th>
+          <th>Niveau</th>
+          <th>Timestamp</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of filteredActivities">
+          <td>{{ item.actionType || 'UNKNOWN' }}</td>
+          <td>{{ item.userId ?? '—' }}</td>
+          <td>{{ item.description || '—' }}</td>
+          <td>Non disponible</td>
+          <td>{{ getSeverity(item.actionType) }}</td>
+          <td>{{ item.timestamp ? (item.timestamp | date:'short') : '—' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p class="empty-state" *ngIf="!loading && filteredActivities.length === 0">Aucun journal trouvé pour ces filtres.</p>
+
+  <div class="pagination" *ngIf="totalPages > 1">
+    <button class="btn ghost" type="button" (click)="goToPage(page - 1)" [disabled]="page === 0">Précédent</button>
+    <span>Page {{ page + 1 }} / {{ totalPages }}</span>
+    <button class="btn ghost" type="button" (click)="goToPage(page + 1)" [disabled]="page + 1 >= totalPages">Suivant</button>
+  </div>
+</section>

@@ -1,11 +1,9 @@
-<ng-container *ngIf="!isLoginPage; else loginOutlet">
+<ng-container *ngIf="!isPublicPage; else publicOutlet">
   <div class="app-layout">
 
-    <!-- Sidebar visible sauf home et login -->
-    <app-sidebar *ngIf="!isHomePage"></app-sidebar>
+    <app-sidebar></app-sidebar>
 
-    <!-- Main area -->
-    <div class="main-area" [class.no-sidebar]="isHomePage">
+    <div class="main-area">
       <app-navbar></app-navbar>
       <main class="page-content">
         <router-outlet></router-outlet>
@@ -15,7 +13,6 @@
   </div>
 </ng-container>
 
-<!-- Page login : rendu sans shell (pas de sidebar, pas de navbar) -->
-<ng-template #loginOutlet>
+<ng-template #publicOutlet>
   <router-outlet></router-outlet>
 </ng-template>

@@ -1,0 +1,38 @@
+.redirect-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: linear-gradient(135deg, rgba(0, 192, 112, 0.14), transparent 35%), var(--bg-secondary);
+}
+
+.redirect-card {
+  width: min(420px, 100%);
+  padding: 36px;
+  border-radius: 26px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 28px 60px rgba(34, 51, 68, 0.14);
+  text-align: center;
+  display: grid;
+  gap: 18px;
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 5px solid rgba(0, 192, 112, 0.18);
+  border-top-color: var(--emerald-600);
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto;
+}
+
+p {
+  color: var(--text-primary);
+  font-size: 1rem;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

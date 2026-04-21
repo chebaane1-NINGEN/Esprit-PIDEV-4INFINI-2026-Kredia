@@ -1,108 +1,280 @@
-<main class="hero">
-  <div class="hero-copy">
-    <span class="pill">The future of micro-credit is here</span>
-    <h1>
-      Fund your projects
-      <span>instantly.</span>
-    </h1>
-    <p>
-      Kredia uses AI to offer micro-credits tailored to your needs.
-      2-minute onboarding, immediate disbursement.
-    </p>
-    <div class="cta">
-      <button class="btn primary">Apply for a loan</button>
-      <button class="btn outline">Watch demo</button>
-    </div>
-    <div class="social-proof">
-      <div class="avatars">
-        <span></span>
-        <span></span>
-        <span></span>
-      </div>
-      <p>Joined by <strong>10,000+</strong> users</p>
-    </div>
-  </div>
+<main class="home-page">
+  <section class="hero-section">
+    <div class="hero-shell">
+      <header class="hero-topbar">
+        <a routerLink="/" class="brand">KREDIA</a>
+        <nav class="hero-nav" aria-label="Main navigation">
+          <a href="javascript:void(0)" (click)="scrollToSection($event, 'features')">Features</a>
+          <a href="javascript:void(0)" (click)="scrollToSection($event, 'kpi')">Analytics</a>
+          <a href="javascript:void(0)" (click)="scrollToSection($event, 'testimonials')">Reviews</a>
+          <a href="javascript:void(0)" (click)="scrollToSection($event, 'contact')">Contact</a>
+        </nav>
+        <div class="hero-cta-wrap">
+          <a routerLink="/login" class="btn btn-outline">Login</a>
+        </div>
+      </header>
 
-  <div class="hero-visual">
-    <div class="device">
-      <div class="device-top">
-        <span class="bar"></span>
-        <span class="dot"></span>
-      </div>
-      <div class="credit-card">
-        <p>Credit approved</p>
-        <h3>$1,500.00</h3>
-      </div>
-      <div class="list">
-        <div class="list-item"></div>
-        <div class="list-item"></div>
-        <div class="list-item"></div>
-      </div>
-      <div class="coach-card">
-        <h4>AI Coach</h4>
-        <p>
-          By repaying before Tuesday, you earn 50 bonus score points.
-        </p>
+      <div class="hero-grid">
+        <div class="hero-copy">
+          <span class="eyebrow">Fintech intelligence for credit & investment</span>
+          <h1>Manage loans, investments and risk from one smart dashboard.</h1>
+          <p>Power your financial decisions with fast credit scoring, portfolio insights, and compliance-grade security in a single modern experience.</p>
+
+          <div class="hero-actions">
+            <a routerLink="/register" class="btn btn-primary">Start free trial</a>
+            <button type="button" class="btn btn-secondary" (click)="scrollToSection($event, 'features')">See features</button>
+          </div>
+
+          <div class="hero-metric-list">
+            <div class="hero-metric">
+              <strong>500K+</strong>
+              <span>Active users</span>
+            </div>
+            <div class="hero-metric">
+              <strong>$2.5B+</strong>
+              <span>Loans processed</span>
+            </div>
+            <div class="hero-metric">
+              <strong>98.5%</strong>
+              <span>Uptime SLA</span>
+            </div>
+          </div>
+        </div>
+
+        <aside class="hero-visual">
+          <div class="visual-card">
+            <div class="visual-tag">Portfolio snapshot</div>
+            <div class="visual-balance">
+              <span>Portfolio</span>
+              <strong>$847K</strong>
+            </div>
+            <div class="visual-summary">
+              <div>
+                <span>Risk score</span>
+                <strong>32%</strong>
+              </div>
+              <div>
+                <span>Monthly return</span>
+                <strong>+3.2%</strong>
+              </div>
+            </div>
+            <div class="visual-chart"></div>
+            <div class="visual-list">
+              <div><span>Credit utilization</span><strong>42%</strong></div>
+              <div><span>Portfolio trend</span><strong>+12%</strong></div>
+              <div><span>Compliance</span><strong>AAA</strong></div>
+            </div>
+          </div>
+        </aside>
       </div>
     </div>
-    <div class="cloud cloud-left"></div>
-    <div class="cloud cloud-right"></div>
-  </div>
+  </section>
+
+  <section class="trusted-by-section">
+    <div class="section-inner">
+      <div class="section-top">
+        <p class="section-label">Trusted by financial leaders</p>
+        <h2>Built for modern banks, lenders and advisors.</h2>
+      </div>
+
+      <div class="trusted-grid">
+        <div class="trusted-logo">Stripe</div>
+        <div class="trusted-logo">Revolut</div>
+        <div class="trusted-logo">Wise</div>
+        <div class="trusted-logo">Plaid</div>
+        <div class="trusted-logo">OAuth</div>
+        <div class="trusted-logo">Keycloak</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="features" class="section features-section">
+    <div class="section-inner">
+      <div class="section-heading">
+        <p class="section-label">Core features</p>
+        <h2>Everything your finance team needs.</h2>
+        <p class="section-copy">A cohesive suite for credit approval, investment monitoring and risk intelligence with the reliability expected from a fintech leader.</p>
+      </div>
+
+      <div class="features-grid">
+        <article class="feature-card">
+          <div class="feature-icon">💳</div>
+          <h3>Smart credit management</h3>
+          <p>Automate lending decisions and offer tailored repayment plans backed by predictive scoring.</p>
+        </article>
+
+        <article class="feature-card">
+          <div class="feature-icon">📊</div>
+          <h3>Investment intelligence</h3>
+          <p>Monitor portfolios in real time and use data-driven signals to rebalance with confidence.</p>
+        </article>
+
+        <article class="feature-card">
+          <div class="feature-icon">🛡️</div>
+          <h3>Security & compliance</h3>
+          <p>Protect sensitive data with OAuth2, encryption, and audit-ready controls for every transaction.</p>
+        </article>
+
+        <article class="feature-card">
+          <div class="feature-icon">🤖</div>
+          <h3>AI financial coach</h3>
+          <p>Get adaptive guidance for credit health and investment performance through intelligent recommendations.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="kpi" class="section kpi-section">
+    <div class="section-inner">
+      <div class="section-heading">
+        <p class="section-label">Platform analytics</p>
+        <h2>Performance metrics in one glance.</h2>
+      </div>
+
+      <div class="kpi-grid">
+        <article class="kpi-card">
+          <strong class="kpi-value">500K+</strong>
+          <span class="kpi-label">Active users</span>
+        </article>
+        <article class="kpi-card">
+          <strong class="kpi-value">$2.5B+</strong>
+          <span class="kpi-label">Loans processed</span>
+        </article>
+        <article class="kpi-card">
+          <strong class="kpi-value">847</strong>
+          <span class="kpi-label">Average risk score</span>
+        </article>
+        <article class="kpi-card">
+          <strong class="kpi-value">98.5%</strong>
+          <span class="kpi-label">Uptime SLA</span>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="testimonials" class="section testimonials-section">
+    <div class="section-inner">
+      <div class="section-heading">
+        <p class="section-label">Customer stories</p>
+        <h2>See why finance leaders choose Kredia.</h2>
+      </div>
+
+      <div class="testimonials-grid">
+        <article class="testimonial-card" *ngFor="let testimonial of testimonials">
+          <div class="testimonial-top">
+            <div class="testimonial-avatar">{{ testimonial.initials }}</div>
+            <div>
+              <strong>{{ testimonial.name }}</strong>
+              <span>{{ testimonial.role }}</span>
+            </div>
+          </div>
+          <p class="testimonial-copy">“{{ testimonial.text }}”</p>
+          <div class="testimonial-rating">
+            <span *ngFor="let star of [1,2,3,4,5]" class="star">★</span>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section ai-coach-section">
+    <div class="section-inner ai-inner">
+      <div class="ai-copy">
+        <p class="section-label">AI coach</p>
+        <h2>Guidance that adapts to your financial goals.</h2>
+        <p>From credit eligibility to portfolio rebalancing, Kredia’s AI assistant delivers actionable recommendations without the noise.</p>
+        <ul class="ai-list">
+          <li>Real-time credit scoring</li>
+          <li>Investment rebalancing alerts</li>
+          <li>Compliance and fraud monitoring</li>
+        </ul>
+      </div>
+      <div class="ai-preview-card">
+        <div class="message message-assistant">Hi there! I can help you optimize your credit and portfolio in minutes.</div>
+        <div class="message message-user">What is my current risk exposure?</div>
+        <div class="message message-assistant">Your mix is 35% equities, 45% fixed income, 20% cash. I recommend reducing exposure to high-volatility assets.</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact" class="section contact-section">
+    <div class="section-inner contact-inner">
+      <div class="contact-copy">
+        <p class="section-label">Contact us</p>
+        <h2>Start your finance transformation.</h2>
+        <p>Our team is ready to support your launch, growth and compliance needs with finance-first tooling.</p>
+        <div class="contact-info-list">
+          <div>
+            <strong>Email</strong>
+            <p>support@kredia.com</p>
+          </div>
+          <div>
+            <strong>Phone</strong>
+            <p>+1 (555) 123-4567</p>
+          </div>
+        </div>
+      </div>
+
+      <form [formGroup]="contactForm" (ngSubmit)="submitContact()" class="contact-form">
+        <div class="form-field">
+          <label>Full name</label>
+          <input type="text" formControlName="name" placeholder="Jane Doe" />
+          <span class="field-error" *ngIf="contactForm.get('name')?.hasError('required') && contactForm.get('name')?.touched">Name is required</span>
+        </div>
+        <div class="form-field">
+          <label>Email</label>
+          <input type="email" formControlName="email" placeholder="jane@company.com" />
+          <span class="field-error" *ngIf="contactForm.get('email')?.hasError('required') && contactForm.get('email')?.touched">Email is required</span>
+          <span class="field-error" *ngIf="contactForm.get('email')?.hasError('email') && contactForm.get('email')?.touched">Enter a valid email</span>
+        </div>
+        <div class="form-field">
+          <label>Message</label>
+          <textarea formControlName="message" rows="4" placeholder="How can we help?"></textarea>
+          <span class="field-error" *ngIf="contactForm.get('message')?.hasError('required') && contactForm.get('message')?.touched">Message is required</span>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full" [disabled]="contactForm.invalid">Send message</button>
+        <div class="form-status">
+          <p class="success-message" *ngIf="contactSent">✓ Thank you! We'll get back to you shortly.</p>
+          <p class="error-message" *ngIf="contactError">✗ Failed to send message. Please try again.</p>
+        </div>
+      </form>
+    </div>
+  </section>
 </main>
 
-<section id="features" class="features">
-  <div class="section-header">
-    <h2>Built for founders and small teams</h2>
-    <p>Everything you need to access flexible capital and track repayments.</p>
-  </div>
-  <div class="feature-grid">
-    <article class="feature-card">
-      <h3>Smart scoring</h3>
-      <p>AI-driven eligibility and risk scoring tailored to your cash flow.</p>
-    </article>
-    <article class="feature-card">
-      <h3>Instant disbursement</h3>
-      <p>Get approved and funded in minutes with transparent terms.</p>
-    </article>
-    <article class="feature-card">
-      <h3>Repayment coach</h3>
-      <p>Actionable nudges to help you keep your credit health strong.</p>
-    </article>
-    <article class="feature-card">
-      <h3>Live dashboard</h3>
-      <p>Track every transaction and repayment from one central space.</p>
-    </article>
-  </div>
-</section>
-
-<section id="simulator" class="steps">
-  <div class="section-header">
-    <h2>Apply in three quick steps</h2>
-    <p>A smooth experience from simulation to disbursement.</p>
-  </div>
-  <div class="step-grid">
-    <div class="step">
-      <span>01</span>
-      <h3>Simulate</h3>
-      <p>Choose the amount and term that match your business needs.</p>
+<footer class="landing-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <strong>KREDIA</strong>
+      <p>Modern financial infrastructure for credit and investing teams.</p>
     </div>
-    <div class="step">
-      <span>02</span>
-      <h3>Verify</h3>
-      <p>Upload your KYC documents and get a decision instantly.</p>
-    </div>
-    <div class="step">
-      <span>03</span>
-      <h3>Receive</h3>
-      <p>Funds land in your wallet the moment you accept the offer.</p>
+    <div class="footer-links-grid">
+      <div>
+        <h4>Product</h4>
+        <a routerLink="/features">Features</a>
+        <a href="javascript:void(0)">Security</a>
+        <a href="javascript:void(0)">Pricing</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="javascript:void(0)">About</a>
+        <a href="javascript:void(0)">Careers</a>
+        <a href="javascript:void(0)">Blog</a>
+      </div>
+      <div>
+        <h4>Support</h4>
+        <a href="javascript:void(0)">Help center</a>
+        <a href="javascript:void(0)">Contact</a>
+        <a href="javascript:void(0)">Status</a>
+      </div>
     </div>
   </div>
-</section>
-
-<section id="coach" class="cta-band">
-  <div>
-    <h2>Your AI credit partner</h2>
-    <p>Stay in control with smart notifications and personalized coaching.</p>
+  <div class="footer-bottom">
+    <p>© 2026 Kredia Technologies. All rights reserved.</p>
+    <div class="footer-legal">
+      <a href="javascript:void(0)">Privacy</a>
+      <a href="javascript:void(0)">Terms</a>
+      <a href="javascript:void(0)">Cookies</a>
+    </div>
   </div>
-  <button class="btn primary">Talk to the AI Coach</button>
-</section>
+</footer>

@@ -17,8 +17,7 @@ export class ShellComponent implements OnInit {
   private readonly cdr    = inject(ChangeDetectorRef);
   private readonly router = inject(Router);
 
-  isHomePage   = false;
-  isLoginPage  = false;
+  isPublicPage = false;
 
   ngOnInit(): void {
     this.updateFlags(this.router.url);
@@ -33,7 +32,16 @@ export class ShellComponent implements OnInit {
 
   private updateFlags(url: string): void {
     const path = url.split('?')[0];
-    this.isHomePage  = path === '/' || path === '/home';
-    this.isLoginPage = path === '/login';
+    this.isPublicPage = [
+      '/',
+      '/home',
+      '/features',
+      '/login',
+      '/signup',
+      '/register',
+      '/forgot-password',
+      '/reset-password',
+      '/oauth2/redirect'
+    ].includes(path);
   }
 }

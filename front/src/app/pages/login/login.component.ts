@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, NgZone }
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { API_BASE_URL } from '../../core/http/api.config';
 import { AuthService, LoginResponse } from '../../core/services/auth.service';
 
 @Component({
@@ -40,19 +41,16 @@ export class LoginComponent {
 
     this.auth.login(this.form.getRawValue()).subscribe({
       next: (response: LoginResponse) => {
-        // 1. Sauvegarde le token immédiatement (synchrone)
         const saved = this.auth.saveToken(response);
-
         this.loading = false;
-        this.cdr.markForCheck();
 
-        if (saved) {
-          this.zone.run(() => this.router.navigateByUrl('/credit/list'));
-        } else {
-          const data = (response as any)?.data;
-          this.error = `Token introuvable. data = ${JSON.stringify(data)}`;
+        if (!saved) {
+          this.error = 'Token introuvable. Veuillez réessayer.';
           this.cdr.markForCheck();
+          return;
         }
+
+        this.navigateAfterLogin();
       },
       error: (err) => {
         this.loading = false;
@@ -67,5 +65,22 @@ export class LoginComponent {
         this.cdr.markForCheck();
       }
     });
+  }
+
+  loginWithProvider(provider: 'google' | 'github'): void {
+    this.loading = true;
+    window.location.href = `${API_BASE_URL}/oauth2/authorization/${provider}`;
+  }
+
+  private navigateAfterLogin(): void {
+    const next = this.auth.isAdmin()
+      ? '/admin'
+      : this.auth.isAgent()
+      ? '/wallet/transactions'
+      : this.auth.isClient()
+      ? '/credit/list'
+      : '/user';
+
+    this.zone.run(() => this.router.navigateByUrl(next));
   }
 }

@@ -254,7 +254,7 @@ export class KycLoanPageComponent implements OnInit {
 
   private extractError(err: any): string {
     if (err instanceof ProgressEvent || err?.error instanceof ProgressEvent)
-      return 'Impossible de contacter le serveur. Vérifiez que le backend est lancé sur le port 8081.';
+      return 'Impossible de contacter le serveur. Vérifiez que le backend est lancé sur le port 8086.';
     if (err?.error && typeof err.error === 'object')
       return err.error.message ?? err.error.error ?? JSON.stringify(err.error);
     if (err?.error && typeof err.error === 'string') return err.error;

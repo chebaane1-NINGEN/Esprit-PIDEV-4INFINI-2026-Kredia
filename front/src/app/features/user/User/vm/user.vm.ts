@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { UserApi } from '../data-access/user.api';
 import { User, UserStatus } from '../models/user.model';
 
@@ -8,7 +8,9 @@ export class UserVm {
   private readonly api = inject(UserApi);
 
   findAll(): Observable<User[]> {
-    return this.api.findAll();
+    return this.api.findAll(undefined, undefined, undefined, 0, 50).pipe(
+      map(response => response.users)
+    );
   }
 
   findById(id: number): Observable<User> {

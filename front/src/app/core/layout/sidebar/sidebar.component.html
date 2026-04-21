@@ -23,16 +23,18 @@
         </a>
       </li>
 
-      <!-- USER -->
-      <li [class.active-parent]="expandedMenus['user']">
-        <a (click)="toggleMenu('user', $event)" class="nav-item parent-link">
-          <span class="nav-icon">👤</span>
-          <span>Users Management</span>
-          <span class="chevron" [class.rotated]="expandedMenus['user']">▼</span>
+      <!-- USER MANAGEMENT -->
+      <li [class.active-parent]="expandedMenus['admin']">
+        <a (click)="toggleMenu('admin', $event)" class="nav-item parent-link">
+          <span class="nav-icon">👥</span>
+          <span>User Management</span>
+          <span class="chevron" [class.rotated]="expandedMenus['admin']">▼</span>
         </a>
-        <ul class="sub" [class.expanded]="expandedMenus['user']">
-          <li><a routerLink="/user" routerLinkActive="active">User List</a></li>
-          <li><a routerLink="/user/kyc-doc" routerLinkActive="active">KYC Documents</a></li>
+        <ul class="sub" [class.expanded]="expandedMenus['admin']">
+          <li><a routerLink="/admin/users" routerLinkActive="active">Users</a></li>
+          <li><a routerLink="/admin/analytics" routerLinkActive="active">Analytics & Reporting</a></li>
+          <li><a routerLink="/admin/agents" routerLinkActive="active">Agent Performance</a></li>
+          <li><a routerLink="/admin/audit" routerLinkActive="active">System Audit Trail</a></li>
         </ul>
       </li>
 

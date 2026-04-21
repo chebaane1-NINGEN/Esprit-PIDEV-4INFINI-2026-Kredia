@@ -1,131 +1,115 @@
-.login-wrapper {
+.login-page {
   min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--bg-secondary);
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at top left, rgba(0, 192, 112, 0.14), transparent 32%),
+    var(--bg-secondary);
   padding: 24px;
 }
 
 .login-card {
+  width: min(520px, 100%);
   background: var(--bg-primary);
-  border-radius: 20px;
-  padding: 48px 40px;
-  width: 100%;
-  max-width: 420px;
-  box-shadow: 0 20px 60px var(--shadow-color);
+  border-radius: 28px;
+  padding: 36px 32px;
   border: 1px solid var(--border-color);
+  box-shadow: 0 28px 70px rgba(34, 51, 68, 0.12);
 }
 
-.login-brand {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  margin-bottom: 8px;
+.login-top {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 24px;
 }
 
-.brand-icon {
-  width: 40px;
-  height: 40px;
-  background: var(--emerald-600);
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
-
-.brand-icon img {
-  width: 30px;
-  height: 30px;
-  object-fit: contain;
-  filter: brightness(0) invert(1);
-}
-
-.brand-name {
+.brand-mark {
   font-family: var(--font-title);
-  font-size: 1.6rem;
-  font-weight: 700;
+  font-size: clamp(2rem, 2.8vw, 2.4rem);
   color: var(--text-primary);
-  letter-spacing: 0.05em;
-  margin: 0;
 }
 
-.login-subtitle {
-  text-align: center;
+.login-heading {
   color: var(--text-secondary);
-  font-size: 0.88rem;
-  margin: 0 0 32px;
+  line-height: 1.75;
 }
 
 .login-form {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
+  display: grid;
+  gap: 16px;
 }
 
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.field label {
-  font-size: 0.85rem;
-  font-weight: 600;
+label {
+  display: grid;
+  gap: 10px;
   color: var(--text-primary);
+  font-size: 0.95rem;
 }
 
-.field input {
-  padding: 11px 14px;
-  border-radius: 10px;
+input {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 14px;
   border: 1px solid var(--border-color);
   background: var(--bg-secondary);
   color: var(--text-primary);
   font-family: var(--font-body);
-  font-size: 0.9rem;
+}
+
+input:focus {
   outline: none;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.field input:focus {
   border-color: var(--emerald-600);
-  box-shadow: 0 0 0 3px rgba(0, 192, 112, 0.1);
+  box-shadow: 0 0 0 3px rgba(0, 192, 112, 0.12);
 }
 
-.field small {
-  font-size: 0.75rem;
-  color: #e53e3e;
+button.btn.primary {
+  width: 100%;
+  padding: 14px 18px;
 }
 
-.btn-login {
-  margin-top: 8px;
-  padding: 13px;
-  border-radius: 12px;
-  border: none;
-  background: linear-gradient(135deg, var(--emerald-600), var(--emerald-700));
-  color: #fff;
-  font-family: var(--font-body);
-  font-size: 0.95rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  box-shadow: 0 8px 20px rgba(0, 192, 112, 0.25);
+.oauth-actions {
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
 }
 
-.btn-login:hover:not(:disabled) {
+.btn.ghost {
+  width: 100%;
+  padding: 14px 18px;
+  border: 1px solid var(--border-color);
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--text-primary);
+}
+
+.btn.ghost:hover {
+  background: rgba(240, 244, 248, 0.95);
   transform: translateY(-2px);
-  box-shadow: 0 12px 28px rgba(0, 192, 112, 0.35);
 }
 
-.btn-login:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
+.login-links {
+  margin-top: 22px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}
+
+.login-links a {
+  color: var(--emerald-600);
+  font-weight: 700;
+}
+
+.alert.error {
+  background: rgba(229, 62, 62, 0.08);
+  border: 1px solid rgba(229, 62, 62, 0.2);
+  color: #9b2c2c;
+  padding: 12px 16px;
+  border-radius: 14px;
 }
 
 .spinner-wrap {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
@@ -134,22 +118,12 @@
 .spinner {
   width: 16px;
   height: 16px;
-  border: 2px solid rgba(255,255,255,0.3);
+  border: 2px solid rgba(255, 255, 255, 0.3);
   border-top-color: #fff;
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
-  display: inline-block;
 }
 
 @keyframes spin {
   to { transform: rotate(360deg); }
-}
-
-.alert.error {
-  background: rgba(229, 62, 62, 0.08);
-  border: 1px solid rgba(229, 62, 62, 0.2);
-  color: #e53e3e;
-  padding: 10px 14px;
-  border-radius: 8px;
-  font-size: 0.85rem;
 }

@@ -1,0 +1,80 @@
+<section class="admin-agents-page">
+  <header class="page-header">
+    <div>
+      <h1>Agent Performance</h1>
+      <p>Analyse en temps réel des agents avec comparaison, score et activité récente.</p>
+    </div>
+  </header>
+
+  <div class="alert error" *ngIf="error">{{ error }}</div>
+
+  <div class="agents-grid">
+    <div class="agents-list panel">
+      <h2>Liste des agents</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Nom</th>
+            <th>Email</th>
+            <th>Rôle</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let agent of agents" (click)="selectAgent(agent)" [class.active]="agent.userId === selectedAgent?.userId">
+            <td>{{ agent.firstName }} {{ agent.lastName }}</td>
+            <td>{{ agent.email }}</td>
+            <td>{{ agent.role }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="pagination">
+        <button class="btn ghost" type="button" (click)="goToPage(page - 1)" [disabled]="page === 0">Précédent</button>
+        <span>Page {{ page + 1 }} / {{ totalPages }}</span>
+        <button class="btn ghost" type="button" (click)="goToPage(page + 1)" [disabled]="page + 1 >= totalPages">Suivant</button>
+      </div>
+    </div>
+
+    <div class="agent-details panel">
+      <h2>Détails de l’agent</h2>
+      <div *ngIf="selectedAgent; else emptyDetails">
+        <div class="detail-block">
+          <span class="label">Agent</span>
+          <strong>{{ selectedAgent.firstName }} {{ selectedAgent.lastName }}</strong>
+        </div>
+        <div class="detail-block">
+          <span class="label">Email</span>
+          <strong>{{ selectedAgent.email }}</strong>
+        </div>
+        <div class="performance-grid" *ngIf="performance">
+          <div class="performance-card">
+            <span>Actions approuvées</span>
+            <strong>{{ performance.approvalActionsCount }}</strong>
+          </div>
+          <div class="performance-card">
+            <span>Actions rejetées</span>
+            <strong>{{ performance.rejectionActionsCount }}</strong>
+          </div>
+          <div class="performance-card">
+            <span>Taux d’approbation</span>
+            <strong>{{ getApprovalRate() | number:'1.0-0' }}%</strong>
+          </div>
+          <div class="performance-card">
+            <span>Score de performance</span>
+            <strong>{{ performance.performanceScore | number:'1.1-1' }}</strong>
+          </div>
+          <div class="performance-card">
+            <span>Clients traités</span>
+            <strong>{{ performance.numberOfClientsHandled }}</strong>
+          </div>
+          <div class="performance-card">
+            <span>Temps moyen</span>
+            <strong>{{ performance.averageProcessingTimeSeconds | number:'1.0-0' }}s</strong>
+          </div>
+        </div>
+      </div>
+      <ng-template #emptyDetails>
+        <p class="empty-state">Sélectionnez un agent pour afficher ses indicateurs.</p>
+      </ng-template>
+    </div>
+  </div>
+</section>

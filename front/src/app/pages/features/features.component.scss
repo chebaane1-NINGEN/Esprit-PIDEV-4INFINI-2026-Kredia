@@ -1,0 +1,124 @@
+.features-page {
+  min-height: 100vh;
+  padding: 48px 24px 80px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.99), rgba(242,247,252,1));
+}
+
+.hero-block {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 32px;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto 48px;
+}
+
+.eyebrow {
+  display: inline-flex;
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: rgba(0, 192, 112, 0.12);
+  color: var(--emerald-600);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+h1 {
+  margin: 20px 0 16px;
+  font-family: var(--font-title);
+  font-size: clamp(2.4rem, 4vw, 3.4rem);
+  color: var(--text-primary);
+  line-height: 1.05;
+}
+
+p {
+  max-width: 560px;
+  color: var(--text-secondary);
+  line-height: 1.75;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.hero-visual {
+  display: grid;
+  place-items: center;
+}
+
+.stat-card {
+  width: 100%;
+  max-width: 360px;
+  padding: 32px;
+  border-radius: 28px;
+  background: linear-gradient(135deg, rgba(0, 192, 112, 0.15), rgba(34, 51, 68, 0.05));
+  border: 1px solid rgba(0, 192, 112, 0.16);
+  box-shadow: 0 20px 40px rgba(34, 51, 68, 0.1);
+}
+
+.stat-card strong {
+  display: block;
+  font-size: 3rem;
+  color: var(--emerald-700);
+}
+
+.stat-card span {
+  display: block;
+  margin-top: 10px;
+  color: var(--text-secondary);
+}
+
+.grid-section {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.feature-card {
+  background: var(--bg-primary);
+  padding: 28px;
+  border-radius: 24px;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 16px 32px rgba(34, 51, 68, 0.08);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.feature-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 24px 46px rgba(34, 51, 68, 0.12);
+}
+
+.icon {
+  font-size: 2rem;
+  margin-bottom: 18px;
+}
+
+.feature-card h3 {
+  margin: 0 0 12px;
+  font-family: var(--font-title);
+  color: var(--text-primary);
+}
+
+.feature-card p {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.75;
+}
+
+@media (max-width: 920px) {
+  .hero-block {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .grid-section {
+    grid-template-columns: 1fr;
+  }
+}

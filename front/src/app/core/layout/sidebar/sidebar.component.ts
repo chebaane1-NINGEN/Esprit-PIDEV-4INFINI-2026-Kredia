@@ -20,7 +20,7 @@ export class SidebarComponent implements OnInit {
   readonly darkModeService = inject(DarkModeService);
 
   expandedMenus: { [key: string]: boolean } = {
-    user: false,
+    admin: true,
     credit: true,
     wallet: false,
     support: false,

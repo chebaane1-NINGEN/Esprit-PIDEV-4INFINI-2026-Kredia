@@ -1,0 +1,125 @@
+.auth-page {
+  min-height: 100vh;
+  padding: 32px 24px;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at top left, rgba(0, 192, 112, 0.15), transparent 40%),
+    radial-gradient(circle at bottom right, rgba(34, 51, 68, 0.12), transparent 35%),
+    var(--bg-secondary);
+}
+
+.auth-panel {
+  width: min(520px, 100%);
+  background: var(--bg-primary);
+  border-radius: 28px;
+  padding: 36px;
+  box-shadow: 0 24px 55px rgba(34, 51, 68, 0.12);
+  border: 1px solid var(--border-color);
+}
+
+.auth-header {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 26px;
+}
+
+.brand {
+  font-family: var(--font-title);
+  font-size: clamp(2rem, 2.4vw, 2.5rem);
+  color: var(--text-primary);
+}
+
+.status-block {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--emerald-600), var(--emerald-700));
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 700;
+  width: fit-content;
+}
+
+.auth-form {
+  display: grid;
+  gap: 18px;
+}
+
+.grid-two {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+label {
+  display: grid;
+  gap: 10px;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+}
+
+input {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+}
+
+input:focus {
+  outline: none;
+  border-color: var(--emerald-600);
+  box-shadow: 0 0 0 3px rgba(0, 192, 112, 0.12);
+}
+
+small {
+  color: #e53e3e;
+}
+
+.alert {
+  border-radius: 16px;
+  padding: 14px 18px;
+  font-size: 0.95rem;
+}
+
+.alert.error {
+  background: rgba(229, 62, 62, 0.08);
+  border: 1px solid rgba(229, 62, 62, 0.2);
+  color: #9b2c2c;
+}
+
+.alert.success {
+  background: rgba(0, 192, 112, 0.12);
+  border: 1px solid rgba(0, 192, 112, 0.25);
+  color: #064e3b;
+}
+
+.footer-copy {
+  margin-top: 18px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.footer-copy a {
+  color: var(--emerald-600);
+  font-weight: 700;
+}
+
+@media (max-width: 720px) {
+  .auth-panel {
+    padding: 28px 20px;
+  }
+
+  .grid-two {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,27 @@
+<div class="features-page">
+  <section class="hero-block">
+    <div>
+      <span class="eyebrow">KREDIA FEATURES</span>
+      <h1>Des fonctionnalités fintech pensées pour les entrepreneurs modernes.</h1>
+      <p>Une plateforme de prêt intelligente, sécurisée et prête à soutenir votre croissance à chaque étape.</p>
+      <div class="hero-actions">
+        <a routerLink="/register" class="btn primary">Commencer maintenant</a>
+        <a routerLink="/login" class="btn outline">S’identifier</a>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="stat-card">
+        <strong>97%</strong>
+        <span>Décisions instantanées</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="grid-section">
+    <div class="feature-card" *ngFor="let feature of features">
+      <div class="icon">{{ feature.icon }}</div>
+      <h3>{{ feature.title }}</h3>
+      <p>{{ feature.description }}</p>
+    </div>
+  </section>
+</div>

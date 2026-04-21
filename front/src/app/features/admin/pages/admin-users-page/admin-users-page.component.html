@@ -1,0 +1,82 @@
+<section class="admin-users-page">
+  <header class="page-header">
+    <div>
+      <h1>Users</h1>
+      <p>Gestion centralisée des utilisateurs avec filtres, actions individuelles et actions de masse.</p>
+    </div>
+    <div class="page-actions">
+      <button class="btn primary" type="button" (click)="loadUsers()">Actualiser</button>
+    </div>
+  </header>
+
+  <div class="panel filters-panel">
+    <div class="filter-field">
+      <label>Recherche</label>
+      <input type="text" [(ngModel)]="query" (keyup.enter)="loadUsers()" placeholder="Nom ou email" />
+    </div>
+    <div class="filter-field">
+      <label>Rôle</label>
+      <select [(ngModel)]="roleFilter" (change)="loadUsers()">
+        <option value="">Tous</option>
+        <option *ngFor="let role of availableRoles" [value]="role">{{ role }}</option>
+      </select>
+    </div>
+    <div class="filter-field">
+      <label>Statut</label>
+      <select [(ngModel)]="statusFilter" (change)="loadUsers()">
+        <option value="">Tous</option>
+        <option *ngFor="let status of availableStatus" [value]="status">{{ status }}</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="panel bulk-actions" *ngIf="selectedIds.size > 0">
+    <p>{{ selectedIds.size }} sélectionné(s)</p>
+    <button class="btn outline" type="button" (click)="bulkDelete()">Supprimer sélection</button>
+    <button class="btn outline" type="button" (click)="bulkUpdateStatus('ACTIVE')">Activer</button>
+    <button class="btn outline" type="button" (click)="bulkUpdateStatus('INACTIVE')">Désactiver</button>
+    <button class="btn outline" type="button" (click)="bulkUpdateStatus('SUSPENDED')">Suspendre</button>
+  </div>
+
+  <div class="alert error" *ngIf="error">{{ error }}</div>
+
+  <div class="table-container" *ngIf="!loading || users.length > 0">
+    <table>
+      <thead>
+        <tr>
+          <th><input type="checkbox" [checked]="users.length > 0 && selectedIds.size === users.length" (change)="users.forEach(u => u.userId && toggleSelect(u.userId))" /></th>
+          <th>Nom</th>
+          <th>Email</th>
+          <th>Rôle</th>
+          <th>Statut</th>
+          <th>Créé le</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let user of users">
+          <td><input type="checkbox" [checked]="isSelected(user.userId)" (change)="toggleSelect(user.userId)" /></td>
+          <td>{{ user.firstName }} {{ user.lastName }}</td>
+          <td>{{ user.email }}</td>
+          <td><span [class]="getRoleClass(user.role)">{{ user.role }}</span></td>
+          <td><span [class]="getStatusClass(user.status)">{{ user.status }}</span></td>
+          <td>{{ user.createdAt ? (user.createdAt | date:'short') : '—' }}</td>
+          <td class="actions-cell">
+            <button class="btn outline" type="button" (click)="updateStatus(user)">{{ user.status === 'ACTIVE' ? 'Bloquer' : 'Débloquer' }}</button>
+            <select [value]="user.role" (change)="changeRole(user, $any($event.target).value)">
+              <option *ngFor="let role of availableRoles" [value]="role">{{ role }}</option>
+            </select>
+            <button class="btn outline" type="button" (click)="deleteUser(user)" [disabled]="user.role === 'ADMIN'">Supprimer</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p *ngIf="users.length === 0 && !loading" class="empty-state">Aucun utilisateur trouvé.</p>
+  </div>
+
+  <div class="pagination" *ngIf="totalPages > 1">
+    <button class="btn ghost" type="button" (click)="goToPage(page - 1)" [disabled]="page === 0">Précédent</button>
+    <span>Page {{ page + 1 }} / {{ totalPages }}</span>
+    <button class="btn ghost" type="button" (click)="goToPage(page + 1)" [disabled]="page + 1 >= totalPages">Suivant</button>
+  </div>
+</section>

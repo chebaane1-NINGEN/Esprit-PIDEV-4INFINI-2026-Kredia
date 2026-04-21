@@ -1,0 +1,163 @@
+.admin-users-page {
+  display: grid;
+  gap: 24px;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.page-header h1 {
+  margin-bottom: 8px;
+  font-size: 2rem;
+  letter-spacing: -0.04em;
+}
+
+.page-header p {
+  color: var(--text-secondary);
+}
+
+.panel {
+  padding: 20px;
+  border-radius: 20px;
+  background: var(--bg-secondary);
+  box-shadow: 0 18px 42px rgba(34, 51, 68, 0.08);
+}
+
+.filters-panel {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.filter-field {
+  display: grid;
+  gap: 8px;
+}
+
+.filter-field label {
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.filter-field input,
+.filter-field select {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.bulk-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+}
+
+.bulk-actions p {
+  margin: 0;
+  font-weight: 600;
+}
+
+.table-container {
+  overflow-x: auto;
+  border-radius: 20px;
+  background: var(--bg-secondary);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 900px;
+}
+
+thead {
+  background: var(--bg-primary);
+}
+
+th, td {
+  text-align: left;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+th {
+  color: var(--text-secondary);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+tbody tr:hover {
+  background: rgba(0, 192, 112, 0.05);
+}
+
+.actions-cell {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.actions-cell select {
+  min-width: 140px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-primary);
+}
+
+.btn.outline {
+  min-width: 112px;
+}
+
+.status--active {
+  color: var(--emerald-700);
+  font-weight: 700;
+}
+
+.status--inactive,
+.status--suspended,
+.status--blocked {
+  color: #d05757;
+  font-weight: 700;
+}
+
+.role--admin {
+  color: #0f4e9e;
+  font-weight: 700;
+}
+
+.role--agent {
+  color: #a06600;
+  font-weight: 700;
+}
+
+.role--client {
+  color: #166d41;
+  font-weight: 700;
+}
+
+.empty-state {
+  padding: 28px;
+  color: var(--text-secondary);
+}
+
+.pagination {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  align-items: center;
+}
+
+.alert.error {
+  padding: 14px 18px;
+  border-radius: 14px;
+  background: rgba(208, 71, 75, 0.12);
+  color: #852929;
+}

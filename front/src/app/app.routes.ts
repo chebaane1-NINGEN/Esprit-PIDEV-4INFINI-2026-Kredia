@@ -6,6 +6,18 @@ import { ForgotPasswordComponent } from './pages/forgot-password/forgot-password
 import { ResetPasswordComponent } from './pages/reset-password/reset-password.component';
 import { FeaturesComponent } from './pages/features/features.component';
 import { Oauth2RedirectComponent } from './pages/oauth2-redirect/oauth2-redirect.component';
+import { SecurityComponent } from './pages/security/security.component';
+import { PricingComponent } from './pages/pricing/pricing.component';
+import { AboutComponent } from './pages/about/about.component';
+import { CareersComponent } from './pages/careers/careers.component';
+import { BlogComponent } from './pages/blog/blog.component';
+import { HelpComponent } from './pages/help/help.component';
+import { ContactPageComponent } from './pages/contact/contact.component';
+import { NotFoundComponent } from './pages/not-found/not-found.component';
+import { StatusComponent } from './pages/status/status.component';
+import { PrivacyComponent } from './pages/privacy/privacy.component';
+import { TermsComponent } from './pages/terms/terms.component';
+import { CookiesComponent } from './pages/cookies/cookies.component';
 import { authGuard, authChildGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
@@ -13,6 +25,17 @@ export const routes: Routes = [
   { path: '', component: HomeComponent, pathMatch: 'full' },
   { path: 'home', component: HomeComponent },
   { path: 'features', component: FeaturesComponent },
+  { path: 'security', component: SecurityComponent },
+  { path: 'pricing', component: PricingComponent },
+  { path: 'about', component: AboutComponent },
+  { path: 'careers', component: CareersComponent },
+  { path: 'blog', component: BlogComponent },
+  { path: 'help', component: HelpComponent },
+  { path: 'contact', component: ContactPageComponent },
+  { path: 'status', component: StatusComponent },
+  { path: 'privacy', component: PrivacyComponent },
+  { path: 'terms', component: TermsComponent },
+  { path: 'cookies', component: CookiesComponent },
   { path: 'login', component: LoginComponent },
   { path: 'signup', redirectTo: 'register', pathMatch: 'full' },
   { path: 'register', component: RegisterComponent },
@@ -125,5 +148,5 @@ export const routes: Routes = [
   },
 
   // ── Fallback ───────────────────────────────────────────
-  { path: '**', redirectTo: '' }
+  { path: '**', component: NotFoundComponent }
 ];

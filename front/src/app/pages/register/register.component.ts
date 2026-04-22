@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators, AbstractControl } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
+import { API_BASE_URL } from '../../core/http/api.config';
 
 @Component({
   selector: 'app-register',
@@ -28,7 +29,8 @@ export class RegisterComponent {
       email: ['', [Validators.required, Validators.email]],
       phoneNumber: ['', [Validators.required, Validators.minLength(6)]],
       password: ['', [Validators.required, Validators.minLength(6)]],
-      confirmPassword: ['', Validators.required]
+      confirmPassword: ['', Validators.required],
+      agreeTerms: [false, Validators.requiredTrue]
     },
     { validators: [this.passwordMatchValidator] }
   );
@@ -72,5 +74,10 @@ export class RegisterComponent {
     const password = control.get('password')?.value;
     const confirm = control.get('confirmPassword')?.value;
     return password === confirm ? null : { passwordMismatch: true };
+  }
+
+  loginWithProvider(provider: 'google' | 'github'): void {
+    this.loading = true;
+    window.location.href = `${API_BASE_URL}/oauth2/authorization/${provider}`;
   }
 }

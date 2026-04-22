@@ -1,0 +1,46 @@
+<main class="pricing-page">
+  <header class="pricing-header">
+    <h1>Simple, Transparent Pricing</h1>
+    <p>Choose the plan that works best for you. No hidden fees, cancel anytime.</p>
+  </header>
+
+  <section class="pricing-content">
+    <div class="pricing-grid">
+      <article class="pricing-card">
+        <div class="plan-name">Starter</div>
+        <div class="plan-price">Free<small>/month</small></div>
+        <ul class="plan-features">
+          <li>Up to 3 loans</li>
+          <li>Basic portfolio tracking</li>
+          <li>Standard support</li>
+        </ul>
+        <button class="plan-cta" (click)="goToRegister()">Get Started</button>
+      </article>
+
+      <article class="pricing-card highlighted">
+        <div class="plan-name">Professional</div>
+        <div class="plan-price">$9.99<small>/month</small></div>
+        <ul class="plan-features">
+          <li>Unlimited loans</li>
+          <li>Advanced portfolio analytics</li>
+          <li>AI financial coach</li>
+          <li>Priority support</li>
+        </ul>
+        <button class="plan-cta" (click)="goToRegister()">Get Started</button>
+      </article>
+
+      <article class="pricing-card">
+        <div class="plan-name">Enterprise</div>
+        <div class="plan-price">Custom<small>/month</small></div>
+        <ul class="plan-features">
+          <li>Everything in Professional</li>
+          <li>Dedicated account manager</li>
+          <li>Custom integrations</li>
+          <li>SLA guarantee</li>
+        </ul>
+        <button class="plan-cta" (click)="contactSales()">Contact Sales</button>
+      </article>
+    </div>
+  </section>
+</main>
+

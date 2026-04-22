@@ -1,46 +1,86 @@
-<div class="login-page">
-  <div class="login-card">
-    <div class="login-top">
-      <div class="brand-mark">KREDIA</div>
-      <p class="login-heading">Accédez à votre espace Kredia et gérez vos crédits en toute confiance.</p>
+<div class="auth-page login-page">
+  <div class="auth-container">
+    <div class="auth-card">
+      <div class="auth-header">
+        <span class="brand-logo">●</span>
+        <h1>Sign in</h1>
+        <p>Welcome back! Please login to your account.</p>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="submit()" class="auth-form">
+        <div class="alert alert-error" *ngIf="error">
+          <span>✕</span> {{ error }}
+        </div>
+
+        <div class="form-field">
+          <label for="email">Email Address</label>
+          <input
+            id="email"
+            type="email"
+            formControlName="email"
+            placeholder="name@example.com"
+            autocomplete="email"
+            class="form-input"
+          />
+          <span class="field-error" *ngIf="form.controls.email.touched && form.controls.email.invalid">
+            Please enter a valid email
+          </span>
+        </div>
+
+        <div class="form-field">
+          <label for="password">Password</label>
+          <input
+            id="password"
+            type="password"
+            formControlName="password"
+            placeholder="••••••••"
+            autocomplete="current-password"
+            class="form-input"
+          />
+          <span class="field-error" *ngIf="form.controls.password.touched && form.controls.password.invalid">
+            Password is required (min. 4 characters)
+          </span>
+        </div>
+
+        <div class="form-actions">
+          <label class="remember-me">
+            <input type="checkbox" /> Keep me signed in
+          </label>
+          <a routerLink="/forgot-password" class="forgot-link">Forgot password?</a>
+        </div>
+
+        <button type="submit" class="btn-primary btn-full" [disabled]="loading || form.invalid">
+          <span *ngIf="!loading">Sign In</span>
+          <span *ngIf="loading" class="btn-loading">
+            <span class="spinner"></span> Signing in...
+          </span>
+        </button>
+      </form>
+
+      <div class="auth-divider">
+        <span>or continue with</span>
+      </div>
+
+      <div class="oauth-buttons">
+        <button type="button" class="oauth-btn" (click)="loginWithProvider('google')" title="Continue with Google">
+          <span>G</span>
+        </button>
+        <button type="button" class="oauth-btn" (click)="loginWithProvider('github')" title="Continue with GitHub">
+          <span>⚙</span>
+        </button>
+      </div>
+
+      <div class="auth-footer">
+        <p>Don't have an account? <a routerLink="/register" class="link-primary">Create one</a></p>
+      </div>
     </div>
 
-    <form [formGroup]="form" (ngSubmit)="submit()" class="login-form">
-      <div class="alert error" *ngIf="error">{{ error }}</div>
-
-      <label>
-        Email
-        <input type="email" formControlName="email" placeholder="admin@kredia.com" autocomplete="email" />
-        <small *ngIf="form.controls.email.touched && form.controls.email.invalid">
-          Email valide requis.
-        </small>
-      </label>
-
-      <label>
-        Mot de passe
-        <input type="password" formControlName="password" placeholder="••••••••" autocomplete="current-password" />
-        <small *ngIf="form.controls.password.touched && form.controls.password.invalid">
-          Mot de passe requis (min. 4 caractères).
-        </small>
-      </label>
-
-      <button type="submit" class="btn primary" [disabled]="loading">
-        <span *ngIf="!loading">Se connecter</span>
-        <span *ngIf="loading" class="spinner-wrap">
-          <span class="spinner"></span>Connexion...
-        </span>
-      </button>
-    </form>
-
-    <div class="oauth-actions">
-      <button type="button" class="btn ghost" (click)="loginWithProvider('google')">Continuer avec Google</button>
-      <button type="button" class="btn ghost" (click)="loginWithProvider('github')">Continuer avec GitHub</button>
-    </div>
-
-    <div class="login-links">
-      <a routerLink="/forgot-password">Mot de passe oublié ?</a>
-      <span>•</span>
-      <a routerLink="/register">Créer un compte</a>
+    <div class="auth-visual">
+      <div class="visual-gradient"></div>
+      <div class="visual-content">
+        <h2>Smart Financial Management</h2>
+        <p>Manage your loans, investments and credit score from one unified dashboard</p>
+      </div>
     </div>
   </div>
 </div>

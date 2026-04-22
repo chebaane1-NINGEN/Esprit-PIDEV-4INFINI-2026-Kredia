@@ -1,64 +1,147 @@
-<div class="auth-page">
-  <div class="auth-panel">
-    <div class="auth-header">
-      <div class="brand">KREDIA</div>
-      <p>Créez votre compte et démarrez votre parcours de financement intelligent.</p>
-    </div>
-
-    <div class="status-block">
-      <div class="pill">Inscription</div>
-      <p>Accédez aux prêts intelligents, au suivi en temps réel et au coach de remboursement.</p>
-    </div>
-
-    <form [formGroup]="form" (ngSubmit)="submit()" class="auth-form">
-      <div class="alert error" *ngIf="error">{{ error }}</div>
-      <div class="alert success" *ngIf="success">{{ success }}</div>
-
-      <div class="grid-two">
-        <label>
-          Prénom
-          <input formControlName="firstName" placeholder="Alice" />
-          <small *ngIf="hasFieldError('firstName', 'required')">Le prénom est requis.</small>
-        </label>
-        <label>
-          Nom
-          <input formControlName="lastName" placeholder="Dupont" />
-          <small *ngIf="hasFieldError('lastName', 'required')">Le nom est requis.</small>
-        </label>
+<div class="auth-page signup-page">
+  <div class="auth-container">
+    <div class="auth-card">
+      <div class="auth-header">
+        <span class="brand-logo">●</span>
+        <h1>Create Account</h1>
+        <p>Join thousands of users managing their finances with KREDIA</p>
       </div>
 
-      <label>
-        Email
-        <input type="email" formControlName="email" placeholder="alice@example.com" />
-        <small *ngIf="hasFieldError('email', 'required')">Email requis.</small>
-        <small *ngIf="hasFieldError('email', 'email')">Email invalide.</small>
-      </label>
+      <form [formGroup]="form" (ngSubmit)="submit()" class="auth-form">
+        <div class="alert alert-error" *ngIf="error">
+          <span>✕</span> {{ error }}
+        </div>
+        <div class="alert alert-success" *ngIf="success">
+          <span>✓</span> {{ success }}
+        </div>
 
-      <label>
-        Téléphone
-        <input formControlName="phoneNumber" placeholder="+33 6 12 34 56 78" />
-        <small *ngIf="hasFieldError('phoneNumber', 'required')">Téléphone requis.</small>
-        <small *ngIf="hasFieldError('phoneNumber', 'minlength')">Au moins 6 caractères.</small>
-      </label>
+        <div class="form-row">
+          <div class="form-field">
+            <label for="firstName">First Name</label>
+            <input
+              id="firstName"
+              type="text"
+              formControlName="firstName"
+              placeholder="John"
+              class="form-input"
+            />
+            <span class="field-error" *ngIf="hasFieldError('firstName', 'required')">
+              First name is required
+            </span>
+          </div>
 
-      <label>
-        Mot de passe
-        <input type="password" formControlName="password" placeholder="••••••••" />
-        <small *ngIf="hasFieldError('password', 'required')">Mot de passe requis.</small>
-        <small *ngIf="hasFieldError('password', 'minlength')">Minimum 6 caractères.</small>
-      </label>
+          <div class="form-field">
+            <label for="lastName">Last Name</label>
+            <input
+              id="lastName"
+              type="text"
+              formControlName="lastName"
+              placeholder="Doe"
+              class="form-input"
+            />
+            <span class="field-error" *ngIf="hasFieldError('lastName', 'required')">
+              Last name is required
+            </span>
+          </div>
+        </div>
 
-      <label>
-        Confirmer le mot de passe
-        <input type="password" formControlName="confirmPassword" placeholder="••••••••" />
-        <small *ngIf="form.errors?.['passwordMismatch'] && form.touched">Les mots de passe ne correspondent pas.</small>
-      </label>
+        <div class="form-field">
+          <label for="email">Email Address</label>
+          <input
+            id="email"
+            type="email"
+            formControlName="email"
+            placeholder="john@example.com"
+            class="form-input"
+          />
+          <span class="field-error" *ngIf="hasFieldError('email', 'required')">Email is required</span>
+          <span class="field-error" *ngIf="hasFieldError('email', 'email')">Please enter a valid email</span>
+        </div>
 
-      <button type="submit" class="btn primary" [disabled]="loading">{{ loading ? 'Création...' : 'Créer un compte' }}</button>
-    </form>
+        <div class="form-field">
+          <label for="phoneNumber">Phone Number</label>
+          <input
+            id="phoneNumber"
+            type="tel"
+            formControlName="phoneNumber"
+            placeholder="+1 (555) 123-4567"
+            class="form-input"
+          />
+          <span class="field-error" *ngIf="hasFieldError('phoneNumber', 'required')">Phone is required</span>
+          <span class="field-error" *ngIf="hasFieldError('phoneNumber', 'minlength')">
+            At least 6 characters
+          </span>
+        </div>
 
-    <p class="footer-copy">
-      Déjà inscrit ? <a routerLink="/login">Connectez-vous</a>
-    </p>
+        <div class="form-field">
+          <label for="password">Password</label>
+          <input
+            id="password"
+            type="password"
+            formControlName="password"
+            placeholder="••••••••"
+            class="form-input"
+          />
+          <span class="field-error" *ngIf="hasFieldError('password', 'required')">Password is required</span>
+          <span class="field-error" *ngIf="hasFieldError('password', 'minlength')">Minimum 6 characters</span>
+        </div>
+
+        <div class="form-field">
+          <label for="confirmPassword">Confirm Password</label>
+          <input
+            id="confirmPassword"
+            type="password"
+            formControlName="confirmPassword"
+            placeholder="••••••••"
+            class="form-input"
+          />
+          <span class="field-error" *ngIf="form.errors?.['passwordMismatch'] && form.touched">
+            Passwords do not match
+          </span>
+        </div>
+
+        <div class="form-agreement">
+          <label class="checkbox-label">
+            <input type="checkbox" formControlName="agreeTerms" />
+            <span>I agree to the <a href="javascript:void(0)">Terms of Service</a> and <a href="javascript:void(0)">Privacy Policy</a></span>
+          </label>
+          <span class="field-error" *ngIf="hasFieldError('agreeTerms', 'required')">
+            You must agree to the terms
+          </span>
+        </div>
+
+        <button type="submit" class="btn-primary btn-full" [disabled]="loading || form.invalid">
+          <span *ngIf="!loading">Create Account</span>
+          <span *ngIf="loading" class="btn-loading">
+            <span class="spinner"></span> Creating...
+          </span>
+        </button>
+      </form>
+
+      <div class="auth-divider">
+        <span>or sign up with</span>
+      </div>
+
+      <div class="oauth-buttons">
+        <button type="button" class="oauth-btn" (click)="loginWithProvider('google')" title="Sign up with Google">
+          <span>G</span>
+        </button>
+        <button type="button" class="oauth-btn" (click)="loginWithProvider('github')" title="Sign up with GitHub">
+          <span>⚙</span>
+        </button>
+      </div>
+
+      <div class="auth-footer">
+        <p>Already have an account? <a routerLink="/login" class="link-primary">Sign in</a></p>
+      </div>
+    </div>
+
+    <div class="auth-visual">
+      <div class="visual-gradient"></div>
+      <div class="visual-content">
+        <h2>Your Financial Journey Starts Here</h2>
+        <p>Access intelligent credit scoring, real-time portfolio tracking, and AI-powered recommendations</p>
+      </div>
+    </div>
   </div>
 </div>

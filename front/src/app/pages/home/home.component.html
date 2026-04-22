@@ -1,71 +1,76 @@
 <main class="home-page">
+  <!-- HERO SECTION -->
   <section class="hero-section">
-    <div class="hero-shell">
-      <header class="hero-topbar">
-        <a routerLink="/" class="brand">KREDIA</a>
-        <nav class="hero-nav" aria-label="Main navigation">
+    <header class="hero-navbar">
+      <div class="navbar-inner">
+        <a routerLink="/" class="navbar-brand">
+          <span class="brand-mark">●</span> KREDIA
+        </a>
+        <nav class="navbar-menu" aria-label="Main navigation">
           <a href="javascript:void(0)" (click)="scrollToSection($event, 'features')">Features</a>
-          <a href="javascript:void(0)" (click)="scrollToSection($event, 'kpi')">Analytics</a>
           <a href="javascript:void(0)" (click)="scrollToSection($event, 'testimonials')">Reviews</a>
           <a href="javascript:void(0)" (click)="scrollToSection($event, 'contact')">Contact</a>
+          <a href="javascript:void(0)" (click)="scrollToSection($event, 'pricing')">Pricing</a>
         </nav>
-        <div class="hero-cta-wrap">
-          <a routerLink="/login" class="btn btn-outline">Login</a>
-        </div>
-      </header>
+        <a routerLink="/login" class="navbar-login">Sign in</a>
+      </div>
+    </header>
 
-      <div class="hero-grid">
-        <div class="hero-copy">
-          <span class="eyebrow">Fintech intelligence for credit & investment</span>
-          <h1>Manage loans, investments and risk from one smart dashboard.</h1>
-          <p>Power your financial decisions with fast credit scoring, portfolio insights, and compliance-grade security in a single modern experience.</p>
-
-          <div class="hero-actions">
-            <a routerLink="/register" class="btn btn-primary">Start free trial</a>
-            <button type="button" class="btn btn-secondary" (click)="scrollToSection($event, 'features')">See features</button>
-          </div>
-
-          <div class="hero-metric-list">
-            <div class="hero-metric">
-              <strong>500K+</strong>
-              <span>Active users</span>
-            </div>
-            <div class="hero-metric">
-              <strong>$2.5B+</strong>
-              <span>Loans processed</span>
-            </div>
-            <div class="hero-metric">
-              <strong>98.5%</strong>
-              <span>Uptime SLA</span>
-            </div>
-          </div>
+    <div class="hero-container">
+      <div class="hero-content">
+        <span class="hero-badge">✨ Welcome to modern fintech</span>
+        <h1 class="hero-title">Manage loans, investments and risk from one smart dashboard</h1>
+        <p class="hero-subtitle">Power your financial decisions with AI-driven credit scoring, portfolio insights, and enterprise-grade security in a seamless experience.</p>
+        
+        <div class="hero-ctas">
+          <a routerLink="/register" class="cta-btn cta-primary">Start Free Trial</a>
+          <button type="button" class="cta-btn cta-secondary" (click)="scrollToSection($event, 'features')">See Demo</button>
         </div>
 
-        <aside class="hero-visual">
-          <div class="visual-card">
-            <div class="visual-tag">Portfolio snapshot</div>
-            <div class="visual-balance">
-              <span>Portfolio</span>
+        <div class="hero-stats">
+          <div class="stat">
+            <strong>500K+</strong>
+            <span>Active Users</span>
+          </div>
+          <div class="stat">
+            <strong>$2.5B+</strong>
+            <span>Loans Processed</span>
+          </div>
+          <div class="stat">
+            <strong>99%</strong>
+            <span>Uptime SLA</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-visual">
+        <div class="visual-showcase">
+          <div class="showcase-card showcase-primary">
+            <div class="card-header">Portfolio Overview</div>
+            <div class="card-stat">
+              <span>Total Assets</span>
               <strong>$847K</strong>
             </div>
-            <div class="visual-summary">
-              <div>
-                <span>Risk score</span>
+            <div class="card-metrics">
+              <div class="metric-row">
+                <span>Risk Score</span>
                 <strong>32%</strong>
               </div>
-              <div>
-                <span>Monthly return</span>
+              <div class="metric-row">
+                <span>Monthly Return</span>
                 <strong>+3.2%</strong>
               </div>
             </div>
-            <div class="visual-chart"></div>
-            <div class="visual-list">
-              <div><span>Credit utilization</span><strong>42%</strong></div>
-              <div><span>Portfolio trend</span><strong>+12%</strong></div>
-              <div><span>Compliance</span><strong>AAA</strong></div>
+            <div class="card-chart">
+              <div class="chart-bar" style="height: 60%;"></div>
+              <div class="chart-bar" style="height: 75%;"></div>
+              <div class="chart-bar" style="height: 50%;"></div>
+              <div class="chart-bar" style="height: 85%;"></div>
+              <div class="chart-bar" style="height: 65%;"></div>
             </div>
           </div>
-        </aside>
+          <div class="showcase-accent"></div>
+        </div>
       </div>
     </div>
   </section>
@@ -252,29 +257,29 @@
       <div>
         <h4>Product</h4>
         <a routerLink="/features">Features</a>
-        <a href="javascript:void(0)">Security</a>
-        <a href="javascript:void(0)">Pricing</a>
+        <a routerLink="/security">Security</a>
+        <a routerLink="/pricing">Pricing</a>
       </div>
       <div>
         <h4>Company</h4>
-        <a href="javascript:void(0)">About</a>
-        <a href="javascript:void(0)">Careers</a>
-        <a href="javascript:void(0)">Blog</a>
+        <a routerLink="/about">About</a>
+        <a routerLink="/careers">Careers</a>
+        <a routerLink="/blog">Blog</a>
       </div>
       <div>
         <h4>Support</h4>
-        <a href="javascript:void(0)">Help center</a>
-        <a href="javascript:void(0)">Contact</a>
-        <a href="javascript:void(0)">Status</a>
+        <a routerLink="/help">Help center</a>
+        <a routerLink="/contact">Contact</a>
+        <a routerLink="/status">Status</a>
       </div>
     </div>
   </div>
   <div class="footer-bottom">
     <p>© 2026 Kredia Technologies. All rights reserved.</p>
     <div class="footer-legal">
-      <a href="javascript:void(0)">Privacy</a>
-      <a href="javascript:void(0)">Terms</a>
-      <a href="javascript:void(0)">Cookies</a>
+      <a routerLink="/privacy">Privacy</a>
+      <a routerLink="/terms">Terms</a>
+      <a routerLink="/cookies">Cookies</a>
     </div>
   </div>
 </footer>

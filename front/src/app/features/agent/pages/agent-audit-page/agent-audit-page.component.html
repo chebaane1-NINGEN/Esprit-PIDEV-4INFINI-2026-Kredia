@@ -1,0 +1,92 @@
+<div class="audit-container">
+  <div class="audit-header">
+    <h1>Activity Log</h1>
+    <p>Track all your actions and client interactions</p>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-section">
+    <div class="filter-group">
+      <input
+        type="text"
+        [(ngModel)]="searchTerm"
+        placeholder="Search activities..."
+        class="search-input"
+      >
+    </div>
+
+    <div class="filter-group">
+      <select [(ngModel)]="selectedAction" class="action-select">
+        <option value="">All Actions</option>
+        <option value="LOGIN">Login</option>
+        <option value="APPROVAL">Approval</option>
+        <option value="CLIENT_HANDLED">Client Handled</option>
+        <option value="STATUS_CHANGED">Status Changed</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Loading activities...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="error-state">
+    <div class="error-icon">⚠️</div>
+    <h3>{{ error }}</h3>
+    <button (click)="loadActivities()" class="retry-btn">Retry</button>
+  </div>
+
+  <!-- Activities Content -->
+  <div *ngIf="!loading && !error" class="audit-content">
+
+    <!-- Empty State -->
+    <div *ngIf="getFilteredActivities().length === 0" class="empty-state">
+      <div class="empty-icon">📋</div>
+      <h3>No activities found</h3>
+      <p>{{ searchTerm || selectedAction ? 'Try adjusting your filters' : 'No activities recorded yet' }}</p>
+    </div>
+
+    <!-- Activities List -->
+    <div *ngIf="getFilteredActivities().length > 0" class="activities-list">
+      <div *ngFor="let activity of getFilteredActivities()" class="activity-item">
+        <div class="activity-icon">{{ getActivityIcon(activity.actionType) }}</div>
+        <div class="activity-content">
+          <p class="activity-description">{{ activity.description }}</p>
+          <p class="activity-meta">
+            <span *ngIf="activity.userName" class="user-name">{{ activity.userName }}</span>
+            <span class="activity-type">{{ activity.actionType }}</span>
+            <span class="activity-time">{{ activity.timestamp | date:'medium' }}</span>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div *ngIf="totalPages > 1" class="pagination">
+      <button
+        (click)="onPageChange(currentPage - 1)"
+        [disabled]="currentPage === 0"
+        class="page-btn"
+      >
+        ‹ Previous
+      </button>
+
+      <span class="page-info">
+        Page {{ currentPage + 1 }} of {{ totalPages }}
+        ({{ totalElements }} total activities)
+      </span>
+
+      <button
+        (click)="onPageChange(currentPage + 1)"
+        [disabled]="currentPage >= totalPages - 1"
+        class="page-btn"
+      >
+        Next ›
+      </button>
+    </div>
+
+  </div>
+</div>

@@ -76,7 +76,7 @@ export class LoginComponent {
     const next = this.auth.isAdmin()
       ? '/admin'
       : this.auth.isAgent()
-      ? '/wallet/transactions'
+      ? '/agent/dashboard'
       : this.auth.isClient()
       ? '/credit/list'
       : '/user';

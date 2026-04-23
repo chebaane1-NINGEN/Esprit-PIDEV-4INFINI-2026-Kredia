@@ -7,15 +7,11 @@ import { ReclamationMessage } from '../models/reclamation-message.model';
 export class ReclamationMessageVm {
   private readonly api = inject(ReclamationMessageApi);
 
-  findAll(): Observable<ReclamationMessage[]> {
-    return this.api.findAll();
+  findByReclamation(reclamationId: number, includeInternal = false): Observable<ReclamationMessage[]> {
+    return this.api.findByReclamation(reclamationId, includeInternal);
   }
 
-  findByReclamation(reclamationId: number): Observable<ReclamationMessage[]> {
-    return this.api.findByReclamation(reclamationId);
-  }
-
-  send(message: ReclamationMessage): Observable<ReclamationMessage> {
-    return this.api.send(message);
+  send(reclamationId: number, message: string, internal = false): Observable<ReclamationMessage> {
+    return this.api.send(reclamationId, message, internal);
   }
 }

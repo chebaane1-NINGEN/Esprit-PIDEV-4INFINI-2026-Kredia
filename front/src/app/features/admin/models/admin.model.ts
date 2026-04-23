@@ -9,6 +9,7 @@ export interface UserResponse {
   phone?: string;
   role: UserRole;
   status: UserStatus;
+  assignedAgentId?: number;
   createdAt?: string;
 }
 

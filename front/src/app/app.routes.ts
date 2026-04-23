@@ -48,6 +48,12 @@ export const routes: Routes = [
     canActivateChild: [authGuard],
     loadChildren: () => import('./features/admin/admin.routes').then(m => m.routes)
   },
+  {
+    path: 'agent',
+    canActivate: [authGuard],
+    canActivateChild: [authGuard],
+    loadChildren: () => import('./features/agent/agent.routes').then(m => m.routes)
+  },
 
   // ── Credit ─────────────────────────────────────────────
   {

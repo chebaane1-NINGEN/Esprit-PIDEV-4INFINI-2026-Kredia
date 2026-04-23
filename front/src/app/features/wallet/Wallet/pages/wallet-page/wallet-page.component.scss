@@ -1,1 +1,221 @@
 /* Wallet page styles */
+
+.wallet-page {
+  padding: 2rem;
+
+  header {
+    margin-bottom: 2rem;
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+    }
+
+    p {
+      color: var(--text-secondary);
+      font-size: 1rem;
+    }
+  }
+
+  .alert {
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+
+    &.error {
+      background-color: #fee;
+      color: #c33;
+      border: 1px solid #fcc;
+    }
+  }
+
+  /* Admin Wallet Management */
+  .table-responsive {
+    overflow-x: auto;
+    background: var(--bg-card);
+    border-radius: 8px;
+    padding: 1rem;
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+
+      th, td {
+        padding: 0.75rem;
+        text-align: left;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      th {
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+
+      td {
+        color: var(--text-secondary);
+      }
+
+      button {
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.875rem;
+
+        &:first-child {
+          background-color: #f44336;
+          color: white;
+          margin-right: 0.5rem;
+
+          &:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+          }
+        }
+
+        &:last-child {
+          background-color: #4caf50;
+          color: white;
+
+          &:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+          }
+        }
+      }
+    }
+  }
+
+  /* Agent Dashboard */
+  .agent-dashboard {
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+
+      .stat-card {
+        background: var(--bg-card);
+        padding: 1.5rem;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+
+        h3 {
+          font-size: 1rem;
+          font-weight: 500;
+          color: var(--text-secondary);
+          margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+          font-size: 2rem;
+          font-weight: 700;
+          color: var(--text-primary);
+          margin-bottom: 0.5rem;
+        }
+
+        .stat-desc {
+          font-size: 0.875rem;
+          color: var(--text-muted);
+        }
+      }
+    }
+
+    .recent-activity {
+      background: var(--bg-card);
+      padding: 1.5rem;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+
+      h3 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+      }
+
+      .empty-state {
+        color: var(--text-muted);
+        font-style: italic;
+      }
+    }
+  }
+
+  /* Client Wallet */
+  .client-wallet {
+    .wallet-balance {
+      background: var(--bg-card);
+      padding: 2rem;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      margin-bottom: 2rem;
+      text-align: center;
+
+      h3 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+      }
+
+      .balance-amount {
+        font-size: 3rem;
+        font-weight: 700;
+        color: var(--primary-color);
+      }
+    }
+
+    .wallet-actions {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+
+      .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        &.primary {
+          background-color: var(--primary-color);
+          color: white;
+
+          &:hover {
+            background-color: var(--primary-hover);
+          }
+        }
+
+        &.secondary {
+          background-color: var(--bg-secondary);
+          color: var(--text-primary);
+          border: 1px solid var(--border-color);
+
+          &:hover {
+            background-color: var(--bg-hover);
+          }
+        }
+      }
+    }
+  }
+
+  /* Status classes */
+  .status--active {
+    color: #4caf50;
+    font-weight: 500;
+  }
+
+  .status--frozen {
+    color: #f44336;
+    font-weight: 500;
+  }
+
+  .status--inactive {
+    color: #ff9800;
+    font-weight: 500;
+  }
+}

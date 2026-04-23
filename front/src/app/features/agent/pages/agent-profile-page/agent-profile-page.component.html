@@ -1,0 +1,181 @@
+<div class="profile-container">
+  <div class="profile-header">
+    <h1>My Profile</h1>
+    <p>Manage your personal information and preferences</p>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Loading profile...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="error-state">
+    <div class="error-icon">⚠️</div>
+    <h3>{{ error }}</h3>
+    <button (click)="loadProfile()" class="retry-btn">Retry</button>
+  </div>
+
+  <!-- Profile Content -->
+  <div *ngIf="!loading && !error && profile" class="profile-content">
+
+    <!-- Profile Picture Section -->
+    <div class="profile-picture-section">
+      <div class="profile-picture">
+        <img
+          [src]="profile.profilePicture || '/assets/default-avatar.png'"
+          [alt]="profile.firstName + ' ' + profile.lastName"
+          class="avatar"
+        >
+        <div *ngIf="isEditing" class="picture-upload">
+          <input
+            type="file"
+            id="profilePicture"
+            accept="image/*"
+            (change)="onFileSelected($event)"
+            style="display: none;"
+          >
+          <label for="profilePicture" class="upload-btn">
+            📷 Change Photo
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Profile Information -->
+    <div class="profile-info">
+      <div class="info-section">
+        <h2>Personal Information</h2>
+
+        <div class="info-grid">
+          <div class="info-field">
+            <label>First Name</label>
+            <input
+              *ngIf="isEditing; else firstNameDisplay"
+              type="text"
+              [(ngModel)]="profile.firstName"
+              class="form-input"
+            >
+            <ng-template #firstNameDisplay>
+              <span class="field-value">{{ profile.firstName }}</span>
+            </ng-template>
+          </div>
+
+          <div class="info-field">
+            <label>Last Name</label>
+            <input
+              *ngIf="isEditing; else lastNameDisplay"
+              type="text"
+              [(ngModel)]="profile.lastName"
+              class="form-input"
+            >
+            <ng-template #lastNameDisplay>
+              <span class="field-value">{{ profile.lastName }}</span>
+            </ng-template>
+          </div>
+
+          <div class="info-field">
+            <label>Email</label>
+            <input
+              *ngIf="isEditing; else emailDisplay"
+              type="email"
+              [(ngModel)]="profile.email"
+              class="form-input"
+            >
+            <ng-template #emailDisplay>
+              <span class="field-value">{{ profile.email }}</span>
+            </ng-template>
+          </div>
+
+          <div class="info-field">
+            <label>Phone Number</label>
+            <input
+              *ngIf="isEditing; else phoneDisplay"
+              type="tel"
+              [(ngModel)]="profile.phoneNumber"
+              class="form-input"
+            >
+            <ng-template #phoneDisplay>
+              <span class="field-value">{{ profile.phoneNumber }}</span>
+            </ng-template>
+          </div>
+
+          <div class="info-field">
+            <label>Role</label>
+            <span class="field-value">{{ profile.role }}</span>
+          </div>
+
+          <div class="info-field">
+            <label>Department</label>
+            <input
+              *ngIf="isEditing; else departmentDisplay"
+              type="text"
+              [(ngModel)]="profile.department"
+              class="form-input"
+            >
+            <ng-template #departmentDisplay>
+              <span class="field-value">{{ profile.department || 'Not specified' }}</span>
+            </ng-template>
+          </div>
+        </div>
+      </div>
+
+      <!-- Account Information -->
+      <div class="info-section">
+        <h2>Account Information</h2>
+
+        <div class="info-grid">
+          <div class="info-field">
+            <label>User ID</label>
+            <span class="field-value">{{ profile.userId }}</span>
+          </div>
+
+          <div class="info-field">
+            <label>Member Since</label>
+            <span class="field-value">{{ profile.createdAt | date:'mediumDate' }}</span>
+          </div>
+
+          <div class="info-field">
+            <label>Last Login</label>
+            <span class="field-value">{{ profile.lastLogin ? (profile.lastLogin | date:'medium') : 'Never' }}</span>
+          </div>
+
+          <div class="info-field">
+            <label>Manager</label>
+            <span class="field-value">{{ profile.manager || 'Not assigned' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="action-buttons">
+        <button
+          *ngIf="!isEditing"
+          (click)="startEditing()"
+          class="edit-btn"
+        >
+          ✏️ Edit Profile
+        </button>
+
+        <div *ngIf="isEditing" class="edit-actions">
+          <button
+            (click)="cancelEditing()"
+            class="cancel-btn"
+            [disabled]="saving"
+          >
+            Cancel
+          </button>
+          <button
+            (click)="saveProfile()"
+            class="save-btn"
+            [disabled]="saving"
+          >
+            <span *ngIf="saving" class="spinner-small"></span>
+            {{ saving ? 'Saving...' : 'Save Changes' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

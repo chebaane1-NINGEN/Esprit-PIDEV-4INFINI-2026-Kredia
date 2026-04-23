@@ -8,8 +8,8 @@
         <p class="hero-subtitle">Power your financial decisions with AI-driven credit scoring, portfolio insights, and enterprise-grade security in a seamless experience.</p>
         
         <div class="hero-ctas">
-          <a routerLink="/register" class="cta-btn cta-primary">Start Free Trial</a>
-          <button type="button" class="cta-btn cta-secondary" (click)="scrollToSection($event, 'features')">See Demo</button>
+          <a routerLink="/register" class="cta-btn cta-primary">Create Account</a>
+          <button type="button" class="cta-btn cta-secondary" (click)="scrollToSection($event, 'features')">Start Now</button>
         </div>
 
         <div class="hero-stats">
@@ -114,6 +114,42 @@
     </div>
   </section>
 
+  <section id="why-kredia" class="section why-kredia-section">
+    <div class="section-inner">
+      <div class="section-heading">
+        <p class="section-label">Why Kredia</p>
+        <h2>The complete fintech solution for modern finance teams.</h2>
+        <p class="section-copy">From AI-powered credit decisions to real-time portfolio monitoring, Kredia delivers the tools and insights needed to excel in today's competitive financial landscape.</p>
+      </div>
+
+      <div class="why-grid">
+        <article class="why-card">
+          <div class="why-icon">🎯</div>
+          <h3>Precision & Accuracy</h3>
+          <p>Our AI models analyze thousands of data points to deliver credit scores with 99% accuracy, reducing default rates by up to 40%.</p>
+        </article>
+
+        <article class="why-card">
+          <div class="why-icon">⚡</div>
+          <h3>Lightning Fast</h3>
+          <p>Process loan applications in minutes, not days. Our automated workflows ensure instant approvals and real-time funding.</p>
+        </article>
+
+        <article class="why-card">
+          <div class="why-icon">🔒</div>
+          <h3>Bank-Grade Security</h3>
+          <p>Enterprise-level encryption, OAuth2 authentication, and comprehensive audit trails keep your data safe and compliant.</p>
+        </article>
+
+        <article class="why-card">
+          <div class="why-icon">📈</div>
+          <h3>Data-Driven Insights</h3>
+          <p>Turn raw financial data into actionable intelligence with advanced analytics and predictive modeling capabilities.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
   <section id="kpi" class="section kpi-section">
     <div class="section-inner">
       <div class="section-heading">
@@ -128,15 +164,15 @@
         </article>
         <article class="kpi-card">
           <strong class="kpi-value">$2.5B+</strong>
-          <span class="kpi-label">Loans processed</span>
+          <span class="kpi-label">Amount financed</span>
+        </article>
+        <article class="kpi-card">
+          <strong class="kpi-value">98.5%</strong>
+          <span class="kpi-label">Success rate</span>
         </article>
         <article class="kpi-card">
           <strong class="kpi-value">847</strong>
           <span class="kpi-label">Average risk score</span>
-        </article>
-        <article class="kpi-card">
-          <strong class="kpi-value">98.5%</strong>
-          <span class="kpi-label">Uptime SLA</span>
         </article>
       </div>
     </div>
@@ -183,6 +219,19 @@
         <div class="message message-assistant">Hi there! I can help you optimize your credit and portfolio in minutes.</div>
         <div class="message message-user">What is my current risk exposure?</div>
         <div class="message message-assistant">Your mix is 35% equities, 45% fixed income, 20% cash. I recommend reducing exposure to high-volatility assets.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section cta-section">
+    <div class="section-inner cta-inner">
+      <div class="cta-content">
+        <h2>Ready to transform your finances?</h2>
+        <p>Join thousands of users who trust Kredia for their financial decisions.</p>
+        <div class="cta-buttons">
+          <a routerLink="/register" class="cta-btn cta-primary">Get Started</a>
+          <a routerLink="/login" class="cta-btn cta-secondary">Sign In</a>
+        </div>
       </div>
     </div>
   </section>

@@ -1,0 +1,91 @@
+<div class="performance-container">
+  <div class="performance-header">
+    <h1>My Performance</h1>
+    <p>Track your performance metrics and statistics</p>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Loading performance data...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="error-state">
+    <div class="error-icon">⚠️</div>
+    <h3>{{ error }}</h3>
+    <button (click)="loadPerformance()" class="retry-btn">Retry</button>
+  </div>
+
+  <!-- Performance Content -->
+  <div *ngIf="!loading && !error && performance" class="performance-content">
+
+    <!-- Performance Score -->
+    <div class="score-section">
+      <div class="score-card">
+        <div class="score-circle" [style.border-color]="getPerformanceColor()">
+          <span class="score-value">{{ performance.performanceScore }}%</span>
+        </div>
+        <div class="score-info">
+          <h3>{{ getPerformanceBadge() }}</h3>
+          <p>Performance Score</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-icon">�</div>
+        <div class="kpi-content">
+          <h3>{{ performance.totalActions }}</h3>
+          <p>Total Actions</p>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-icon">✅</div>
+        <div class="kpi-content">
+          <h3>{{ performance.approvalActionsCount }}</h3>
+          <p>Approvals</p>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-icon">❌</div>
+        <div class="kpi-content">
+          <h3>{{ performance.rejectionActionsCount }}</h3>
+          <p>Rejections</p>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-icon">📊</div>
+        <div class="kpi-content">
+          <h3>{{ getApprovalRate() }}%</h3>
+          <p>Approval Rate</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-icon">👥</div>
+        <div class="kpi-content">
+          <h3>{{ performance.numberOfClientsHandled }}</h3>
+          <p>Clients Handled</p>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-icon">⏱️</div>
+        <div class="kpi-content">
+          <h3>{{ performance.averageProcessingTimeSeconds | number:'1.0-0' }}s</h3>
+          <p>Avg Processing Time</p>
+        </div>
+      </div>
+    </div>
+
+
+  </div>
+</div>

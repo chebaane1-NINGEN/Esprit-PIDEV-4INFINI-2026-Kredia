@@ -1,0 +1,110 @@
+<div class="clients-container">
+  <div class="clients-header">
+    <h1>My Clients</h1>
+    <p>Manage and monitor your assigned clients</p>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-section">
+    <div class="filter-group">
+      <input
+        type="text"
+        [(ngModel)]="searchEmail"
+        (keyup.enter)="onSearch()"
+        placeholder="Search by email..."
+        class="search-input"
+      >
+      <button (click)="onSearch()" class="search-btn">🔍</button>
+    </div>
+
+    <div class="filter-group">
+      <select [(ngModel)]="selectedStatus" (change)="onStatusFilter()" class="status-select">
+        <option value="">All Status</option>
+        <option value="ACTIVE">Active</option>
+        <option value="INACTIVE">Inactive</option>
+        <option value="SUSPENDED">Suspended</option>
+        <option value="BLOCKED">Blocked</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Loading clients...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="error-state">
+    <div class="error-icon">⚠️</div>
+    <h3>{{ error }}</h3>
+    <button (click)="loadClients()" class="retry-btn">Retry</button>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && !error && clients.length === 0" class="empty-state">
+    <div class="empty-icon">👥</div>
+    <h3>No clients found</h3>
+    <p>{{ searchEmail || selectedStatus ? 'Try adjusting your filters' : 'No clients assigned yet' }}</p>
+  </div>
+
+  <!-- Clients Table -->
+  <div *ngIf="!loading && !error && clients.length > 0" class="clients-content">
+    <div class="table-container">
+      <table class="clients-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let client of clients" class="client-row">
+            <td>{{ client.firstName }} {{ client.lastName }}</td>
+            <td>{{ client.email }}</td>
+            <td>{{ client.phoneNumber }}</td>
+            <td>
+              <span class="status-badge" [class]="getStatusBadgeClass(client.status)">
+                {{ getStatusIcon(client.status) }} {{ client.status }}
+              </span>
+            </td>
+            <td>{{ client.createdAt | date:'shortDate' }}</td>
+            <td>
+              <button (click)="viewClientDetails(client)" class="action-btn view-btn">
+                👁️ View
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div *ngIf="totalPages > 1" class="pagination">
+      <button
+        (click)="onPageChange(currentPage - 1)"
+        [disabled]="currentPage === 0"
+        class="page-btn"
+      >
+        ‹ Previous
+      </button>
+
+      <span class="page-info">
+        Page {{ currentPage + 1 }} of {{ totalPages }}
+        ({{ totalElements }} total clients)
+      </span>
+
+      <button
+        (click)="onPageChange(currentPage + 1)"
+        [disabled]="currentPage >= totalPages - 1"
+        class="page-btn"
+      >
+        Next ›
+      </button>
+    </div>
+  </div>
+</div>

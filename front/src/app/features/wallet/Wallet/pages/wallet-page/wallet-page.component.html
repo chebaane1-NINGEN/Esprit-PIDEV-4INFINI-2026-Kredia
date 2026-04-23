@@ -1,41 +1,104 @@
 <section class="wallet-page">
-  <header>
-    <h1>Wallets</h1>
-    <p>Manage all user wallets and their statuses.</p>
-  </header>
+  <!-- Admin Wallet Management -->
+  <ng-container *ngIf="authService.isAdmin()">
+    <header>
+      <h1>Wallets</h1>
+      <p>Manage all user wallets and their statuses.</p>
+    </header>
 
-  <div class="alert error" *ngIf="error">{{ error }}</div>
+    <div class="alert error" *ngIf="error">{{ error }}</div>
 
-  <div class="table-responsive" *ngIf="!loading || wallets.length > 0">
-    <table>
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>User ID</th>
-          <th>Balance</th>
-          <th>Currency</th>
-          <th>Type</th>
-          <th>Status</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let w of wallets">
-          <td>{{ w.walletId }}</td>
-          <td>{{ w.userId }}</td>
-          <td>{{ w.balance | currency:w.currency:'symbol':'1.2-2' }}</td>
-          <td>{{ w.currency }}</td>
-          <td>{{ w.walletType }}</td>
-          <td><span [class]="getStatusClass(w.status)">{{ w.status }}</span></td>
-          <td>
-            <button (click)="freeze(w.walletId!)"   [disabled]="w.status === 'FROZEN'">Freeze</button>
-            <button (click)="unfreeze(w.walletId!)" [disabled]="w.status !== 'FROZEN'">Unfreeze</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <p *ngIf="wallets.length === 0 && !loading">No wallets found.</p>
-  </div>
+    <div class="table-responsive" *ngIf="!loading || wallets.length > 0">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>User ID</th>
+            <th>Balance</th>
+            <th>Currency</th>
+            <th>Type</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let w of wallets">
+            <td>{{ w.walletId }}</td>
+            <td>{{ w.userId }}</td>
+            <td>{{ w.balance | currency:w.currency:'symbol':'1.2-2' }}</td>
+            <td>{{ w.currency }}</td>
+            <td>{{ w.walletType }}</td>
+            <td><span [class]="getStatusClass(w.status)">{{ w.status }}</span></td>
+            <td>
+              <button (click)="freeze(w.walletId!)"   [disabled]="w.status === 'FROZEN'">Freeze</button>
+              <button (click)="unfreeze(w.walletId!)" [disabled]="w.status !== 'FROZEN'">Unfreeze</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <p *ngIf="wallets.length === 0 && !loading">No wallets found.</p>
+    </div>
 
-  <p *ngIf="loading && wallets.length === 0">Loading...</p>
+    <p *ngIf="loading && wallets.length === 0">Loading...</p>
+  </ng-container>
+
+  <!-- Agent Dashboard -->
+  <ng-container *ngIf="authService.isAgent()">
+    <header>
+      <h1>My Overview</h1>
+      <p>Agent dashboard and performance metrics.</p>
+    </header>
+
+    <div class="agent-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <h3>Clients Handled</h3>
+          <div class="stat-value">0</div>
+          <p class="stat-desc">Total clients processed this month</p>
+        </div>
+        <div class="stat-card">
+          <h3>Approval Rate</h3>
+          <div class="stat-value">0%</div>
+          <p class="stat-desc">Applications approved</p>
+        </div>
+        <div class="stat-card">
+          <h3>Performance Score</h3>
+          <div class="stat-value">0.0</div>
+          <p class="stat-desc">Current performance rating</p>
+        </div>
+        <div class="stat-card">
+          <h3>Average Processing Time</h3>
+          <div class="stat-value">0s</div>
+          <p class="stat-desc">Time per application</p>
+        </div>
+      </div>
+
+      <div class="recent-activity">
+        <h3>Recent Activity</h3>
+        <p class="empty-state">No recent activity to display.</p>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- Client Wallet -->
+  <ng-container *ngIf="authService.isClient()">
+    <header>
+      <h1>My Wallet</h1>
+      <p>Manage your wallet balance and transactions.</p>
+    </header>
+
+    <div class="client-wallet">
+      <div class="wallet-balance">
+        <h3>Current Balance</h3>
+        <div class="balance-amount" *ngIf="userWallet">{{ userWallet.balance | currency:userWallet.currency:'symbol':'1.2-2' }}</div>
+        <div class="balance-amount" *ngIf="!userWallet">Loading...</div>
+      </div>
+
+      <div class="wallet-actions">
+        <button class="btn primary">Add Funds</button>
+        <button class="btn secondary">Transfer</button>
+        <button class="btn secondary">View Transactions</button>
+      </div>
+    </div>
+  </ng-container>
 </section>

@@ -2,14 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
 import { API_BASE_URL } from '../../../../core/http/api.config';
-
-export interface ReclamationMessage {
-  messageId?: number;
-  authorUserId?: number;
-  message: string;
-  createdAt?: string;
-  visibility?: 'PUBLIC' | 'INTERNAL';
-}
+import { ReclamationMessage } from '../models/reclamation-message.model';
 
 @Injectable({ providedIn: 'root' })
 export class ReclamationMessageApi {

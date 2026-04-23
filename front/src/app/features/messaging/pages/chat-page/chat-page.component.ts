@@ -37,7 +37,21 @@ export class ChatPageComponent implements OnInit {
     this.adminApi.findUsers(undefined, undefined, undefined, 0, 100).subscribe({
       next: (data: PageResponse<UserResponse>) => {
         const myId = this.auth.getCurrentUserId();
-        this.users = (data.content ?? []).filter(u => u.userId !== myId);
+        let filteredUsers = (data.content ?? []).filter(u => u.userId !== myId);
+
+        // Role-based filtering
+        if (this.auth.isAdmin()) {
+          // Admins can message other admins and agents
+          filteredUsers = filteredUsers.filter(u => u.role === 'ADMIN' || u.role === 'AGENT');
+        } else if (this.auth.isAgent()) {
+          // Agents can message admins and other agents
+          filteredUsers = filteredUsers.filter(u => u.role === 'ADMIN' || u.role === 'AGENT');
+        } else if (this.auth.isClient()) {
+          // Clients can message agents (for support)
+          filteredUsers = filteredUsers.filter(u => u.role === 'AGENT');
+        }
+
+        this.users = filteredUsers;
         this.loading = false;
         this.cdr.markForCheck();
       },

@@ -10,6 +10,7 @@
 
   <!-- Section label -->
   <p class="section-label" *ngIf="authService.isAdmin()">ADMINISTRATION</p>
+  <p class="section-label" *ngIf="authService.isAgent()">AGENT DASHBOARD</p>
 
   <!-- Navigation -->
   <nav class="sidebar-nav">
@@ -21,7 +22,11 @@
           <span class="nav-icon">⊞</span>
           <span>Dashboard</span>
         </a>
-        <a routerLink="/wallet" *ngIf="authService.isAgent() || authService.isClient()" routerLinkActive="active" class="nav-item">
+        <a routerLink="/agent/dashboard" *ngIf="authService.isAgent()" routerLinkActive="active" class="nav-item">
+          <span class="nav-icon">⊞</span>
+          <span>Dashboard</span>
+        </a>
+        <a routerLink="/wallet" *ngIf="authService.isClient()" routerLinkActive="active" class="nav-item">
           <span class="nav-icon">⊞</span>
           <span>My Overview</span>
         </a>
@@ -39,6 +44,21 @@
           <li><a routerLink="/admin/analytics" routerLinkActive="active">Analytics & Reporting</a></li>
           <li><a routerLink="/admin/agents" routerLinkActive="active">Agent Performance</a></li>
           <li><a routerLink="/admin/audit" routerLinkActive="active">System Audit Trail</a></li>
+        </ul>
+      </li>
+
+      <!-- AGENT MANAGEMENT (AGENT ONLY) -->
+      <li *ngIf="authService.isAgent()" [class.active-parent]="expandedMenus['agent']">
+        <a (click)="toggleMenu('agent', $event)" class="nav-item parent-link">
+          <span class="nav-icon">👥</span>
+          <span>Client Management</span>
+          <span class="chevron" [class.rotated]="expandedMenus['agent']">▼</span>
+        </a>
+        <ul class="sub" [class.expanded]="expandedMenus['agent']">
+          <li><a routerLink="/agent/clients" routerLinkActive="active">My Clients</a></li>
+          <li><a routerLink="/agent/performance" routerLinkActive="active">Performance</a></li>
+          <li><a routerLink="/agent/audit" routerLinkActive="active">Activity Log</a></li>
+          <li><a routerLink="/agent/profile" routerLinkActive="active">My Profile</a></li>
         </ul>
       </li>
 
@@ -79,6 +99,18 @@
         <a routerLink="/messages" routerLinkActive="active" class="nav-item">
           <span class="nav-icon">💬</span>
           <span>Messages</span>
+        </a>
+      </li>
+
+      <!-- PROFILE -->
+      <li>
+        <a routerLink="/agent/profile" *ngIf="authService.isAgent()" routerLinkActive="active" class="nav-item">
+          <span class="nav-icon">👤</span>
+          <span>Profile</span>
+        </a>
+        <a routerLink="/user/profile" *ngIf="authService.isClient()" routerLinkActive="active" class="nav-item">
+          <span class="nav-icon">👤</span>
+          <span>Profile</span>
         </a>
       </li>
 

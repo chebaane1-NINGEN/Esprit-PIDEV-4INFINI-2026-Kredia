@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { finalize } from 'rxjs';
-import { ReclamationMessageApi, ReclamationMessage } from '../../data-access/reclamation-message.api';
-import { ReclamationApi } from '../../Reclamation/data-access/reclamation.api';
+import { ReclamationMessageApi } from '../../data-access/reclamation-message.api';
+import { ReclamationMessage } from '../../models/reclamation-message.model';
 import { AuthService } from '../../../../../core/services/auth.service';
 
 @Component({
@@ -16,7 +16,6 @@ import { AuthService } from '../../../../../core/services/auth.service';
 })
 export class ReclamationMessagePageComponent implements OnInit {
   private readonly api = inject(ReclamationMessageApi);
-  private readonly reclamationApi = inject(ReclamationApi);
   private readonly route = inject(ActivatedRoute);
   private readonly cdr = inject(ChangeDetectorRef);
   readonly auth = inject(AuthService);

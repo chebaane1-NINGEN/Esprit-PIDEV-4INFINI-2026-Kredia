@@ -1,21 +1,6 @@
 <main class="home-page">
   <!-- HERO SECTION -->
   <section class="hero-section">
-    <header class="hero-navbar">
-      <div class="navbar-inner">
-        <a routerLink="/" class="navbar-brand">
-          <span class="brand-mark">●</span> KREDIA
-        </a>
-        <nav class="navbar-menu" aria-label="Main navigation">
-          <a href="javascript:void(0)" (click)="scrollToSection($event, 'features')">Features</a>
-          <a href="javascript:void(0)" (click)="scrollToSection($event, 'testimonials')">Reviews</a>
-          <a href="javascript:void(0)" (click)="scrollToSection($event, 'contact')">Contact</a>
-          <a href="javascript:void(0)" (click)="scrollToSection($event, 'pricing')">Pricing</a>
-        </nav>
-        <a routerLink="/login" class="navbar-login">Sign in</a>
-      </div>
-    </header>
-
     <div class="hero-container">
       <div class="hero-content">
         <span class="hero-badge">✨ Welcome to modern fintech</span>
@@ -246,40 +231,3 @@
     </div>
   </section>
 </main>
-
-<footer class="landing-footer">
-  <div class="footer-inner">
-    <div class="footer-brand">
-      <strong>KREDIA</strong>
-      <p>Modern financial infrastructure for credit and investing teams.</p>
-    </div>
-    <div class="footer-links-grid">
-      <div>
-        <h4>Product</h4>
-        <a routerLink="/features">Features</a>
-        <a routerLink="/security">Security</a>
-        <a routerLink="/pricing">Pricing</a>
-      </div>
-      <div>
-        <h4>Company</h4>
-        <a routerLink="/about">About</a>
-        <a routerLink="/careers">Careers</a>
-        <a routerLink="/blog">Blog</a>
-      </div>
-      <div>
-        <h4>Support</h4>
-        <a routerLink="/help">Help center</a>
-        <a routerLink="/contact">Contact</a>
-        <a routerLink="/status">Status</a>
-      </div>
-    </div>
-  </div>
-  <div class="footer-bottom">
-    <p>© 2026 Kredia Technologies. All rights reserved.</p>
-    <div class="footer-legal">
-      <a routerLink="/privacy">Privacy</a>
-      <a routerLink="/terms">Terms</a>
-      <a routerLink="/cookies">Cookies</a>
-    </div>
-  </div>
-</footer>

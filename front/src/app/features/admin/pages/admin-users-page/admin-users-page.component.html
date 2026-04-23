@@ -49,6 +49,7 @@
           <th>Email</th>
           <th>Rôle</th>
           <th>Statut</th>
+          <th>Agent</th>
           <th>Créé le</th>
           <th>Actions</th>
         </tr>
@@ -60,6 +61,13 @@
           <td>{{ user.email }}</td>
           <td><span [class]="getRoleClass(user.role)">{{ user.role }}</span></td>
           <td><span [class]="getStatusClass(user.status)">{{ user.status }}</span></td>
+          <td>
+            <select *ngIf="user.role === 'CLIENT'" [value]="user.assignedAgentId || ''" (change)="assignAgent(user, $any($event.target).value)">
+              <option value="">Non assigné</option>
+              <option *ngFor="let agent of agents" [value]="agent.userId">{{ agent.firstName }} {{ agent.lastName }}</option>
+            </select>
+            <span *ngIf="user.role !== 'CLIENT'">—</span>
+          </td>
           <td>{{ user.createdAt ? (user.createdAt | date:'short') : '—' }}</td>
           <td class="actions-cell">
             <button class="btn outline" type="button" (click)="updateStatus(user)">{{ user.status === 'ACTIVE' ? 'Bloquer' : 'Débloquer' }}</button>

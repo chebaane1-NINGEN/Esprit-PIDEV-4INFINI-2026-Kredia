@@ -9,7 +9,7 @@
   </div>
 
   <!-- Section label -->
-  <p class="section-label">ADMINISTRATION</p>
+  <p class="section-label" *ngIf="authService.isAdmin()">ADMINISTRATION</p>
 
   <!-- Navigation -->
   <nav class="sidebar-nav">
@@ -17,14 +17,18 @@
 
       <!-- Dashboard -->
       <li>
-        <a routerLink="/home" routerLinkActive="active" class="nav-item">
+        <a routerLink="/admin/analytics" *ngIf="authService.isAdmin()" routerLinkActive="active" class="nav-item">
           <span class="nav-icon">⊞</span>
           <span>Dashboard</span>
         </a>
+        <a routerLink="/wallet" *ngIf="authService.isAgent() || authService.isClient()" routerLinkActive="active" class="nav-item">
+          <span class="nav-icon">⊞</span>
+          <span>My Overview</span>
+        </a>
       </li>
 
-      <!-- USER MANAGEMENT -->
-      <li [class.active-parent]="expandedMenus['admin']">
+      <!-- USER MANAGEMENT (ADMIN ONLY) -->
+      <li *ngIf="authService.isAdmin()" [class.active-parent]="expandedMenus['admin']">
         <a (click)="toggleMenu('admin', $event)" class="nav-item parent-link">
           <span class="nav-icon">👥</span>
           <span>User Management</span>
@@ -100,6 +104,7 @@
           <li><a routerLink="/investissement/portfolio" routerLinkActive="active">Portfolio</a></li>
         </ul>
       </li>
+
 
     </ul>
   </nav>

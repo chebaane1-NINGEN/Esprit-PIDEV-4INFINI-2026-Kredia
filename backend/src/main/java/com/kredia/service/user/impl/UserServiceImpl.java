@@ -210,12 +210,35 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Page<UserActivityResponseDTO> adminActivityByRole(Long actorId, Optional<UserRole> role, Pageable pageable) {
+        if (role.isPresent()) {
+            return userActivityRepository.findAllByUserRoleOrderByTimestampDesc(role.get(), pageable).map(this::toActivityDto);
+        }
         return userActivityRepository.findAllByOrderByTimestampDesc(pageable).map(this::toActivityDto);
     }
 
     @Override
     public AgentPerformanceDTO agentDashboard(Long agentId) {
+        User agent = findUser(agentId);
         AgentPerformanceDTO dto = new AgentPerformanceDTO();
+        
+        long approvals = userActivityRepository.countByUserIdAndActionType(agentId, UserActivityActionType.APPROVAL);
+        long rejections = userActivityRepository.countByUserIdAndActionType(agentId, UserActivityActionType.REJECTION);
+        long totalActions = userActivityRepository.countByUserId(agentId);
+        long clientsHandled = userActivityRepository.countByUserIdAndActionType(agentId, UserActivityActionType.CLIENT_HANDLED);
+        
+        dto.setApprovalActionsCount((int) approvals);
+        dto.setRejectionActionsCount((int) rejections);
+        dto.setTotalActions((int) totalActions);
+        dto.setNumberOfClientsHandled((int) clientsHandled);
+        
+        // Calculate a basic performance score (0-100)
+        double score = 0;
+        if (totalActions > 0) {
+            score = ((double) (approvals + rejections) / totalActions) * 100;
+        }
+        dto.setPerformanceScore(score);
+        dto.setAverageProcessingTimeSeconds(300.0); // Mock average for now
+        
         return dto;
     }
 
@@ -241,15 +264,34 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ClientRiskScoreDTO clientRiskScore(Long clientId) {
+        User client = findUser(clientId);
         ClientRiskScoreDTO dto = new ClientRiskScoreDTO();
-        dto.setRiskScore(0);
+        
+        int baseScore = 30; // Starting with a "safe" score
+        
+        // Penalize for failed logins
+        long failedLogins = userActivityRepository.countByUserIdAndActionType(clientId, UserActivityActionType.FAILED_LOGIN);
+        baseScore += (int) (failedLogins * 5);
+        
+        // Penalize for being blocked in the past
+        long blockedEvents = userActivityRepository.countByUserIdAndActionType(clientId, UserActivityActionType.ACCOUNT_BLOCKED);
+        baseScore += (int) (blockedEvents * 20);
+        
+        // Cap the score
+        dto.setRiskScore(Math.min(100, baseScore));
         return dto;
     }
 
     @Override
     public ClientEligibilityDTO clientEligibility(Long clientId) {
+        User client = findUser(clientId);
         ClientEligibilityDTO dto = new ClientEligibilityDTO();
-        dto.setEligible(true);
+        
+        ClientRiskScoreDTO risk = clientRiskScore(clientId);
+        boolean isEligible = client.getStatus() == UserStatus.ACTIVE && risk.getRiskScore() < 70;
+        
+        dto.setEligible(isEligible);
+        dto.setReason(isEligible ? "Client meets standard criteria." : "High risk score or inactive account.");
         return dto;
     }
 

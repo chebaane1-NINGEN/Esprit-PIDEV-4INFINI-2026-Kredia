@@ -143,48 +143,13 @@ $shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
   }
 }
 
-.form-actions {
+.form-field-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 0.85rem;
+  gap: 12px;
 }
 
-.remember-me {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  cursor: pointer;
-  color: $text-secondary;
-
-  input {
-    cursor: pointer;
-    width: 16px;
-    height: 16px;
-    border: 1.5px solid $border-light;
-    border-radius: 4px;
-    accent-color: $primary;
-
-    &:focus {
-      outline: none;
-    }
-  }
-}
-
-.forgot-link {
-  color: $primary;
-  text-decoration: none;
-  font-weight: 600;
-  transition: color 0.2s ease;
-
-  &:hover {
-    color: $primary-dark;
-  }
-}
-
-// ──────────────────────────────────────────────────
-// BUTTONS
-// ──────────────────────────────────────────────────
 .btn-primary {
   padding: 11px 16px;
   background: $primary;

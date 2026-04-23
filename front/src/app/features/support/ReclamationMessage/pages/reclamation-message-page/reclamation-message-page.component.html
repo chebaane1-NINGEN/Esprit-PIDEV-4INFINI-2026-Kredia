@@ -1,4 +1,35 @@
-<div class="page-container">
-  <h1>Reclamation Message</h1>
-  <p>This is a placeholder for the Reclamation Message component.</p>
-</div>
+<section class="messaging-page">
+  <header class="page-header">
+    <h1>Messages</h1>
+    <p *ngIf="reclamationId">Conversation pour la réclamation #{{ reclamationId }}</p>
+  </header>
+
+  <div class="alert error" *ngIf="error">{{ error }}</div>
+
+  <div class="chat-container" *ngIf="reclamationId; else noSelection">
+    <div class="messages-list">
+      <div *ngFor="let msg of messages" class="message-wrapper" [class.me]="isMe(msg)">
+        <div class="message-bubble">
+          <p>{{ msg.message }}</p>
+          <span class="message-meta">
+            {{ msg.createdAt | date:'shortTime' }}
+            <span *ngIf="msg.visibility === 'INTERNAL'" class="internal-tag">INTERNAL</span>
+          </span>
+        </div>
+      </div>
+      <p *ngIf="messages.length === 0 && !loading" class="empty-chat">Aucun message. Commencez la discussion !</p>
+    </div>
+
+    <div class="chat-input">
+      <textarea [(ngModel)]="newMessage" (keyup.enter)="sendMessage()" placeholder="Écrivez votre message..."></textarea>
+      <button class="btn primary" (click)="sendMessage()" [disabled]="!newMessage.trim() || loading">Envoyer</button>
+    </div>
+  </div>
+
+  <ng-template #noSelection>
+    <div class="panel empty-state">
+      <p>Veuillez sélectionner une réclamation depuis la liste pour voir les messages.</p>
+      <button class="btn outline" routerLink="/support/reclamations">Voir les réclamations</button>
+    </div>
+  </ng-template>
+</section>

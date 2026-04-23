@@ -1,18 +1,24 @@
-<ng-container *ngIf="!isPublicPage; else publicOutlet">
+<!-- Dashboard Layout -->
+<ng-container *ngIf="!isPublicPage && !isAuthPage">
   <div class="app-layout">
-
     <app-sidebar></app-sidebar>
-
     <div class="main-area">
       <app-navbar></app-navbar>
       <main class="page-content">
         <router-outlet></router-outlet>
       </main>
     </div>
-
   </div>
 </ng-container>
 
-<ng-template #publicOutlet>
+<!-- Landing Page Layout -->
+<ng-container *ngIf="isPublicPage">
+  <app-landing-navbar></app-landing-navbar>
   <router-outlet></router-outlet>
-</ng-template>
+  <app-landing-footer></app-landing-footer>
+</ng-container>
+
+<!-- Auth Page Layout -->
+<ng-container *ngIf="isAuthPage">
+  <router-outlet></router-outlet>
+</ng-container>

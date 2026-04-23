@@ -3,12 +3,21 @@ import { CommonModule } from '@angular/common';
 import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
 import { NavbarComponent } from '../navbar/navbar.component';
 import { SidebarComponent } from '../sidebar/sidebar.component';
+import { LandingNavbarComponent } from '../landing-navbar/landing-navbar.component';
+import { LandingFooterComponent } from '../landing-footer/landing-footer.component';
 import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-shell',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, NavbarComponent, SidebarComponent],
+  imports: [
+    CommonModule, 
+    RouterOutlet, 
+    NavbarComponent, 
+    SidebarComponent, 
+    LandingNavbarComponent, 
+    LandingFooterComponent
+  ],
   templateUrl: './shell.component.html',
   styleUrl: './shell.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -18,6 +27,7 @@ export class ShellComponent implements OnInit {
   private readonly router = inject(Router);
 
   isPublicPage = false;
+  isAuthPage = false;
 
   ngOnInit(): void {
     this.updateFlags(this.router.url);
@@ -31,9 +41,19 @@ export class ShellComponent implements OnInit {
   }
 
   private updateFlags(url: string): void {
-    const path = url.split('?')[0];
-    this.isPublicPage = [
-      '/',
+    const path = url.split('?')[0].replace(/\/$/, ''); // Remove trailing slash
+    
+    const authPaths = [
+      '/login',
+      '/signup',
+      '/register',
+      '/forgot-password',
+      '/reset-password',
+      '/oauth2/redirect'
+    ];
+
+    const landingPaths = [
+      '',
       '/home',
       '/features',
       '/security',
@@ -46,13 +66,10 @@ export class ShellComponent implements OnInit {
       '/status',
       '/privacy',
       '/terms',
-      '/cookies',
-      '/login',
-      '/signup',
-      '/register',
-      '/forgot-password',
-      '/reset-password',
-      '/oauth2/redirect'
-    ].includes(path);
+      '/cookies'
+    ];
+    
+    this.isAuthPage = authPaths.includes(path);
+    this.isPublicPage = landingPaths.includes(path) || path === '';
   }
 }

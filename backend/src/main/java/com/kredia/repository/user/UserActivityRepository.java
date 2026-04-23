@@ -28,4 +28,8 @@ public interface UserActivityRepository extends JpaRepository<UserActivity, Long
 
     @Query("SELECT ua FROM UserActivity ua JOIN User u ON ua.userId = u.id WHERE u.role = :role")
     Page<UserActivity> findAllByUserRoleOrderByTimestampDesc(UserRole role, Pageable pageable);
+
+    long countByUserIdAndActionType(Long userId, com.kredia.entity.user.UserActivityActionType actionType);
+    
+    long countByUserId(Long userId);
 }

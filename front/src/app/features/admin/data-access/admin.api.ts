@@ -98,6 +98,20 @@ export class AdminApi {
     );
   }
 
+  assignClient(agentId: number, clientId: number): Observable<UserResponse> {
+    const params = new HttpParams().set('agentId', agentId.toString()).set('clientId', clientId.toString());
+    return this.http.post<ApiResponse<UserResponse>>(`${API_BASE_URL}/api/user/admin/assign`, null, { params }).pipe(
+      map(response => response.data)
+    );
+  }
+
+  unassignClient(clientId: number): Observable<UserResponse> {
+    const params = new HttpParams().set('clientId', clientId.toString());
+    return this.http.delete<ApiResponse<UserResponse>>(`${API_BASE_URL}/api/user/admin/assign`, { params }).pipe(
+      map(response => response.data)
+    );
+  }
+
   getActivities(role?: UserRole, page = 0, size = 20): Observable<PageResponse<UserActivity>> {
     let params = new HttpParams().set('page', page.toString()).set('size', size.toString());
     if (role) params = params.set('role', role);

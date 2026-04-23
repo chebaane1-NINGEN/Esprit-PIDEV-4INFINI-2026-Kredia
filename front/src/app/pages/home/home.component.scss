@@ -35,7 +35,7 @@ $shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.08);
   position: relative;
   padding: 0;
   background: linear-gradient(135deg, #f8fafc 0%, rgba(16, 185, 129, 0.03) 100%);
-  min-height: 100vh;
+  min-height: 80vh; // Reduced from 100vh
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -129,13 +129,13 @@ $shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.08);
   align-items: center;
   max-width: 1320px;
   margin: 0 auto;
-  padding: 60px clamp(20px, 4vw, 48px);
+  padding: 40px clamp(20px, 4vw, 48px); // Reduced from 60px
   width: 100%;
 
   @media (max-width: 968px) {
     grid-template-columns: 1fr;
     gap: 40px;
-    padding: 40px clamp(20px, 4vw, 48px);
+    padding: 30px clamp(20px, 4vw, 48px); // Reduced from 40px
   }
 }
 

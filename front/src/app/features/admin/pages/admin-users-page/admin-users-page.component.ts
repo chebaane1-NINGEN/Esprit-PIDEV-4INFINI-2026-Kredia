@@ -28,9 +28,18 @@ export class AdminUsersPageComponent implements OnInit {
   totalElements = 0;
   availableRoles: UserRole[] = ['ADMIN', 'AGENT', 'CLIENT'];
   availableStatus: UserStatus[] = ['ACTIVE', 'INACTIVE', 'SUSPENDED', 'BLOCKED'];
+  agents: UserResponse[] = [];
 
   ngOnInit(): void {
     this.loadUsers();
+    this.loadAgents();
+  }
+
+  loadAgents(): void {
+    this.api.getAgents(0, 100).subscribe(data => {
+      this.agents = data.content ?? [];
+      this.cdr.markForCheck();
+    });
   }
 
   loadUsers(): void {
@@ -132,6 +141,28 @@ export class AdminUsersPageComponent implements OnInit {
         next: () => this.loadUsers(),
         error: () => {
           this.error = 'Impossible de mettre à jour le rôle.';
+          this.cdr.markForCheck();
+        }
+      });
+  }
+
+  assignAgent(user: UserResponse, agentIdStr: string): void {
+    if (!user.userId) return;
+    const agentId = parseInt(agentIdStr, 10);
+    
+    this.loading = true;
+    this.error = null;
+    this.cdr.markForCheck();
+
+    const request = isNaN(agentId) 
+      ? this.api.unassignClient(user.userId)
+      : this.api.assignClient(agentId, user.userId);
+
+    request.pipe(finalize(() => { this.loading = false; this.cdr.markForCheck(); }))
+      .subscribe({
+        next: () => this.loadUsers(),
+        error: () => {
+          this.error = 'Erreur lors de l’assignation.';
           this.cdr.markForCheck();
         }
       });

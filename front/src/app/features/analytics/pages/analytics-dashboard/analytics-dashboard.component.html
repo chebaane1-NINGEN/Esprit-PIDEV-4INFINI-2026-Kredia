@@ -1,0 +1,267 @@
+<div class="analytics-container p-6 space-y-6">
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-8">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900">Tableau de Bord Analytique</h1>
+      <p class="text-gray-600 mt-1">Vue complète des KPIs et métriques système en temps réel</p>
+    </div>
+    <div class="flex gap-3">
+      <button
+        (click)="manualRefresh()"
+        [disabled]="loading"
+        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
+        🔄 Actualiser
+      </button>
+      <button
+        (click)="toggleAutoRefresh()"
+        [class.bg-green-600]="autoRefreshEnabled"
+        [class.bg-gray-400]="!autoRefreshEnabled"
+        class="px-4 py-2 text-white rounded-lg">
+        {{ autoRefreshEnabled ? '⏱ Auto ON' : '⏱ Auto OFF' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Period Selector -->
+  <div class="flex gap-2 mb-6">
+    <button
+      *ngFor="let days of [7, 30, 60, 90]"
+      (click)="changePeriod(days)"
+      [class.bg-blue-600]="selectedPeriodDays === days"
+      [class.bg-gray-200]="selectedPeriodDays !== days"
+      [class.text-white]="selectedPeriodDays === days"
+      class="px-4 py-2 rounded-lg transition">
+      {{ days }}j
+    </button>
+  </div>
+
+  <!-- Error Alert -->
+  <div *ngIf="error" class="p-4 bg-red-100 text-red-800 rounded-lg flex justify-between items-center">
+    <span>{{ error }}</span>
+    <button (click)="error = null" class="text-red-600 font-bold">✕</button>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading && !dashboard" class="flex justify-center items-center h-96">
+    <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
+  </div>
+
+  <!-- Dashboard Content -->
+  <div *ngIf="dashboard" class="space-y-6">
+    <!-- Last Refresh -->
+    <div class="text-sm text-gray-600">
+      Dernière actualisation: <span class="font-semibold">{{ getTimeAgo() }}</span>
+    </div>
+
+    <!-- === KPI CARDS === -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <!-- Growth Rate -->
+      <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-blue-600">
+        <div class="flex justify-between items-start mb-4">
+          <div>
+            <p class="text-gray-600 text-sm font-medium">{{ dashboard.growthRate.label }}</p>
+            <p class="text-3xl font-bold text-gray-900 mt-2">{{ dashboard.growthRate.value }}</p>
+          </div>
+          <span class="text-2xl">📈</span>
+        </div>
+        <div class="flex items-center gap-2 pt-3 border-t">
+          <span [class]="getKpiColor(dashboard.growthRate)" class="text-sm font-semibold">
+            {{ getTrendArrow(dashboard.growthRate.trendDirection) }}
+            {{ dashboard.growthRate.trend?.toFixed(2) }}%
+          </span>
+          <span class="text-xs text-gray-500">vs. période précédente</span>
+        </div>
+        <button
+          (click)="openDrillDown('growth-rate')"
+          class="mt-4 w-full px-3 py-2 bg-blue-50 text-blue-600 text-sm rounded hover:bg-blue-100 transition">
+          Voir détails
+        </button>
+      </div>
+
+      <!-- Activity Rate -->
+      <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-green-600">
+        <div class="flex justify-between items-start mb-4">
+          <div>
+            <p class="text-gray-600 text-sm font-medium">{{ dashboard.activityRate.label }}</p>
+            <p class="text-3xl font-bold text-gray-900 mt-2">{{ dashboard.activityRate.value }}</p>
+          </div>
+          <span class="text-2xl">⚡</span>
+        </div>
+        <div class="flex items-center gap-2 pt-3 border-t">
+          <span [class]="getKpiColor(dashboard.activityRate)" class="text-sm font-semibold">
+            {{ getTrendArrow(dashboard.activityRate.trendDirection) }}
+            {{ dashboard.activityRate.trend?.toFixed(2) }}%
+          </span>
+          <span class="text-xs text-gray-500">{{ dashboard.activityRate.unit }}</span>
+        </div>
+        <button
+          (click)="openDrillDown('activity-rate')"
+          class="mt-4 w-full px-3 py-2 bg-green-50 text-green-600 text-sm rounded hover:bg-green-100 transition">
+          Voir détails
+        </button>
+      </div>
+
+      <!-- System Load -->
+      <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-yellow-600">
+        <div class="flex justify-between items-start mb-4">
+          <div>
+            <p class="text-gray-600 text-sm font-medium">{{ dashboard.systemLoad.label }}</p>
+            <p class="text-3xl font-bold text-gray-900 mt-2">{{ dashboard.systemLoad.value }}</p>
+          </div>
+          <span class="text-2xl">🖥️</span>
+        </div>
+        <div class="flex items-center gap-2 pt-3 border-t">
+          <span [class]="getKpiColor(dashboard.systemLoad)" class="text-sm font-semibold">
+            {{ getTrendArrow(dashboard.systemLoad.trendDirection) }}
+          </span>
+          <span class="text-xs text-gray-500">Charge système</span>
+        </div>
+        <button
+          (click)="openDrillDown('system-load')"
+          class="mt-4 w-full px-3 py-2 bg-yellow-50 text-yellow-600 text-sm rounded hover:bg-yellow-100 transition">
+          Voir détails
+        </button>
+      </div>
+
+      <!-- Success Rate -->
+      <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-purple-600">
+        <div class="flex justify-between items-start mb-4">
+          <div>
+            <p class="text-gray-600 text-sm font-medium">{{ dashboard.successRate.label }}</p>
+            <p class="text-3xl font-bold text-gray-900 mt-2">{{ dashboard.successRate.value }}</p>
+          </div>
+          <span class="text-2xl">✅</span>
+        </div>
+        <div class="flex items-center gap-2 pt-3 border-t">
+          <span [class]="getKpiColor(dashboard.successRate)" class="text-sm font-semibold">
+            {{ getTrendArrow(dashboard.successRate.trendDirection) }}
+            {{ dashboard.successRate.trend?.toFixed(2) }}%
+          </span>
+          <span class="text-xs text-gray-500">Taux de succès</span>
+        </div>
+        <button
+          (click)="openDrillDown('success-rate')"
+          class="mt-4 w-full px-3 py-2 bg-purple-50 text-purple-600 text-sm rounded hover:bg-purple-100 transition">
+          Voir détails
+        </button>
+      </div>
+    </div>
+
+    <!-- === STATS CARDS === -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="bg-blue-50 p-4 rounded-lg">
+        <p class="text-gray-600 text-sm">Total Utilisateurs</p>
+        <p class="text-2xl font-bold text-blue-600">{{ formatNumber(dashboard.totalUsers) }}</p>
+      </div>
+      <div class="bg-green-50 p-4 rounded-lg">
+        <p class="text-gray-600 text-sm">Clients Actifs</p>
+        <p class="text-2xl font-bold text-green-600">{{ formatNumber(dashboard.totalClients) }}</p>
+      </div>
+      <div class="bg-purple-50 p-4 rounded-lg">
+        <p class="text-gray-600 text-sm">Agents</p>
+        <p class="text-2xl font-bold text-purple-600">{{ formatNumber(dashboard.totalAgents) }}</p>
+      </div>
+      <div class="bg-red-50 p-4 rounded-lg">
+        <p class="text-gray-600 text-sm">Approvals</p>
+        <p class="text-2xl font-bold text-red-600">{{ formatNumber(dashboard.approvalCount) }}</p>
+      </div>
+    </div>
+
+    <!-- === SYSTEM HEALTH === -->
+    <div class="bg-white p-6 rounded-lg shadow-md">
+      <h2 class="text-xl font-bold text-gray-900 mb-4">Santé Système</h2>
+      <div class="flex items-center gap-6">
+        <div>
+          <p class="text-5xl font-bold text-gray-900">{{ dashboard.systemHealthScore.toFixed(1) }}/100</p>
+          <p [class]="'mt-2 px-3 py-1 rounded text-sm font-semibold ' + getHealthStatusColor(dashboard.systemHealthStatus)">
+            {{ dashboard.systemHealthStatus }}
+          </p>
+        </div>
+        <div class="flex-1 space-y-2">
+          <div *ngFor="let component of (dashboard.componentHealth | keyvalue)" class="flex justify-between items-center">
+            <span class="text-gray-700 text-sm">{{ component.key }}</span>
+            <div class="flex items-center gap-2">
+              <div class="w-20 h-2 bg-gray-200 rounded-full">
+                <div
+                  class="h-full bg-green-600 rounded-full"
+                  [style.width.%]="component.value">
+                </div>
+              </div>
+              <span class="text-sm font-semibold text-gray-700">{{ component.value }}%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Drill-Down Modal -->
+  <div *ngIf="showDrillDownModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg max-w-4xl w-full mx-4 max-h-96 overflow-y-auto p-6">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-2xl font-bold">Drill-Down: {{ drillDownMetric }}</h2>
+        <button
+          (click)="closeDrillDown()"
+          class="text-gray-500 hover:text-gray-700 text-2xl">
+          ✕
+        </button>
+      </div>
+
+      <div *ngIf="drillDownLoading" class="flex justify-center py-8">
+        <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-600"></div>
+      </div>
+
+      <div *ngIf="selectedDrillDown && !drillDownLoading" class="space-y-6">
+        <!-- Calculated Value & Formula -->
+        <div class="bg-blue-50 p-4 rounded-lg">
+          <p class="text-gray-600 text-sm mb-2">Formule de Calcul</p>
+          <p class="text-gray-900 font-mono text-sm mb-4">{{ selectedDrillDown.calculationFormula }}</p>
+          <p class="text-gray-600 text-sm mb-2">Valeur Calculée</p>
+          <p class="text-3xl font-bold text-blue-600">{{ selectedDrillDown.calculatedValue }}</p>
+        </div>
+
+        <!-- Raw Variables -->
+        <div>
+          <h3 class="text-lg font-bold text-gray-900 mb-3">Variables Brutes</h3>
+          <div class="bg-gray-50 p-4 rounded-lg">
+            <div *ngFor="let item of (selectedDrillDown.rawVariables | keyvalue)" class="flex justify-between py-2 border-b last:border-b-0">
+              <span class="text-gray-700 font-semibold">{{ item.key }}</span>
+              <span class="text-gray-600">{{ item.value }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Detailed Data Table -->
+        <div *ngIf="selectedDrillDown.detailedData && selectedDrillDown.detailedData.length > 0">
+          <h3 class="text-lg font-bold text-gray-900 mb-3">
+            Enregistrements Détaillés ({{ selectedDrillDown.totalRecords }})
+          </h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="bg-gray-100 border-b">
+                  <th *ngFor="let column of (selectedDrillDown.detailedData[0] | keyvalue)" class="px-4 py-2 text-left font-semibold text-gray-700">
+                    {{ column.key }}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let row of selectedDrillDown.detailedData; let i = index" [class.bg-gray-50]="i % 2 === 1" class="border-b">
+                  <td *ngFor="let column of (row | keyvalue)" class="px-4 py-2 text-gray-700">
+                    {{ column.value }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Metadata -->
+        <div class="bg-gray-50 p-4 rounded-lg text-sm text-gray-600">
+          <p class="mb-2"><span class="font-semibold">Période:</span> {{ selectedDrillDown.period }}</p>
+          <p><span class="font-semibold">Calculé le:</span> {{ selectedDrillDown.lastCalculatedAt }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

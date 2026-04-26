@@ -39,4 +39,12 @@ public class ApiResponse<T> {
         res.setTimestamp(Instant.now());
         return res;
     }
+
+    public static <T> ApiResponse<T> error(String message) {
+        ApiResponse<T> res = new ApiResponse<>();
+        res.setSuccess(false);
+        res.setData(null);
+        res.setTimestamp(Instant.now());
+        return res;
+    }
 }

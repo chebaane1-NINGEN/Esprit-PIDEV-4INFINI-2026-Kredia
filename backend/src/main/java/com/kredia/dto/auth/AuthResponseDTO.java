@@ -4,9 +4,11 @@ public class AuthResponseDTO {
     
     private String token;
     private String type = "Bearer";
+    private String role;
 
-    public AuthResponseDTO(String token) {
+    public AuthResponseDTO(String token, String role) {
         this.token = token;
+        this.role = role;
     }
 
     public String getToken() { return token; }
@@ -14,4 +16,7 @@ public class AuthResponseDTO {
 
     public String getType() { return type; }
     public void setType(String type) { this.type = type; }
+
+    public String getRole() { return role; }
+    public void setRole(String role) { this.role = role; }
 }

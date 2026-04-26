@@ -1,247 +1,61 @@
 <section class="admin-users-page">
+  <!-- Top Bar with Title & Actions -->
   <div class="topbar">
     <div class="topbar__title">
       <p class="eyebrow">Admin Dashboard</p>
       <h1>Users Management</h1>
       <p class="description">Manage all system users with advanced controls, bulk actions, filters and fast insights.</p>
     </div>
-  <div class="topbar__actions">
-    <button class="btn ghost" type="button" (click)="openAdvancedFiltersModal()">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
-      </svg>
-      Advanced Filters
-      <span class="filter-badge" *ngIf="hasActiveFilters()">{{ getActiveFiltersCount() }}</span>
-    </button>
-    <div class="dropdown">
-      <button class="btn outline dropdown-toggle" type="button" (click)="toggleExportDropdown()">
+    <div class="topbar__actions">
+      <button class="btn ghost" type="button" (click)="openAdvancedFiltersModal()">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-          <polyline points="7,10 12,15 17,10"></polyline>
-          <line x1="12" y1="15" x2="12" y2="3"></line>
+          <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
         </svg>
-        Export
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" [class.rotated]="exportDropdownOpen">
-          <polyline points="6,9 12,15 18,9"></polyline>
-        </svg>
+        Advanced Filters
+        <span class="filter-badge" *ngIf="hasActiveFilters()">{{ getActiveFiltersCount() }}</span>
       </button>
-      <div class="dropdown-menu" [class.show]="exportDropdownOpen">
-        <button class="dropdown-item" (click)="exportCsv()" [disabled]="exportLoading">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-            <polyline points="14,2 14,8 20,8"></polyline>
-            <line x1="16" y1="13" x2="8" y2="13"></line>
-            <line x1="16" y1="17" x2="8" y2="17"></line>
-            <polyline points="10,9 9,9 8,9"></polyline>
+      <div class="dropdown">
+        <button class="btn outline dropdown-toggle" type="button" (click)="toggleExportDropdown()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7,10 12,15 17,10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
           </svg>
-          <span *ngIf="!exportLoading">Export CSV</span>
-          <span *ngIf="exportLoading">Exporting...</span>
-        </button>
-        <button class="dropdown-item" (click)="exportExcel()" [disabled]="exportLoading">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-            <polyline points="14,2 14,8 20,8"></polyline>
-            <line x1="16" y1="13" x2="8" y2="13"></line>
-            <line x1="16" y1="17" x2="8" y2="17"></line>
-            <polyline points="10,9 9,9 8,9"></polyline>
-          </svg>
-          <span *ngIf="!exportLoading">Export Excel</span>
-          <span *ngIf="exportLoading">Exporting...</span>
-        </button>
-        <button class="dropdown-item" (click)="exportPdf()" [disabled]="exportLoading">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-            <polyline points="14,2 14,8 20,8"></polyline>
-            <text x="12" y="15" font-size="8" text-anchor="middle" fill="currentColor">PDF</text>
-          </svg>
-          <span *ngIf="!exportLoading">Export PDF</span>
-          <span *ngIf="exportLoading">Exporting...</span>
-        </button>
-      </div>
-    </div>
-    <button class="btn primary" type="button" (click)="openAddUserModal()">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <line x1="12" y1="5" x2="12" y2="19"></line>
-        <line x1="5" y1="12" x2="19" y2="12"></line>
-      </svg>
-      Add User
-    </button>
-  </div>
-  </div>
-
-  <!-- Advanced Filters Modal -->
-  <div class="modal-overlay" *ngIf="advancedFiltersOpen" (click)="toggleAdvancedFilters()">
-    <div class="modal" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <h3>Advanced Filters</h3>
-        <button class="modal-close" (click)="toggleAdvancedFilters()">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
+          Export
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" [class.rotated]="exportDropdownOpen">
+            <polyline points="6,9 12,15 18,9"></polyline>
           </svg>
         </button>
-      </div>
-      <div class="modal-body">
-        <div class="filters-grid">
-          <div class="filter-group">
-            <label class="filter-label">Role</label>
-            <select [(ngModel)]="roleFilter" class="filter-select">
-              <option value="">All Roles</option>
-              <option *ngFor="let role of availableRoles" [value]="role">{{ role }}</option>
-            </select>
-          </div>
-          <div class="filter-group">
-            <label class="filter-label">Status</label>
-            <select [(ngModel)]="statusFilter" class="filter-select">
-              <option value="">All Status</option>
-              <option *ngFor="let status of availableStatus" [value]="status">{{ status }}</option>
-            </select>
-          </div>
-          <div class="filter-group">
-            <label class="filter-label">Registration Date From</label>
-            <input type="date" [(ngModel)]="createdFrom" class="filter-input" />
-          </div>
-          <div class="filter-group">
-            <label class="filter-label">Registration Date To</label>
-            <input type="date" [(ngModel)]="createdTo" class="filter-input" />
-          </div>
+        <div class="dropdown-menu" [class.show]="exportDropdownOpen">
+          <button class="dropdown-item" (click)="exportCsv()" [disabled]="exportLoading">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14,2 14,8 20,8"></polyline>
+            </svg>
+            <span *ngIf="!exportLoading">Export CSV</span>
+            <span *ngIf="exportLoading">Exporting...</span>
+          </button>
+          <button class="dropdown-item" (click)="exportExcel()" [disabled]="exportLoading">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14,2 14,8 20,8"></polyline>
+            </svg>
+            <span *ngIf="!exportLoading">Export Excel</span>
+            <span *ngIf="exportLoading">Exporting...</span>
+          </button>
         </div>
       </div>
-      <div class="modal-footer">
-        <button class="btn outline" (click)="resetFilters()">Reset Filters</button>
-        <button class="btn primary" (click)="loadUsers(); toggleAdvancedFilters()">Apply Filters</button>
-      </div>
+      <button class="btn primary" type="button" (click)="openAddUserModal()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        Add User
+      </button>
     </div>
   </div>
 
-  <section class="panel panel--form" *ngIf="showAddUserForm">
-    <div class="form-header">
-      <div>
-        <h2>Add New User</h2>
-        <p>Create a new user account with appropriate role and permissions.</p>
-      </div>
-      <button class="btn ghost" type="button" (click)="closeAddUserForm()">×</button>
-    </div>
-    <form class="user-form" (ngSubmit)="createUser()" #userForm="ngForm">
-      <div class="form-grid">
-        <div class="form-field">
-          <label for="firstName">First Name *</label>
-          <input
-            id="firstName"
-            type="text"
-            [(ngModel)]="newUser.firstName"
-            name="firstName"
-            placeholder="Enter first name"
-            required
-            #firstName="ngModel"
-            [class.error]="firstName.invalid && firstName.touched"
-          />
-          <div class="error-message" *ngIf="firstName.invalid && firstName.touched">
-            First name is required
-          </div>
-        </div>
-        <div class="form-field">
-          <label for="lastName">Last Name *</label>
-          <input
-            id="lastName"
-            type="text"
-            [(ngModel)]="newUser.lastName"
-            name="lastName"
-            placeholder="Enter last name"
-            required
-            #lastName="ngModel"
-            [class.error]="lastName.invalid && lastName.touched"
-          />
-          <div class="error-message" *ngIf="lastName.invalid && lastName.touched">
-            Last name is required
-          </div>
-        </div>
-        <div class="form-field">
-          <label for="email">Email Address *</label>
-          <input
-            id="email"
-            type="email"
-            [(ngModel)]="newUser.email"
-            name="email"
-            placeholder="Enter email address"
-            required
-            email
-            #email="ngModel"
-            [class.error]="email.invalid && email.touched"
-          />
-          <div class="error-message" *ngIf="email.invalid && email.touched">
-            Please enter a valid email address
-          </div>
-        </div>
-        <div class="form-field">
-          <label for="phoneNumber">Phone Number</label>
-          <input
-            id="phoneNumber"
-            type="tel"
-            [(ngModel)]="newUser.phoneNumber"
-            name="phoneNumber"
-            placeholder="Enter phone number"
-          />
-        </div>
-        <div class="form-field">
-          <label for="password">Password *</label>
-          <input
-            id="password"
-            type="password"
-            [(ngModel)]="newUser.password"
-            name="password"
-            placeholder="Enter password"
-            required
-            minlength="6"
-            #password="ngModel"
-            [class.error]="password.invalid && password.touched"
-          />
-          <div class="error-message" *ngIf="password.invalid && password.touched">
-            Password must be at least 6 characters long
-          </div>
-        </div>
-        <div class="form-field">
-          <label for="role">Role *</label>
-          <select
-            id="role"
-            [(ngModel)]="newUser.role"
-            name="role"
-            required
-            #role="ngModel"
-            [class.error]="role.invalid && role.touched"
-          >
-            <option value="">Select a role</option>
-            <option *ngFor="let role of availableRoles" [value]="role">{{ role }}</option>
-          </select>
-          <div class="error-message" *ngIf="role.invalid && role.touched">
-            Please select a role
-          </div>
-        </div>
-        <div class="form-field">
-          <label for="status">Status</label>
-          <select
-            id="status"
-            [(ngModel)]="newUser.status"
-            name="status"
-          >
-            <option *ngFor="let status of availableStatus" [value]="status">{{ status }}</option>
-          </select>
-        </div>
-      </div>
-      <div class="form-actions">
-        <button type="button" class="btn outline" (click)="closeAddUserForm()">Cancel</button>
-        <button
-          type="submit"
-          class="btn primary"
-          [disabled]="userForm.invalid || createLoading"
-        >
-          <span *ngIf="createLoading" class="spinner"></span>
-          {{ createLoading ? 'Creating...' : 'Create User' }}
-        </button>
-      </div>
-    </form>
-  </section>
-
+  <!-- Stats Cards -->
   <div class="stats-grid">
     <article class="stat-card">
       <div>
@@ -250,7 +64,6 @@
       </div>
       <span class="stat-card__icon">👥</span>
     </article>
-
     <article class="stat-card stat-card--success">
       <div>
         <span class="stat-card__label">Active Users</span>
@@ -258,7 +71,6 @@
       </div>
       <span class="stat-card__icon">✔️</span>
     </article>
-
     <article class="stat-card stat-card--danger">
       <div>
         <span class="stat-card__label">Blocked Users</span>
@@ -266,7 +78,6 @@
       </div>
       <span class="stat-card__icon">⛔</span>
     </article>
-
     <article class="stat-card stat-card--info">
       <div>
         <span class="stat-card__label">New (24h)</span>
@@ -274,7 +85,6 @@
       </div>
       <span class="stat-card__icon">➕</span>
     </article>
-
     <article class="stat-card stat-card--health">
       <div>
         <span class="stat-card__label">Health Index</span>
@@ -285,42 +95,7 @@
     </article>
   </div>
 
-  <section class="panel panel--filters" *ngIf="advancedFiltersOpen">
-    <div class="search-wrapper">
-      <label class="visually-hidden" for="user-search">Recherche</label>
-      <div class="search-box">
-        <span>🔍</span>
-        <input id="user-search" type="text" [(ngModel)]="query" (keyup.enter)="loadUsers()" placeholder="Search by name or email" />
-      </div>
-      <button class="btn outline" type="button" (click)="resetFilters()">Reset filters</button>
-    </div>
-
-    <div class="filter-group">
-      <div class="filter-field">
-        <label>Role</label>
-        <select [(ngModel)]="roleFilter" (change)="loadUsers()">
-          <option value="">All Roles</option>
-          <option *ngFor="let role of availableRoles" [value]="role">{{ role }}</option>
-        </select>
-      </div>
-      <div class="filter-field">
-        <label>Status</label>
-        <select [(ngModel)]="statusFilter" (change)="loadUsers()">
-          <option value="">All Status</option>
-          <option *ngFor="let status of availableStatus" [value]="status">{{ status }}</option>
-        </select>
-      </div>
-      <div class="filter-field">
-        <label>Date from</label>
-        <input type="date" [(ngModel)]="createdFrom" (change)="loadUsers()" />
-      </div>
-      <div class="filter-field">
-        <label>Date to</label>
-        <input type="date" [(ngModel)]="createdTo" (change)="loadUsers()" />
-      </div>
-    </div>
-  </section>
-
+  <!-- Bulk Actions Panel (shown when items selected) -->
   <section class="panel panel--bulk" *ngIf="selectedCount > 0">
     <div class="bulk-summary">
       <span>{{ selectedCount }} selected</span>
@@ -333,20 +108,38 @@
     </div>
   </section>
 
-  <div class="alert error" *ngIf="error">{{ error }}</div>
+  <!-- Error Alert -->
+  <div class="alert error" *ngIf="error">
+    <span>{{ error }}</span>
+    <button type="button" (click)="error = null" class="alert-close">×</button>
+  </div>
 
+  <!-- Users Table Section -->
   <section class="table-card">
     <div class="table-card__header">
       <div>
         <h2>Users List</h2>
-        <p>Fast access to users, roles, status, assignment and actions.</p>
+        <p>Fast access to users, roles, status, assignments and bulk actions.</p>
       </div>
       <div class="header-actions">
-        <button class="btn ghost" type="button" aria-label="Refresh list" (click)="loadUsers()">Refresh</button>
+        <button class="btn ghost" type="button" aria-label="Refresh list" (click)="refreshUsers()" [disabled]="loading">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" [class.spin]="loading">
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <path d="M20.49 15a9 9 0 1 1-2-8.12"></path>
+          </svg>
+          {{ loading ? 'Refreshing...' : 'Refresh' }}
+        </button>
       </div>
     </div>
 
-    <div class="table-overflow">
+    <!-- Loading State -->
+    <div class="table-loading" *ngIf="loading">
+      <div class="spinner"></div>
+      <p>Loading users...</p>
+    </div>
+
+    <!-- Users Table -->
+    <div class="table-overflow" *ngIf="!loading">
       <table>
         <thead>
           <tr>
@@ -354,16 +147,25 @@
               <input type="checkbox" [checked]="isAllSelected" (change)="toggleSelectAll($event)" aria-label="Select all users" />
             </th>
             <th>
-              <button type="button" class="column-sort" (click)="sortBy('firstName')">USER <span>{{ sortKey === 'firstName' ? (sortDirection === 'asc' ? '▲' : '▼') : '↕' }}</span></button>
+              <button type="button" class="column-sort" (click)="sortBy('firstName')">
+                USER
+                <span>{{ sortKey === 'firstName' ? (sortDirection === 'asc' ? '▲' : '▼') : '↕' }}</span>
+              </button>
             </th>
             <th>
-              <button type="button" class="column-sort" (click)="sortBy('email')">EMAIL <span>{{ sortKey === 'email' ? (sortDirection === 'asc' ? '▲' : '▼') : '↕' }}</span></button>
+              <button type="button" class="column-sort" (click)="sortBy('email')">
+                EMAIL
+                <span>{{ sortKey === 'email' ? (sortDirection === 'asc' ? '▲' : '▼') : '↕' }}</span>
+              </button>
             </th>
             <th>ROLE</th>
             <th>STATUS</th>
             <th>AGENT</th>
             <th>
-              <button type="button" class="column-sort" (click)="sortBy('createdAt')">REGISTERED <span>{{ sortKey === 'createdAt' ? (sortDirection === 'asc' ? '▲' : '▼') : '↕' }}</span></button>
+              <button type="button" class="column-sort" (click)="sortBy('createdAt')">
+                REGISTERED
+                <span>{{ sortKey === 'createdAt' ? (sortDirection === 'asc' ? '▲' : '▼') : '↕' }}</span>
+              </button>
             </th>
             <th>ACTIONS</th>
           </tr>
@@ -379,9 +181,11 @@
                 <div class="user-meta">
                   <span class="user-name">{{ user.firstName }} {{ user.lastName }}</span>
                   <span class="user-subtitle">{{ user.email }}</span>
-                  <span class="user-subtitle">{{ user.phone || '+216 000 000 000' }}</span>
                 </div>
               </div>
+            </td>
+            <td>
+              <span class="table-email">{{ user.email }}</span>
             </td>
             <td>
               <span class="pill role-pill" [ngClass]="getRoleClass(user.role)">{{ user.role }}</span>
@@ -390,7 +194,7 @@
               <span class="pill status-pill" [ngClass]="getStatusClass(user.status)">{{ user.status }}</span>
             </td>
             <td>
-              <select *ngIf="user.role === 'CLIENT'" [value]="user.assignedAgentId || ''" (change)="assignAgent(user, $any($event.target).value)">
+              <select *ngIf="user.role === 'CLIENT'" [value]="user.assignedAgentId || ''" (change)="assignAgent(user, $any($event.target).value)" class="agent-select">
                 <option value="">Unassigned</option>
                 <option *ngFor="let agent of agents" [value]="agent.userId">{{ agent.firstName }} {{ agent.lastName }}</option>
               </select>
@@ -398,19 +202,45 @@
             </td>
             <td>{{ user.createdAt ? (user.createdAt | date:'shortDate') : '—' }}</td>
             <td class="actions-cell">
-              <button class="icon-btn view" type="button" title="View user">👁️</button>
-              <button class="icon-btn edit" type="button" title="Edit user">✏️</button>
-              <button class="icon-btn history" type="button" title="History">📄</button>
-              <button class="icon-btn block" type="button" title="Toggle status" (click)="updateStatus(user)">⛔</button>
-              <button class="icon-btn delete" type="button" title="Delete user" (click)="deleteUser(user)" [disabled]="user.role === 'ADMIN'">🗑️</button>
+              <button class="icon-btn view" type="button" title="View user details" (click)="openViewUserModal(user)" aria-label="View user">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              </button>
+              <button class="icon-btn edit" type="button" title="Edit user" (click)="openEditUserModal(user)" aria-label="Edit user">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                </svg>
+              </button>
+              <button class="icon-btn block" type="button" title="Toggle status" (click)="updateStatus(user)" aria-label="Toggle user status">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="8" y1="15" x2="16" y2="15"></line>
+                </svg>
+              </button>
+              <button class="icon-btn delete" type="button" title="Delete user" (click)="deleteUser(user)" [disabled]="user.role === 'ADMIN'" aria-label="Delete user">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  <line x1="10" y1="11" x2="10" y2="17"></line>
+                  <line x1="14" y1="11" x2="14" y2="17"></line>
+                </svg>
+              </button>
             </td>
           </tr>
         </tbody>
       </table>
+
+      <!-- Empty State -->
+      <div class="table-empty" *ngIf="users.length === 0">
+        <p>No users found</p>
+      </div>
     </div>
 
-    <div class="table-footer">
-      <span class="table-note">Showing {{ users.length }} of {{ totalUsers }} users</span>
+    <!-- Table Footer -->
+    <div class="table-footer" *ngIf="!loading && users.length > 0">
+      <span class="table-note">Showing {{ users.length }} of {{ totalElements }} users</span>
       <div class="pagination">
         <button class="btn ghost" type="button" (click)="goToPage(page - 1)" [disabled]="page === 0">Previous</button>
         <span>Page {{ page + 1 }} / {{ totalPages }}</span>
@@ -419,12 +249,14 @@
     </div>
   </section>
 
+  <!-- ============ MODALS ============ -->
+
   <!-- Advanced Filters Modal -->
   <div class="modal-overlay" *ngIf="showAdvancedFiltersModal" (click)="closeAdvancedFiltersModal()">
     <div class="modal advanced-filters-modal" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h2>Advanced Filters</h2>
-        <button class="modal-close" (click)="closeAdvancedFiltersModal()">
+        <button class="modal-close" (click)="closeAdvancedFiltersModal()" aria-label="Close modal">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -434,50 +266,53 @@
 
       <div class="modal-body">
         <div class="filters-grid">
-          <!-- Role Filter -->
+          <!-- Search Filter -->
           <div class="filter-group">
-            <label class="filter-label">Role</label>
+            <label class="filter-label">Search by Name or Email</label>
+            <input type="text" [(ngModel)]="filterQuery" (input)="onFilterChange()" placeholder="Enter name or email..." class="form-input">
+          </div>
+
+          <!-- Role Filter (Multiple) -->
+          <div class="filter-group">
+            <label class="filter-label">Roles</label>
             <div class="checkbox-group">
               <label *ngFor="let role of availableRoles" class="checkbox-item">
-                <input type="checkbox" [value]="role" [(ngModel)]="filterRoles" (change)="onFilterChange()">
+                <input type="checkbox" [value]="role" [(ngModel)]="filterRoles" (change)="onFilterChange()" />
                 <span class="checkmark"></span>
                 <span class="label">{{ role }}</span>
               </label>
             </div>
           </div>
 
-          <!-- Status Filter -->
+          <!-- Status Filter (Multiple) -->
           <div class="filter-group">
             <label class="filter-label">Status</label>
             <div class="checkbox-group">
               <label *ngFor="let status of availableStatus" class="checkbox-item">
-                <input type="checkbox" [value]="status" [(ngModel)]="filterStatus" (change)="onFilterChange()">
+                <input type="checkbox" [value]="status" [(ngModel)]="filterStatus" (change)="onFilterChange()" />
                 <span class="checkmark"></span>
                 <span class="label">{{ status }}</span>
               </label>
             </div>
           </div>
 
-          <!-- Date Range -->
-          <div class="filter-group">
+          <!-- Date Range Filter -->
+          <div class="filter-group full-width">
             <label class="filter-label">Created Between</label>
             <div class="date-range">
               <div class="date-input">
-                <input type="date" [(ngModel)]="filterCreatedFrom" (change)="onFilterChange()" placeholder="From">
+                <label for="filterFrom">From</label>
+                <input id="filterFrom" type="date" [(ngModel)]="filterCreatedFrom" (change)="onFilterChange()" />
               </div>
               <div class="date-input">
-                <input type="date" [(ngModel)]="filterCreatedTo" (change)="onFilterChange()" placeholder="To">
+                <label for="filterTo">To</label>
+                <input id="filterTo" type="date" [(ngModel)]="filterCreatedTo" (change)="onFilterChange()" />
               </div>
             </div>
           </div>
-
-          <!-- Search -->
-          <div class="filter-group">
-            <label class="filter-label">Search</label>
-            <input type="text" [(ngModel)]="filterQuery" (input)="onFilterChange()" placeholder="Name or email..." class="search-input">
-          </div>
         </div>
 
+        <!-- Filter Results Preview -->
         <div class="filter-results" *ngIf="filteredResultsCount !== null">
           <div class="results-info">
             <span class="results-count">{{ filteredResultsCount }} users match your filters</span>
@@ -486,8 +321,8 @@
       </div>
 
       <div class="modal-footer">
-        <button class="btn outline" (click)="resetAdvancedFilters()">Reset All</button>
-        <button class="btn primary" (click)="applyAdvancedFilters()">Apply Filters</button>
+        <button class="btn outline" type="button" (click)="resetAdvancedFilters()">Reset All</button>
+        <button class="btn primary" type="button" (click)="applyAdvancedFilters()">Apply Filters</button>
       </div>
     </div>
   </div>
@@ -497,7 +332,7 @@
     <div class="modal add-user-modal" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h2>Add New User</h2>
-        <button class="modal-close" (click)="closeAddUserModal()">
+        <button class="modal-close" (click)="closeAddUserModal()" aria-label="Close modal">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -505,151 +340,214 @@
         </button>
       </div>
 
-      <form class="modal-body" #userForm="ngForm" (ngSubmit)="createUser()">
+      <form class="modal-body" #addUserForm="ngForm" (ngSubmit)="createUser()">
         <div class="form-grid">
           <div class="form-field">
-            <label for="firstName">First Name *</label>
-            <input
-              id="firstName"
-              type="text"
-              [(ngModel)]="newUser.firstName"
-              name="firstName"
-              required
-              #firstName="ngModel"
-              class="form-input"
-              [class.error]="firstName.invalid && firstName.touched"
-            >
-            <div class="error-message" *ngIf="firstName.invalid && firstName.touched">
-              First name is required
-            </div>
+            <label for="addFirstName">First Name *</label>
+            <input id="addFirstName" type="text" [(ngModel)]="newUser.firstName" name="firstName" required class="form-input" #addFirstName="ngModel" [class.error]="addFirstName.invalid && addFirstName.touched" />
+            <div class="error-message" *ngIf="addFirstName.invalid && addFirstName.touched">First name is required</div>
           </div>
 
           <div class="form-field">
-            <label for="lastName">Last Name *</label>
-            <input
-              id="lastName"
-              type="text"
-              [(ngModel)]="newUser.lastName"
-              name="lastName"
-              required
-              #lastName="ngModel"
-              class="form-input"
-              [class.error]="lastName.invalid && lastName.touched"
-            >
-            <div class="error-message" *ngIf="lastName.invalid && lastName.touched">
-              Last name is required
-            </div>
+            <label for="addLastName">Last Name *</label>
+            <input id="addLastName" type="text" [(ngModel)]="newUser.lastName" name="lastName" required class="form-input" #addLastName="ngModel" [class.error]="addLastName.invalid && addLastName.touched" />
+            <div class="error-message" *ngIf="addLastName.invalid && addLastName.touched">Last name is required</div>
           </div>
 
           <div class="form-field full-width">
-            <label for="email">Email Address *</label>
-            <input
-              id="email"
-              type="email"
-              [(ngModel)]="newUser.email"
-              name="email"
-              required
-              email
-              #email="ngModel"
-              class="form-input"
-              [class.error]="email.invalid && email.touched"
-              placeholder="user@example.com"
-            >
-            <div class="error-message" *ngIf="email.invalid && email.touched">
-              Please enter a valid email address
-            </div>
+            <label for="addEmail">Email Address *</label>
+            <input id="addEmail" type="email" [(ngModel)]="newUser.email" name="email" required email class="form-input" #addEmail="ngModel" [class.error]="addEmail.invalid && addEmail.touched" placeholder="user@example.com" />
+            <div class="error-message" *ngIf="addEmail.invalid && addEmail.touched">Please enter a valid email</div>
           </div>
 
           <div class="form-field full-width">
-            <label for="phoneNumber">Phone Number</label>
-            <input
-              id="phoneNumber"
-              type="tel"
-              [(ngModel)]="newUser.phoneNumber"
-              name="phoneNumber"
-              class="form-input"
-              placeholder="+1234567890"
-            >
+            <label for="addPhone">Phone Number</label>
+            <input id="addPhone" type="tel" [(ngModel)]="newUser.phone" name="phone" class="form-input" placeholder="+1234567890" />
           </div>
 
           <div class="form-field">
-            <label for="role">Role *</label>
-            <select
-              id="role"
-              [(ngModel)]="newUser.role"
-              name="role"
-              required
-              #role="ngModel"
-              class="form-select"
-              [class.error]="role.invalid && role.touched"
-            >
+            <label for="addRole">Role *</label>
+            <select id="addRole" [(ngModel)]="newUser.role" name="role" required class="form-select" #addRole="ngModel" [class.error]="addRole.invalid && addRole.touched">
               <option value="">Select Role</option>
               <option *ngFor="let role of availableRoles" [value]="role">{{ role }}</option>
             </select>
-            <div class="error-message" *ngIf="role.invalid && role.touched">
-              Please select a role
-            </div>
+            <div class="error-message" *ngIf="addRole.invalid && addRole.touched">Please select a role</div>
           </div>
 
           <div class="form-field">
-            <label for="status">Status *</label>
-            <select
-              id="status"
-              [(ngModel)]="newUser.status"
-              name="status"
-              required
-              #status="ngModel"
-              class="form-select"
-              [class.error]="status.invalid && status.touched"
-            >
+            <label for="addStatus">Status *</label>
+            <select id="addStatus" [(ngModel)]="newUser.status" name="status" required class="form-select" #addStatus="ngModel" [class.error]="addStatus.invalid && addStatus.touched">
               <option value="">Select Status</option>
               <option *ngFor="let status of availableStatus" [value]="status">{{ status }}</option>
             </select>
-            <div class="error-message" *ngIf="status.invalid && status.touched">
-              Please select a status
-            </div>
+            <div class="error-message" *ngIf="addStatus.invalid && addStatus.touched">Please select a status</div>
           </div>
 
           <div class="form-field full-width">
-            <label for="password">Password *</label>
+            <label for="addPassword">Password *</label>
             <div class="password-input">
-              <input
-                id="password"
-                [type]="showPassword ? 'text' : 'password'"
-                [(ngModel)]="newUser.password"
-                name="password"
-                required
-                minlength="8"
-                #password="ngModel"
-                class="form-input"
-                [class.error]="password.invalid && password.touched"
-                placeholder="Minimum 8 characters"
-              >
-              <button type="button" class="password-toggle" (click)="togglePasswordVisibility()">
+              <input id="addPassword" [type]="showPassword ? 'text' : 'password'" [(ngModel)]="newUser.password" name="password" required minlength="8" class="form-input" #addPassword="ngModel" [class.error]="addPassword.invalid && addPassword.touched" placeholder="Minimum 8 characters" />
+              <button type="button" class="password-toggle" (click)="togglePasswordVisibility()" aria-label="Toggle password visibility">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                   <circle cx="12" cy="12" r="3"></circle>
-                  <path *ngIf="!showPassword" d="M2.5 2.5l19 19"></path>
                 </svg>
               </button>
             </div>
-            <div class="error-message" *ngIf="password.invalid && password.touched">
-              Password must be at least 8 characters long
-            </div>
+            <div class="error-message" *ngIf="addPassword.invalid && addPassword.touched">Password must be at least 8 characters</div>
           </div>
         </div>
       </form>
 
       <div class="modal-footer">
         <button class="btn outline" type="button" (click)="closeAddUserModal()" [disabled]="createLoading">Cancel</button>
-        <button
-          class="btn primary"
-          type="submit"
-          (click)="createUser()"
-          [disabled]="userForm.invalid || createLoading"
-        >
+        <button class="btn primary" type="submit" (click)="addUserForm.onSubmit($event)" [disabled]="addUserForm.invalid || createLoading">
           <span *ngIf="createLoading" class="spinner"></span>
           {{ createLoading ? 'Creating...' : 'Create User' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- View User Modal -->
+  <div class="modal-overlay" *ngIf="showViewUserModal && viewingUser" (click)="closeViewUserModal()">
+    <div class="modal view-user-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>User Details</h2>
+        <button class="modal-close" (click)="closeViewUserModal()" aria-label="Close modal">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <div class="modal-body view-user-body">
+        <div class="user-details-grid">
+          <div class="detail-group">
+            <label>First Name</label>
+            <p>{{ viewingUser.firstName }}</p>
+          </div>
+          <div class="detail-group">
+            <label>Last Name</label>
+            <p>{{ viewingUser.lastName }}</p>
+          </div>
+          <div class="detail-group full-width">
+            <label>Email</label>
+            <p>{{ viewingUser.email }}</p>
+          </div>
+          <div class="detail-group full-width">
+            <label>Phone</label>
+            <p>{{ viewingUser.phone || 'Not provided' }}</p>
+          </div>
+          <div class="detail-group">
+            <label>Role</label>
+            <span class="pill role-pill" [ngClass]="getRoleClass(viewingUser.role)">{{ viewingUser.role }}</span>
+          </div>
+          <div class="detail-group">
+            <label>Status</label>
+            <span class="pill status-pill" [ngClass]="getStatusClass(viewingUser.status)">{{ viewingUser.status }}</span>
+          </div>
+          <div class="detail-group">
+            <label>Email Verified</label>
+            <p>{{ viewingUser.emailVerified ? '✅ Yes' : '❌ No' }}</p>
+          </div>
+          <div class="detail-group">
+            <label>Created</label>
+            <p>{{ viewingUser.createdAt ? (viewingUser.createdAt | date:'medium') : '—' }}</p>
+          </div>
+          <div class="detail-group" *ngIf="viewingUser.assignedAgentId">
+            <label>Assigned Agent ID</label>
+            <p>#{{ viewingUser.assignedAgentId }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn outline" type="button" (click)="closeViewUserModal()">Close</button>
+        <button class="btn primary" type="button" (click)="closeViewUserModal(); openEditUserModal(viewingUser)">Edit User</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit User Modal -->
+  <div class="modal-overlay" *ngIf="showEditUserModal && editingUser" (click)="closeEditUserModal()">
+    <div class="modal edit-user-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Edit User</h2>
+        <button class="modal-close" (click)="closeEditUserModal()" aria-label="Close modal">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <form class="modal-body" #editUserForm="ngForm" (ngSubmit)="updateUser()">
+        <div class="form-grid">
+          <div class="form-field">
+            <label for="editFirstName">First Name</label>
+            <input id="editFirstName" type="text" [(ngModel)]="editingUser.firstName" name="firstName" class="form-input" />
+          </div>
+
+          <div class="form-field">
+            <label for="editLastName">Last Name</label>
+            <input id="editLastName" type="text" [(ngModel)]="editingUser.lastName" name="lastName" class="form-input" />
+          </div>
+
+          <div class="form-field full-width">
+            <label for="editEmail">Email Address</label>
+            <input id="editEmail" type="email" [(ngModel)]="editingUser.email" name="email" email class="form-input" #editEmail="ngModel" [class.error]="editEmail.invalid && editEmail.touched" />
+            <div class="error-message" *ngIf="editEmail.invalid && editEmail.touched">Please enter a valid email</div>
+          </div>
+
+          <div class="form-field full-width">
+            <label for="editPhone">Phone Number</label>
+            <input id="editPhone" type="tel" [(ngModel)]="editingUser.phone" name="phone" class="form-input" />
+          </div>
+
+          <div class="form-field">
+            <label for="editRole">Role</label>
+            <select id="editRole" [(ngModel)]="editingUser.role" name="role" class="form-select">
+              <option *ngFor="let role of availableRoles" [value]="role">{{ role }}</option>
+            </select>
+          </div>
+
+          <div class="form-field">
+            <label for="editStatus">Status</label>
+            <select id="editStatus" [(ngModel)]="editingUser.status" name="status" class="form-select">
+              <option *ngFor="let status of availableStatus" [value]="status">{{ status }}</option>
+            </select>
+          </div>
+        </div>
+      </form>
+
+      <div class="modal-footer">
+        <button class="btn outline" type="button" (click)="closeEditUserModal()" [disabled]="editLoading">Cancel</button>
+        <button class="btn primary" type="submit" (click)="editUserForm.onSubmit($event)" [disabled]="editUserForm.invalid || editLoading">
+          <span *ngIf="editLoading" class="spinner"></span>
+          {{ editLoading ? 'Updating...' : 'Save Changes' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal-overlay" *ngIf="showDeleteConfirm && userToDelete" (click)="cancelDelete()">
+    <div class="modal delete-confirm-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Confirm Deletion</h2>
+      </div>
+      <div class="modal-body">
+        <p class="delete-warning">
+          Are you sure you want to delete <strong>{{ userToDelete.firstName }} {{ userToDelete.lastName }}</strong>?
+        </p>
+        <p class="delete-info">This action cannot be undone.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn outline" type="button" (click)="cancelDelete()" [disabled]="deleteLoading">Cancel</button>
+        <button class="btn danger" type="button" (click)="confirmDelete()" [disabled]="deleteLoading">
+          {{ deleteLoading ? 'Deleting...' : 'Delete User' }}
         </button>
       </div>
     </div>

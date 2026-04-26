@@ -59,8 +59,8 @@ public class UserController {
     public ResponseEntity<ApiResponse<Page<UserResponseDTO>>> search(
             @RequestHeader("X-Actor-Id") Long actorId,
             @RequestParam(name = "email", required = false) String email,
-            @RequestParam(name = "status", required = false) UserStatus status,
-            @RequestParam(name = "role", required = false) UserRole role,
+            @RequestParam(name = "status", required = false) List<UserStatus> status,
+            @RequestParam(name = "role", required = false) List<UserRole> role,
             @RequestParam(name = "createdFrom", required = false) String createdFrom,
             @RequestParam(name = "createdTo", required = false) String createdTo,
             @PageableDefault Pageable pageable
@@ -248,8 +248,8 @@ public class UserController {
     public ResponseEntity<byte[]> exportUsersCsv(
             @RequestHeader("X-Actor-Id") Long actorId,
             @RequestParam(name = "email", required = false) String email,
-            @RequestParam(name = "status", required = false) UserStatus status,
-            @RequestParam(name = "role", required = false) UserRole role,
+            @RequestParam(name = "status", required = false) List<UserStatus> status,
+            @RequestParam(name = "role", required = false) List<UserRole> role,
             @RequestParam(name = "createdFrom", required = false) String createdFrom,
             @RequestParam(name = "createdTo", required = false) String createdTo
     ) {
@@ -264,8 +264,8 @@ public class UserController {
     public ResponseEntity<byte[]> exportUsersExcel(
             @RequestHeader("X-Actor-Id") Long actorId,
             @RequestParam(name = "email", required = false) String email,
-            @RequestParam(name = "status", required = false) UserStatus status,
-            @RequestParam(name = "role", required = false) UserRole role,
+            @RequestParam(name = "status", required = false) List<UserStatus> status,
+            @RequestParam(name = "role", required = false) List<UserRole> role,
             @RequestParam(name = "createdFrom", required = false) String createdFrom,
             @RequestParam(name = "createdTo", required = false) String createdTo
     ) {

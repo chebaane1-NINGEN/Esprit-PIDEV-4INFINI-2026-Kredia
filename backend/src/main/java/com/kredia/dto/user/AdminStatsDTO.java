@@ -13,6 +13,8 @@ public class AdminStatsDTO {
     private long activeUser;
     private long blockedUser;
     private long suspendedUser;
+    private long approvalCount;
+    private long rejectionCount;
     private long last24hRegistrations;
     private Map<UserRole, Long> roleDistribution;
     private double systemHealthIndex;
@@ -44,6 +46,12 @@ public class AdminStatsDTO {
 
     public long getSuspendedUser() { return suspendedUser; }
     public void setSuspendedUser(long suspendedUser) { this.suspendedUser = suspendedUser; }
+
+    public long getApprovalCount() { return approvalCount; }
+    public void setApprovalCount(long approvalCount) { this.approvalCount = approvalCount; }
+
+    public long getRejectionCount() { return rejectionCount; }
+    public void setRejectionCount(long rejectionCount) { this.rejectionCount = rejectionCount; }
 
     public long getLast24hRegistrations() { return last24hRegistrations; }
     public void setLast24hRegistrations(long last24hRegistrations) { this.last24hRegistrations = last24hRegistrations; }

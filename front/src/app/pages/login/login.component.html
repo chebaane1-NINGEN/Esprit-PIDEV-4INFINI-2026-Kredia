@@ -47,11 +47,6 @@
         <p class="mt-2 text-gray-600">Access your Kredia dashboard</p>
       </div>
 
-      <!-- Error Alert -->
-      <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg" *ngIf="error" role="alert">
-        {{ error }}
-      </div>
-
       <!-- OAuth Buttons -->
       <div class="space-y-3">
         <button type="button" class="w-full flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg shadow-sm bg-white text-gray-700 hover:bg-gray-50 transition-colors" (click)="loginWithProvider('google')">

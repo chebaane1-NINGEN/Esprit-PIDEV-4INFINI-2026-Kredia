@@ -30,8 +30,8 @@ public interface UserService {
     Page<UserResponseDTO> search(
             Long actorId,
             Optional<String> email,
-            Optional<UserStatus> status,
-            Optional<UserRole> role,
+            Optional<List<UserStatus>> status,
+            Optional<List<UserRole>> role,
             Optional<Instant> createdFrom,
             Optional<Instant> createdTo,
             Pageable pageable
@@ -65,8 +65,8 @@ public interface UserService {
     Page<UserResponseDTO> agentClients(Long actorId, Optional<String> email, Optional<UserStatus> status, Pageable pageable);
     Page<UserActivityResponseDTO> adminAudit(Long actorId, Long userId, Pageable pageable);
     Page<UserActivityResponseDTO> adminActivities(Long actorId, Optional<UserRole> role, Optional<String> actionType, Optional<Long> userId, Optional<Instant> from, Optional<Instant> to, Pageable pageable);
-    byte[] exportUsersCsv(Long actorId, Optional<String> email, Optional<UserStatus> status, Optional<UserRole> role, Optional<Instant> createdFrom, Optional<Instant> createdTo);
-    byte[] exportUsersExcel(Long actorId, Optional<String> email, Optional<UserStatus> status, Optional<UserRole> role, Optional<Instant> createdFrom, Optional<Instant> createdTo);
+    byte[] exportUsersCsv(Long actorId, Optional<String> email, Optional<List<UserStatus>> status, Optional<List<UserRole>> role, Optional<Instant> createdFrom, Optional<Instant> createdTo);
+    byte[] exportUsersExcel(Long actorId, Optional<String> email, Optional<List<UserStatus>> status, Optional<List<UserRole>> role, Optional<Instant> createdFrom, Optional<Instant> createdTo);
     byte[] exportSelectedUsersCsv(Long actorId, List<Long> ids);
     byte[] exportSelectedUsersExcel(Long actorId, List<Long> ids);
 

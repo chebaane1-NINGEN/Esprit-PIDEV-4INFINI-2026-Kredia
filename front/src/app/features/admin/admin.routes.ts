@@ -8,7 +8,8 @@ import { AdminAgentPerformancePageComponent } from './pages/admin-agent-performa
 export const routes: Routes = [
   { path: '', redirectTo: 'users', pathMatch: 'full' },
   { path: 'users', component: AdminUsersPageComponent },
-  { path: 'analytics', component: AdminAnalyticsPageComponent },
+  { path: 'analytics', loadChildren: () => import('../analytics/analytics.routes').then(m => m.ANALYTICS_ROUTES) },
+  { path: 'analytics-overview', component: AdminAnalyticsPageComponent },
   { path: 'agents', component: AdminAgentsPageComponent },
   { path: 'agent-performance', component: AdminAgentPerformancePageComponent },
   { path: 'audit', component: AdminAuditPageComponent }

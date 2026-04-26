@@ -21,7 +21,6 @@ export class LoginComponent {
   private readonly zone   = inject(NgZone);
 
   loading = false;
-  error: string | null = null;
   showPassword = false;
   touched = { email: false, password: false };
 
@@ -72,7 +71,6 @@ export class LoginComponent {
     }
 
     this.loading = true;
-    this.error   = null;
     this.cdr.markForCheck();
 
     this.auth.login(this.form.getRawValue()).subscribe({
@@ -81,16 +79,17 @@ export class LoginComponent {
         this.loading = false;
 
         if (!saved) {
-          this.error = 'Token not found. Please try again.';
+          this.showToast('Token not found. Please try again.', 'error');
           this.cdr.markForCheck();
           return;
         }
 
+        this.showToast('Login successful!', 'success');
         this.navigateAfterLogin();
       },
       error: (err) => {
         this.loading = false;
-        this.error =
+        const message =
           err?.error?.message ??
           err?.error?.error ??
           (err?.status === 0
@@ -98,8 +97,9 @@ export class LoginComponent {
             : err?.status === 401
             ? 'Invalid email or password.'
             : err?.status === 403
-            ? 'CORS blocked. Backend server may not be configured properly.'
+            ? 'Account blocked or suspended.'
             : `Error ${err?.status ?? 'unknown'} — please try again.`);
+        this.showToast(message, 'error');
         this.cdr.markForCheck();
       }
     });
@@ -112,13 +112,37 @@ export class LoginComponent {
 
   private navigateAfterLogin(): void {
     const next = this.auth.isAdmin()
-      ? '/admin'
+      ? '/admin/dashboard'
       : this.auth.isAgent()
       ? '/agent/dashboard'
       : this.auth.isClient()
-      ? '/credit/list'
+      ? '/client/dashboard'
       : '/user';
 
     this.zone.run(() => this.router.navigateByUrl(next));
+  }
+
+  private showToast(message: string, type: 'success' | 'error' | 'info' = 'info'): void {
+    const toast = document.createElement('div');
+    toast.className = `toast toast--${type}`;
+    toast.textContent = message;
+    toast.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 12px 16px;
+      border-radius: 4px;
+      color: white;
+      font-weight: 500;
+      z-index: 10000;
+      background-color: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      transition: opacity 0.3s ease;
+    `;
+    document.body.appendChild(toast);
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      setTimeout(() => document.body.removeChild(toast), 300);
+    }, 3000);
   }
 }

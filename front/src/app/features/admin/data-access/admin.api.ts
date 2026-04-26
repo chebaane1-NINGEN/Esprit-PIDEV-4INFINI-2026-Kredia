@@ -20,8 +20,8 @@ export class AdminApi {
 
   findUsers(
     query?: string,
-    role?: UserRole,
-    status?: UserStatus,
+    roles?: UserRole[] | UserRole,
+    statuses?: UserStatus[] | UserStatus,
     createdFrom?: string,
     createdTo?: string,
     page = 0,
@@ -32,8 +32,16 @@ export class AdminApi {
       .set('size', size.toString());
 
     if (query) params = params.set('email', query);
-    if (role) params = params.set('role', role);
-    if (status) params = params.set('status', status);
+    if (Array.isArray(roles)) {
+      roles.forEach(role => { params = params.append('role', role); });
+    } else if (roles) {
+      params = params.set('role', roles);
+    }
+    if (Array.isArray(statuses)) {
+      statuses.forEach(status => { params = params.append('status', status); });
+    } else if (statuses) {
+      params = params.set('status', statuses);
+    }
     if (createdFrom) params = params.set('createdFrom', createdFrom);
     if (createdTo) params = params.set('createdTo', createdTo);
 
@@ -85,21 +93,43 @@ export class AdminApi {
     );
   }
 
-  exportUsersCsv(query?: string, role?: UserRole, status?: UserStatus, createdFrom?: string, createdTo?: string): Observable<Blob> {
+  updateUser(id: number, payload: UserResponse): Observable<UserResponse> {
+    return this.http.put<ApiResponse<UserResponse>>(`${API_BASE_URL}/api/user/${id}`, payload).pipe(
+      map(response => response.data)
+    );
+  }
+
+  exportUsersCsv(query?: string, roles?: UserRole[] | UserRole, statuses?: UserStatus[] | UserStatus, createdFrom?: string, createdTo?: string): Observable<Blob> {
     let params = new HttpParams();
     if (query) params = params.set('email', query);
-    if (role) params = params.set('role', role);
-    if (status) params = params.set('status', status);
+    if (Array.isArray(roles)) {
+      roles.forEach(role => { params = params.append('role', role); });
+    } else if (roles) {
+      params = params.set('role', roles);
+    }
+    if (Array.isArray(statuses)) {
+      statuses.forEach(status => { params = params.append('status', status); });
+    } else if (statuses) {
+      params = params.set('status', statuses);
+    }
     if (createdFrom) params = params.set('createdFrom', createdFrom);
     if (createdTo) params = params.set('createdTo', createdTo);
     return this.http.get(`${API_BASE_URL}/api/user/admin/export/csv`, { params, responseType: 'blob' });
   }
 
-  exportUsersExcel(query?: string, role?: UserRole, status?: UserStatus, createdFrom?: string, createdTo?: string): Observable<Blob> {
+  exportUsersExcel(query?: string, roles?: UserRole[] | UserRole, statuses?: UserStatus[] | UserStatus, createdFrom?: string, createdTo?: string): Observable<Blob> {
     let params = new HttpParams();
     if (query) params = params.set('email', query);
-    if (role) params = params.set('role', role);
-    if (status) params = params.set('status', status);
+    if (Array.isArray(roles)) {
+      roles.forEach(role => { params = params.append('role', role); });
+    } else if (roles) {
+      params = params.set('role', roles);
+    }
+    if (Array.isArray(statuses)) {
+      statuses.forEach(status => { params = params.append('status', status); });
+    } else if (statuses) {
+      params = params.set('status', statuses);
+    }
     if (createdFrom) params = params.set('createdFrom', createdFrom);
     if (createdTo) params = params.set('createdTo', createdTo);
     return this.http.get(`${API_BASE_URL}/api/user/admin/export/excel`, { params, responseType: 'blob' });

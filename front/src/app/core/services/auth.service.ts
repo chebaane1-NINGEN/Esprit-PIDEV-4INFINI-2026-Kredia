@@ -33,12 +33,16 @@ export interface LoginResponse {
   timestamp?: string;
   data?: {
     token?: string;
+    type?: string;
+    role?: string;
     accessToken?: string;
     access_token?: string;
     jwt?: string;
     [key: string]: any;
   };
   token?: string;
+  type?: string;
+  role?: string;
   accessToken?: string;
   access_token?: string;
   jwt?: string;

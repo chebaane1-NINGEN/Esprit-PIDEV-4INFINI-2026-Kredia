@@ -47,6 +47,26 @@ public interface UserActivityRepository extends JpaRepository<UserActivity, Long
                                      Pageable pageable);
 
     long countByUserIdAndActionType(Long userId, com.kredia.entity.user.UserActivityActionType actionType);
+
+    long countByActionType(com.kredia.entity.user.UserActivityActionType actionType);
     
     long countByUserId(Long userId);
+
+    // ==================== Time-Based Queries for Analytics ====================
+    
+    List<UserActivity> findByTimestampBetween(Instant startDate, Instant endDate);
+    
+    long countByTimestampBetween(Instant startDate, Instant endDate);
+    
+    long countByTimestampAfter(Instant timestamp);
+    
+    List<UserActivity> findByTimestampAfterOrderByTimestampDesc(Instant timestamp);
+    
+    List<UserActivity> findByTimestampAfterOrderByTimestampDesc(Instant timestamp, Pageable pageable);
+    
+    List<UserActivity> findByUserIdAndTimestampBetween(Long userId, Instant startDate, Instant endDate);
+    
+    long countByUserIdAndTimestampBetween(Long userId, Instant startDate, Instant endDate);
+    
+    List<UserActivity> findByUserIdAndTimestampAfterOrderByTimestampDesc(Long userId, Instant timestamp);
 }

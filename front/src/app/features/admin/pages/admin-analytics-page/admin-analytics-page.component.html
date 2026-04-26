@@ -60,8 +60,8 @@
   </div>
 
   <!-- Charts Section -->
-  <div class="charts-section" *ngIf="!loading && userGrowthChart">
-    <div class="chart-container">
+  <div class="charts-section" *ngIf="!loading && (userGrowthChart || roleDistributionChart || approvalChart || stats?.recentActivities?.length)">
+    <div class="chart-container" *ngIf="userGrowthChart">
       <div class="chart-header">
         <h3>User Growth Trend</h3>
         <div class="chart-legend">
@@ -157,33 +157,18 @@
       </div>
     </div>
 
-    <div class="chart-container activity-chart">
+    <div class="chart-container activity-chart" *ngIf="stats?.recentActivities?.length">
       <div class="chart-header">
-        <h3>User Activity Overview</h3>
-        <div class="chart-legend">
-          <span class="legend-item">
-            <span class="legend-color logins"></span>
-            User Logins
-          </span>
-          <span class="legend-item">
-            <span class="legend-color actions"></span>
-            Total Actions
-          </span>
-        </div>
+        <h3>Recent Activity</h3>
+        <p class="chart-summary">Last 10 administration events from the audit trail.</p>
       </div>
-      <div class="activity-chart-content" *ngIf="activityChart">
-        <div class="activity-bars">
-          <div class="bar-group" *ngFor="let item of getActivityBars(activityChart); let i = index">
-            <div class="bar-date">{{ item.label }}</div>
-            <div class="dual-bar">
-              <div class="bar logins" [style.height.%]="item.loginsPercent">
-                <span class="bar-tooltip">{{ item.logins }}</span>
-              </div>
-              <div class="bar actions" [style.height.%]="item.actionsPercent">
-                <span class="bar-tooltip">{{ item.actions }}</span>
-              </div>
-            </div>
+      <div class="recent-activity-list">
+        <div class="activity-row" *ngFor="let activity of stats?.recentActivities">
+          <div class="activity-meta">
+            <span class="activity-type">{{ activity.actionType }}</span>
+            <span class="activity-timestamp">{{ activity.timestamp | date:'medium' }}</span>
           </div>
+          <div class="activity-description">{{ activity.description }}</div>
         </div>
       </div>
     </div>

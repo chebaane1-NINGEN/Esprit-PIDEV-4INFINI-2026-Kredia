@@ -1,5 +1,6 @@
 package com.kredia.service.user.impl;
 
+import com.kredia.dto.auth.AuthResponseDTO;
 import com.kredia.dto.auth.LoginRequestDTO;
 import com.kredia.dto.auth.RegisterRequestDTO;
 import com.kredia.dto.user.UserResponseDTO;
@@ -62,7 +63,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public String login(LoginRequestDTO request) {
+    public AuthResponseDTO login(LoginRequestDTO request) {
         User user = userRepository.findByEmailAndDeletedFalse(request.getEmail())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid email or password"));
 
@@ -83,7 +84,8 @@ public class AuthServiceImpl implements AuthService {
         user.setFailedLoginAttempts(0);
         userRepository.save(user);
 
-        return jwtTokenProvider.generateToken(user.getId(), user.getEmail(), user.getRole().name(), user.getFirstName(), user.getLastName());
+        String token = jwtTokenProvider.generateToken(user.getId(), user.getEmail(), user.getRole().name(), user.getFirstName(), user.getLastName());
+        return new AuthResponseDTO(token, user.getRole().name());
     }
 
     @Override

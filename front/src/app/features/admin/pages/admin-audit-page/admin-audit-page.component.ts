@@ -1,99 +1,143 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
-import { CommonModule, NgFor, NgIf } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { finalize } from 'rxjs';
-import { AdminApi } from '../../data-access/admin.api';
-import { UserActivity, UserRole } from '../../models/admin.model';
+import { AuditService, AuditLogDTO, AuditLogFilter, AuditLogSummary } from '../../../../core/services/audit.service';
 
 @Component({
+  selector: 'app-admin-audit-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgFor, NgIf],
+  imports: [CommonModule, FormsModule],
   templateUrl: './admin-audit-page.component.html',
-  styleUrl: './admin-audit-page.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  styleUrls: ['./admin-audit-page.component.scss']
 })
 export class AdminAuditPageComponent implements OnInit {
-  private readonly api = inject(AdminApi);
-  private readonly cdr = inject(ChangeDetectorRef);
+  auditLogs: AuditLogDTO[] = [];
+  summary: AuditLogSummary | null = null;
+  selectedLog: AuditLogDTO | null = null;
+  showModal = false;
 
-  activities: UserActivity[] = [];
-  filteredActivities: UserActivity[] = [];
-  loading = false;
-  error: string | null = null;
-  roleFilter: UserRole | '' = '';
-  searchUserId = '';
-  actionType = '';
-  fromDate = '';
-  toDate = '';
-  page = 0;
-  size = 20;
+  currentPage = 0;
+  totalPages = 0;
   totalElements = 0;
-  actionTypes: string[] = [];
+
+  filters: AuditLogFilter = {
+    page: 0,
+    pageSize: 20,
+    sortBy: 'timestamp',
+    sortDirection: 'DESC'
+  };
+
+  constructor(private auditService: AuditService) {}
 
   ngOnInit(): void {
-    this.loadActivities();
+    this.loadSummary();
+    this.loadAuditLogs();
   }
 
-  loadActivities(): void {
-    this.loading = true;
-    this.error = null;
-    this.cdr.markForCheck();
+  loadSummary(): void {
+    this.auditService.getAuditSummary().subscribe({
+      next: (summary) => {
+        this.summary = summary;
+      },
+      error: (error) => {
+        console.error('Failed to load audit summary:', error);
+      }
+    });
+  }
 
-    const userId = this.searchUserId ? Number(this.searchUserId) : undefined;
-
-    this.api.getActivities(
-      this.roleFilter || undefined,
-      this.actionType || undefined,
-      userId,
-      this.fromDate || undefined,
-      this.toDate || undefined,
-      this.page,
-      this.size
-    )
-      .pipe(finalize(() => { this.loading = false; this.cdr.markForCheck(); }))
-      .subscribe({
-        next: result => {
-          this.activities = result.content ?? [];
-          this.totalElements = result.totalElements ?? 0;
-          this.actionTypes = Array.from(new Set(this.activities.map(a => a.actionType ?? ''))).filter(value => !!value);
-          this.applyFilters();
-          this.cdr.markForCheck();
-        },
-        error: () => {
-          this.error = 'Impossible de charger les logs d’audit.';
-          this.activities = [];
-          this.filteredActivities = [];
-          this.cdr.markForCheck();
-        }
-      });
+  loadAuditLogs(): void {
+    this.auditService.getAuditLogs(this.filters).subscribe({
+      next: (response) => {
+        this.auditLogs = response.content;
+        this.currentPage = this.filters.page || 0;
+        this.totalPages = response.totalPages;
+        this.totalElements = response.totalElements;
+      },
+      error: (error) => {
+        console.error('Failed to load audit logs:', error);
+        this.auditLogs = [];
+      }
+    });
   }
 
   applyFilters(): void {
-    this.filteredActivities = this.activities.filter(activity => {
-      const matchesUser = this.searchUserId ? activity.userId?.toString().includes(this.searchUserId) : true;
-      const matchesAction = this.actionType ? activity.actionType === this.actionType : true;
-      const date = activity.timestamp ? new Date(activity.timestamp) : null;
-      const matchesFrom = this.fromDate && date ? date >= new Date(this.fromDate) : true;
-      const matchesTo = this.toDate && date ? date <= new Date(this.toDate) : true;
-      return matchesUser && matchesAction && matchesFrom && matchesTo;
-    });
-    this.cdr.markForCheck();
+    this.filters.page = 0; // Reset to first page
+    this.loadAuditLogs();
+  }
+
+  resetFilters(): void {
+    this.filters = {
+      page: 0,
+      pageSize: 20,
+      sortBy: 'timestamp',
+      sortDirection: 'DESC'
+    };
+    this.loadAuditLogs();
+  }
+
+  sortBy(field: string): void {
+    if (this.filters.sortBy === field) {
+      this.filters.sortDirection = this.filters.sortDirection === 'ASC' ? 'DESC' : 'ASC';
+    } else {
+      this.filters.sortBy = field;
+      this.filters.sortDirection = 'ASC';
+    }
+    this.applyFilters();
   }
 
   goToPage(page: number): void {
-    if (page < 0 || page >= Math.ceil(this.totalElements / this.size)) return;
-    this.page = page;
-    this.loadActivities();
+    this.filters.page = page;
+    this.loadAuditLogs();
   }
 
-  get totalPages(): number {
-    return Math.max(1, Math.ceil(this.totalElements / this.size));
+  selectLog(log: AuditLogDTO): void {
+    this.selectedLog = log;
   }
 
-  getSeverity(actionType?: string): string {
-    if (!actionType) return 'INFO';
-    if (actionType.toLowerCase().includes('delete') || actionType.toLowerCase().includes('reject')) return 'CRITICAL';
-    if (actionType.toLowerCase().includes('block') || actionType.toLowerCase().includes('suspend')) return 'WARNING';
-    return 'INFO';
+  viewDetails(log: AuditLogDTO): void {
+    this.selectedLog = log;
+    this.showModal = true;
+  }
+
+  closeModal(): void {
+    this.showModal = false;
+    this.selectedLog = null;
+  }
+
+  getActionClass(actionType: string): string {
+    const actionClasses: { [key: string]: string } = {
+      'LOGIN': 'login',
+      'LOGOUT': 'logout',
+      'CREATE_USER': 'create',
+      'UPDATE_USER': 'update',
+      'DELETE_USER': 'delete',
+      'CREATE_CREDIT': 'create',
+      'UPDATE_CREDIT': 'update',
+      'DELETE_CREDIT': 'delete',
+      'CREATE_TRANSACTION': 'create',
+      'UPDATE_TRANSACTION': 'update',
+      'DELETE_TRANSACTION': 'delete'
+    };
+    return actionClasses[actionType] || 'default';
+  }
+
+  getStatusClass(status: string): string {
+    const statusClasses: { [key: string]: string } = {
+      'SUCCESS': 'success',
+      'FAILED': 'failed',
+      'PARTIAL': 'partial',
+      'PENDING': 'pending'
+    };
+    return statusClasses[status] || 'default';
+  }
+
+  getSeverityClass(severity: string): string {
+    const severityClasses: { [key: string]: string } = {
+      'LOW': 'low',
+      'MEDIUM': 'medium',
+      'HIGH': 'high',
+      'CRITICAL': 'critical'
+    };
+    return severityClasses[severity] || 'default';
   }
 }

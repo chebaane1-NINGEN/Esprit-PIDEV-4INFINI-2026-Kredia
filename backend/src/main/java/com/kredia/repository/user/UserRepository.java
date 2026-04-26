@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -57,4 +58,12 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
         User agent, String email, UserStatus status, Pageable pageable);
     
     long countByAssignedAgentAndDeletedFalse(User agent);
+
+    // ==================== Time-Based Queries for Analytics ====================
+    
+    long countByCreatedAtBetweenAndDeletedFalse(Instant startDate, Instant endDate);
+    
+    List<User> findByCreatedAtBetweenAndDeletedFalse(Instant startDate, Instant endDate);
+    
+    List<User> findAllByRoleAndDeletedFalse(UserRole role);
 }

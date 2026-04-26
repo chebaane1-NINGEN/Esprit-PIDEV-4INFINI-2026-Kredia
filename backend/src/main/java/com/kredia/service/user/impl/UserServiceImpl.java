@@ -68,8 +68,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Page<UserResponseDTO> search(Long actorId, Optional<String> query, Optional<UserStatus> status,
-                                         Optional<UserRole> role, Optional<Instant> createdFrom,
+    public Page<UserResponseDTO> search(Long actorId, Optional<String> query, Optional<List<UserStatus>> status,
+                                         Optional<List<UserRole>> role, Optional<Instant> createdFrom,
                                          Optional<Instant> createdTo, Pageable pageable) {
         Specification<User> spec = Specification.where(notDeleted());
 
@@ -82,11 +82,11 @@ public class UserServiceImpl implements UserService {
             ));
         }
 
-        if (status.isPresent()) {
-            spec = spec.and(hasStatus(status.get()));
+        if (status.isPresent() && !status.get().isEmpty()) {
+            spec = spec.and((root, q, cb) -> root.get("status").in(status.get()));
         }
-        if (role.isPresent()) {
-            spec = spec.and(hasRole(role.get()));
+        if (role.isPresent() && !role.get().isEmpty()) {
+            spec = spec.and((root, q, cb) -> root.get("role").in(role.get()));
         }
         if (createdFrom.isPresent()) {
             spec = spec.and(createdAfter(createdFrom.get()));
@@ -100,8 +100,8 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public byte[] exportUsersCsv(Long actorId, Optional<String> email, Optional<UserStatus> status,
-                                 Optional<UserRole> role, Optional<Instant> createdFrom,
+    public byte[] exportUsersCsv(Long actorId, Optional<String> email, Optional<List<UserStatus>> status,
+                                 Optional<List<UserRole>> role, Optional<Instant> createdFrom,
                                  Optional<Instant> createdTo) {
         var pageable = Pageable.unpaged();
         var users = search(actorId, email, status, role, createdFrom, createdTo, pageable).getContent();
@@ -129,8 +129,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public byte[] exportUsersExcel(Long actorId, Optional<String> email, Optional<UserStatus> status,
-                                   Optional<UserRole> role, Optional<Instant> createdFrom,
+    public byte[] exportUsersExcel(Long actorId, Optional<String> email, Optional<List<UserStatus>> status,
+                                   Optional<List<UserRole>> role, Optional<Instant> createdFrom,
                                    Optional<Instant> createdTo) {
         var users = search(actorId, email, status, role, createdFrom, createdTo, Pageable.unpaged()).getContent();
         return writeUsersToExcel(users);
@@ -322,12 +322,44 @@ public class UserServiceImpl implements UserService {
     @Override
     public AdminStatsDTO adminStats(Long actorId) {
         AdminStatsDTO dto = new AdminStatsDTO();
-        dto.setTotalUser(userRepository.countByDeletedFalse());
-        dto.setTotalClient(userRepository.countByRoleAndDeletedFalse(UserRole.CLIENT));
-        dto.setTotalAgent(userRepository.countByRoleAndDeletedFalse(UserRole.AGENT));
-        dto.setActiveUser(userRepository.countByStatusAndDeletedFalse(UserStatus.ACTIVE));
-        dto.setBlockedUser(userRepository.countByStatusAndDeletedFalse(UserStatus.BLOCKED));
-        dto.setSuspendedUser(userRepository.countByStatusAndDeletedFalse(UserStatus.SUSPENDED));
+        long totalUsers = userRepository.countByDeletedFalse();
+        long totalClients = userRepository.countByRoleAndDeletedFalse(UserRole.CLIENT);
+        long totalAgents = userRepository.countByRoleAndDeletedFalse(UserRole.AGENT);
+        long activeUsers = userRepository.countByStatusAndDeletedFalse(UserStatus.ACTIVE);
+        long blockedUsers = userRepository.countByStatusAndDeletedFalse(UserStatus.BLOCKED);
+        long suspendedUsers = userRepository.countByStatusAndDeletedFalse(UserStatus.SUSPENDED);
+        long last24hRegistrations = userRepository.countByCreatedAtAfterAndDeletedFalse(Instant.now().minus(1, java.time.temporal.ChronoUnit.DAYS));
+        long approvalCount = userActivityRepository.countByActionType(UserActivityActionType.APPROVAL);
+        long rejectionCount = userActivityRepository.countByActionType(UserActivityActionType.REJECTION);
+
+        dto.setTotalUser(totalUsers);
+        dto.setTotalClient(totalClients);
+        dto.setTotalAgent(totalAgents);
+        dto.setActiveUser(activeUsers);
+        dto.setBlockedUser(blockedUsers);
+        dto.setSuspendedUser(suspendedUsers);
+        dto.setApprovalCount(approvalCount);
+        dto.setRejectionCount(rejectionCount);
+        dto.setLast24hRegistrations(last24hRegistrations);
+
+        dto.setRoleDistribution(Map.of(
+            UserRole.ADMIN, userRepository.countByRoleAndDeletedFalse(UserRole.ADMIN),
+            UserRole.AGENT, totalAgents,
+            UserRole.CLIENT, totalClients
+        ));
+
+        var monthlyRegistrations = userRepository.countRegistrationsByMonth();
+        var registrationEvolution = new java.util.LinkedHashMap<String, Long>();
+        for (Object[] row : monthlyRegistrations) {
+            registrationEvolution.put(String.valueOf(row[0]), ((Number) row[1]).longValue());
+        }
+        dto.setRegistrationEvolution(registrationEvolution);
+
+        dto.setSystemHealthIndex(totalUsers > 0 ? Math.min(100.0, Math.max(0.0, (activeUsers / (double) totalUsers) * 100.0)) : 0.0);
+
+        var recentActivities = userActivityRepository.findTop10ByOrderByTimestampDesc();
+        dto.setRecentActivities(recentActivities.stream().map(this::toActivityDto).collect(java.util.stream.Collectors.toList()));
+
         return dto;
     }
 

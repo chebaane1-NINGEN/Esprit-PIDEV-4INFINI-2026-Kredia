@@ -1,14 +1,13 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
-import { CommonModule, NgFor, NgIf } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { finalize } from 'rxjs';
-// import { downloadBlob } from '../../../core/utils/download.util';
 import { AdminApi } from '../../data-access/admin.api';
 import { UserResponse, UserRole, UserStatus } from '../../models/admin.model';
 
 @Component({
   standalone: true,
-  imports: [CommonModule, FormsModule, NgFor, NgIf],
+  imports: [CommonModule, FormsModule],
   templateUrl: './admin-users-page.component.html',
   styleUrl: './admin-users-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -17,47 +16,57 @@ export class AdminUsersPageComponent implements OnInit {
   private readonly api = inject(AdminApi);
   private readonly cdr = inject(ChangeDetectorRef);
 
-  users: UserResponse[] = [];
-  selectedIds = new Set<number>();
+  // ===== UI STATE =====
   loading = false;
+  createLoading = false;
+  editLoading = false;
+  deleteLoading = false;
+  exportLoading = false;
   error: string | null = null;
-  query = '';
-  roleFilter: UserRole | '' = '';
-  statusFilter: UserStatus | '' = '';
-  createdFrom = '';
-  createdTo = '';
+
+  // ===== DATA STATE =====
+  users: UserResponse[] = [];
+  agents: UserResponse[] = [];
+  totalElements = 0;
   page = 0;
   size = 12;
-  totalElements = 0;
-  availableRoles: UserRole[] = ['ADMIN', 'AGENT', 'CLIENT'];
-  availableStatus: UserStatus[] = ['ACTIVE', 'INACTIVE', 'SUSPENDED', 'BLOCKED'];
-  agents: UserResponse[] = [];
+  selectedIds = new Set<number>();
+
+  // ===== SORTING =====
   sortKey: keyof UserResponse = 'firstName';
   sortDirection: 'asc' | 'desc' = 'asc';
-  showAddUserForm = false;
-  createLoading = false;
-  createSuccess: string | null = null;
-  exportLoading = false;
-  showAdvancedFiltersModal = false;
-  showAddUserModal = false;
-  exportDropdownOpen = false;
-  showPassword = false;
-  filteredResultsCount: number | null = null;
-  advancedFiltersOpen = false;
-  advancedFiltersOpen = false;
 
-  // Advanced filters
+  // ===== FILTERS =====
+  filterQuery = '';
   filterRoles: string[] = [];
   filterStatus: string[] = [];
   filterCreatedFrom = '';
   filterCreatedTo = '';
-  filterQuery = '';
+  filteredResultsCount: number | null = null;
+  private filterTimeout: any;
 
+  // ===== AVAILABLE OPTIONS =====
+  availableRoles: UserRole[] = ['ADMIN', 'AGENT', 'CLIENT'];
+  availableStatus: UserStatus[] = ['ACTIVE', 'INACTIVE', 'SUSPENDED', 'BLOCKED'];
+
+  // ===== MODAL STATES =====
+  showAddUserModal = false;
+  showViewUserModal = false;
+  showEditUserModal = false;
+  showDeleteConfirm = false;
+  showAdvancedFiltersModal = false;
+
+  // ===== MODAL DATA =====
+  viewingUser: UserResponse | null = null;
+  editingUser: UserResponse | null = null;
+  userToDelete: UserResponse | null = null;
+
+  // ===== FORM DATA =====
   newUser: {
     firstName: string;
     lastName: string;
     email: string;
-    phoneNumber: string;
+    phone: string;
     password: string;
     role: UserRole;
     status: UserStatus;
@@ -65,133 +74,226 @@ export class AdminUsersPageComponent implements OnInit {
     firstName: '',
     lastName: '',
     email: '',
-    phoneNumber: '',
+    phone: '',
     password: '',
     role: 'CLIENT',
     status: 'ACTIVE'
   };
+
+  showPassword = false;
+  exportDropdownOpen = false;
 
   ngOnInit(): void {
     this.loadUsers();
     this.loadAgents();
   }
 
-  loadAgents(): void {
-    this.api.getAgents(0, 100).subscribe(data => {
-      this.agents = data.content ?? [];
-      this.cdr.markForCheck();
-    });
-  }
+  // ==================== CRUD OPERATIONS ====================
 
-  toggleAdvancedFilters(): void {
-    this.advancedFiltersOpen = !this.advancedFiltersOpen;
-    this.cdr.markForCheck();
-  }
-
-  resetFilters(): void {
-    this.query = '';
-    this.roleFilter = '';
-    this.statusFilter = '';
-    this.createdFrom = '';
-    this.createdTo = '';
-    this.page = 0;
-    this.loadUsers();
-  }
-
+  /**
+   * Load users with current filters and pagination
+   */
   loadUsers(): void {
     this.loading = true;
     this.error = null;
     this.cdr.markForCheck();
 
+    const roles = this.filterRoles.length > 0 ? (this.filterRoles as UserRole[]) : undefined;
+    const statuses = this.filterStatus.length > 0 ? (this.filterStatus as UserStatus[]) : undefined;
+
     this.api.findUsers(
-      this.query || undefined,
-      this.roleFilter || undefined,
-      this.statusFilter || undefined,
-      this.createdFrom || undefined,
-      this.createdTo || undefined,
+      this.filterQuery || undefined,
+      roles,
+      statuses,
+      this.filterCreatedFrom || undefined,
+      this.filterCreatedTo || undefined,
       this.page,
       this.size
     )
       .pipe(finalize(() => { this.loading = false; this.cdr.markForCheck(); }))
       .subscribe({
-        next: data => {
+        next: (data) => {
           this.users = data.content ?? [];
           this.totalElements = data.totalElements ?? 0;
           this.selectedIds.clear();
           this.applySorting();
-          this.cdr.markForCheck();
+          this.showToast('Users loaded successfully', 'info');
         },
         error: () => {
-          this.error = 'Impossible de charger la liste des utilisateurs. Réessayez.';
+          this.error = 'Failed to load users. Please try again.';
           this.cdr.markForCheck();
         }
       });
   }
 
-  get totalPages(): number {
-    return Math.max(1, Math.ceil(this.totalElements / this.size));
+  /**
+   * Refresh users with UI feedback
+   */
+  refreshUsers(): void {
+    this.showToast('Refreshing user list...', 'info');
+    this.loadUsers();
   }
 
-  toggleSelect(userId?: number): void {
-    if (!userId) return;
-    if (this.selectedIds.has(userId)) {
-      this.selectedIds.delete(userId);
-    } else {
-      this.selectedIds.add(userId);
-    }
-    this.cdr.markForCheck();
+  /**
+   * Load available agents
+   */
+  loadAgents(): void {
+    this.api.getAgents(0, 100).subscribe({
+      next: (data) => {
+        this.agents = data.content ?? [];
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.agents = [];
+      }
+    });
   }
 
-  isSelected(userId?: number): boolean {
-    return !!userId && this.selectedIds.has(userId);
-  }
-
-  updateStatus(user: UserResponse): void {
-    if (!user.userId) return;
-    const newStatus = user.status === 'ACTIVE' ? 'BLOCKED' : 'ACTIVE';
-    
-    this.loading = true;
-    this.cdr.markForCheck();
-
-    const request = newStatus === 'BLOCKED' ? this.api.blockUser(user.userId) : this.api.activateUser(user.userId);
-    
-    request.pipe(finalize(() => { this.loading = false; this.cdr.markForCheck(); }))
-      .subscribe({
-        next: () => this.loadUsers(),
-        error: () => {
-          this.error = 'Erreur lors du changement de statut.';
-          this.cdr.markForCheck();
-        }
-      });
-  }
-
-  deleteUser(user: UserResponse): void {
-    if (!user.userId) return;
-    if (user.role === 'ADMIN') {
-      this.error = 'La suppression des administrateurs est désactivée.';
-      this.cdr.markForCheck();
-      return;
-    }
-
-    if (!window.confirm(`Supprimer ${user.firstName} ${user.lastName} ?`)) {
-      return;
-    }
-
-    this.loading = true;
+  /**
+   * Create new user
+   */
+  createUser(): void {
+    this.createLoading = true;
     this.error = null;
     this.cdr.markForCheck();
 
-    this.api.deleteUser(user.userId)
-      .pipe(finalize(() => { this.loading = false; this.cdr.markForCheck(); }))
+    this.api.createUser({
+      firstName: this.newUser.firstName,
+      lastName: this.newUser.lastName,
+      email: this.newUser.email,
+      phone: this.newUser.phone,
+      password: this.newUser.password,
+      role: this.newUser.role,
+      status: this.newUser.status
+    } as UserResponse)
+      .pipe(finalize(() => { this.createLoading = false; this.cdr.markForCheck(); }))
       .subscribe({
-        next: () => this.loadUsers(),
-        error: () => {
-          this.error = 'Impossible de supprimer cet utilisateur.';
-          this.cdr.markForCheck();
+        next: () => {
+          this.showToast(`User ${this.newUser.firstName} created successfully!`, 'success');
+          this.closeAddUserModal();
+          this.resetAddUserForm();
+          this.page = 0;
+          this.loadUsers();
+        },
+        error: (err) => {
+          const msg = err.error?.message || 'Failed to create user. Please check the information.';
+          this.error = msg;
+          this.showToast(msg, 'error');
         }
       });
   }
 
+  /**
+   * Update user details
+   */
+  updateUser(): void {
+    if (!this.editingUser?.userId) return;
+
+    this.editLoading = true;
+    this.error = null;
+    this.cdr.markForCheck();
+
+    this.api.updateUser(this.editingUser.userId, {
+      firstName: this.editingUser.firstName,
+      lastName: this.editingUser.lastName,
+      email: this.editingUser.email,
+      phone: this.editingUser.phone,
+      role: this.editingUser.role,
+      status: this.editingUser.status
+    } as UserResponse)
+      .pipe(finalize(() => { this.editLoading = false; this.cdr.markForCheck(); }))
+      .subscribe({
+        next: () => {
+          this.showToast('User updated successfully!', 'success');
+          this.closeEditUserModal();
+          this.loadUsers();
+        },
+        error: (err) => {
+          const msg = err.error?.message || 'Failed to update user.';
+          this.error = msg;
+          this.showToast(msg, 'error');
+        }
+      });
+  }
+
+  /**
+   * Delete user (with confirmation)
+   */
+  deleteUser(user: UserResponse): void {
+    if (!user.userId) return;
+    if (user.role === 'ADMIN') {
+      this.error = 'Administrators cannot be deleted';
+      this.cdr.markForCheck();
+      return;
+    }
+    this.userToDelete = user;
+    this.showDeleteConfirm = true;
+    this.cdr.markForCheck();
+  }
+
+  /**
+   * Confirm user deletion
+   */
+  confirmDelete(): void {
+    if (!this.userToDelete?.userId) return;
+
+    this.deleteLoading = true;
+    this.cdr.markForCheck();
+
+    this.api.deleteUser(this.userToDelete.userId)
+      .pipe(finalize(() => { this.deleteLoading = false; this.cdr.markForCheck(); }))
+      .subscribe({
+        next: () => {
+          this.showToast('User deleted successfully', 'success');
+          this.cancelDelete();
+          this.loadUsers();
+        },
+        error: () => {
+          this.error = 'Failed to delete user.';
+          this.showToast('Failed to delete user', 'error');
+        }
+      });
+  }
+
+  /**
+   * Cancel deletion
+   */
+  cancelDelete(): void {
+    this.userToDelete = null;
+    this.showDeleteConfirm = false;
+    this.cdr.markForCheck();
+  }
+
+  /**
+   * Update user status (toggle active/blocked)
+   */
+  updateStatus(user: UserResponse): void {
+    if (!user.userId) return;
+
+    this.loading = true;
+    this.cdr.markForCheck();
+
+    const newStatus = user.status === 'ACTIVE' ? 'BLOCKED' : 'ACTIVE';
+    const request = newStatus === 'BLOCKED' 
+      ? this.api.blockUser(user.userId) 
+      : this.api.activateUser(user.userId);
+
+    request.pipe(finalize(() => { this.loading = false; this.cdr.markForCheck(); }))
+      .subscribe({
+        next: () => {
+          this.showToast(`User ${newStatus === 'BLOCKED' ? 'blocked' : 'activated'} successfully`, 'success');
+          this.loadUsers();
+        },
+        error: () => {
+          this.error = 'Failed to update user status.';
+          this.showToast('Failed to update status', 'error');
+        }
+      });
+  }
+
+  /**
+   * Change user role
+   */
   changeRole(user: UserResponse, role: UserRole): void {
     if (!user.userId || user.role === role) return;
 
@@ -202,39 +304,50 @@ export class AdminUsersPageComponent implements OnInit {
     this.api.changeUserRole(user.userId, role)
       .pipe(finalize(() => { this.loading = false; this.cdr.markForCheck(); }))
       .subscribe({
-        next: () => this.loadUsers(),
+        next: () => {
+          this.showToast('User role updated', 'success');
+          this.loadUsers();
+        },
         error: () => {
-          this.error = 'Impossible de mettre à jour le rôle.';
-          this.cdr.markForCheck();
+          this.error = 'Failed to update role.';
+          this.showToast('Failed to update role', 'error');
         }
       });
   }
 
+  /**
+   * Assign client to agent
+   */
   assignAgent(user: UserResponse, agentIdStr: string): void {
     if (!user.userId) return;
     const agentId = parseInt(agentIdStr, 10);
-    
+
     this.loading = true;
     this.error = null;
     this.cdr.markForCheck();
 
-    const request = isNaN(agentId) 
+    const request = isNaN(agentId)
       ? this.api.unassignClient(user.userId)
       : this.api.assignClient(agentId, user.userId);
 
     request.pipe(finalize(() => { this.loading = false; this.cdr.markForCheck(); }))
       .subscribe({
-        next: () => this.loadUsers(),
+        next: () => {
+          this.showToast('Assignment updated', 'success');
+          this.loadUsers();
+        },
         error: () => {
-          this.error = 'Erreur lors de l’assignation.';
-          this.cdr.markForCheck();
+          this.error = 'Failed to assign agent.';
+          this.showToast('Failed to assign agent', 'error');
         }
       });
   }
 
+  // ==================== BULK OPERATIONS ====================
+
   bulkDelete(): void {
     if (this.selectedIds.size === 0) return;
-    if (!confirm(`Supprimer ${this.selectedIds.size} utilisateur(s) ?`)) return;
+    if (!confirm(`Delete ${this.selectedIds.size} user(s)? This cannot be undone.`)) return;
 
     this.loading = true;
     this.cdr.markForCheck();
@@ -243,12 +356,13 @@ export class AdminUsersPageComponent implements OnInit {
       .pipe(finalize(() => { this.loading = false; this.cdr.markForCheck(); }))
       .subscribe({
         next: () => {
+          this.showToast('Users deleted successfully', 'success');
           this.selectedIds.clear();
           this.loadUsers();
         },
         error: () => {
-          this.error = 'Erreur lors de la suppression groupée.';
-          this.cdr.markForCheck();
+          this.error = 'Failed to delete selected users.';
+          this.showToast('Bulk delete failed', 'error');
         }
       });
   }
@@ -263,294 +377,152 @@ export class AdminUsersPageComponent implements OnInit {
       .pipe(finalize(() => { this.loading = false; this.cdr.markForCheck(); }))
       .subscribe({
         next: () => {
+          this.showToast(`Users status updated to ${status}`, 'success');
           this.selectedIds.clear();
           this.loadUsers();
         },
         error: () => {
-          this.error = 'Erreur lors de la mise à jour groupée.';
-          this.cdr.markForCheck();
+          this.error = 'Failed to update user statuses.';
+          this.showToast('Bulk status update failed', 'error');
         }
       });
   }
 
-  openAddUserForm(): void {
-    this.showAddUserForm = true;
-    this.createSuccess = null;
-    this.error = null;
-    this.cdr.markForCheck();
-  }
+  // ==================== EXPORT OPERATIONS ====================
 
-  closeAddUserForm(): void {
-    this.showAddUserForm = false;
-    this.createSuccess = null;
-    this.error = null;
-    this.resetAddUserForm();
-    this.cdr.markForCheck();
-  }
-
-  resetAddUserForm(): void {
-    this.newUser = {
-      firstName: '',
-      lastName: '',
-      email: '',
-      phoneNumber: '',
-      password: '',
-      role: 'CLIENT',
-      status: 'ACTIVE'
-    };
-  }
-
-  createUser(): void {
-    this.createLoading = true;
-    this.createSuccess = null;
-    this.error = null;
+  exportCsv(): void {
+    this.exportLoading = true;
     this.cdr.markForCheck();
 
-    const payload = {
-      firstName: this.newUser.firstName,
-      lastName: this.newUser.lastName,
-      email: this.newUser.email,
-      phoneNumber: this.newUser.phoneNumber,
-      password: this.newUser.password,
-      role: this.newUser.role,
-      status: this.newUser.status
-    };
+    const ids = Array.from(this.selectedIds);
+    const roles = this.filterRoles.length > 0 ? (this.filterRoles as UserRole[]) : undefined;
+    const statuses = this.filterStatus.length > 0 ? (this.filterStatus as UserStatus[]) : undefined;
 
-    this.api.createUser(payload as UserResponse)
-      .pipe(finalize(() => { this.createLoading = false; this.cdr.markForCheck(); }))
+    const request = ids.length > 0
+      ? this.api.exportSelectedCsv(ids)
+      : this.api.exportUsersCsv(
+          this.filterQuery || undefined,
+          roles,
+          statuses,
+          this.filterCreatedFrom || undefined,
+          this.filterCreatedTo || undefined
+        );
+
+    request.pipe(finalize(() => { this.exportLoading = false; this.cdr.markForCheck(); }))
       .subscribe({
-        next: () => {
-          this.showToast(`User ${this.newUser.firstName} ${this.newUser.lastName} created successfully!`, 'success');
-          this.closeAddUserForm();
-          this.loadUsers();
-          this.resetAddUserForm();
+        next: (blob: Blob) => {
+          const timestamp = new Date().toISOString().split('T')[0];
+          const filename = ids.length > 0 ? `selected-users-${timestamp}.csv` : `users-export-${timestamp}.csv`;
+          this.downloadFile(blob, filename, 'text/csv');
+          this.showToast('CSV exported successfully', 'success');
+          this.exportDropdownOpen = false;
         },
-        error: (error) => {
-          const errorMessage = error.error?.message || 'Failed to create user. Please check the information and try again.';
-          this.showToast(errorMessage, 'error');
+        error: () => {
+          this.showToast('Failed to export CSV', 'error');
         }
       });
   }
 
-  goToPage(page: number): void {
-    if (page < 0 || page >= this.totalPages) return;
-    this.page = page;
-    this.loadUsers();
-  }
+  exportExcel(): void {
+    this.exportLoading = true;
+    this.cdr.markForCheck();
 
-  get totalUsers(): number {
-    return this.totalElements;
-  }
+    const ids = Array.from(this.selectedIds);
+    const roles = this.filterRoles.length > 0 ? (this.filterRoles as UserRole[]) : undefined;
+    const statuses = this.filterStatus.length > 0 ? (this.filterStatus as UserStatus[]) : undefined;
 
-  get activeUsersCount(): number {
-    return this.users.filter(u => u.status === 'ACTIVE').length;
-  }
+    const request = ids.length > 0
+      ? this.api.exportSelectedExcel(ids)
+      : this.api.exportUsersExcel(
+          this.filterQuery || undefined,
+          roles,
+          statuses,
+          this.filterCreatedFrom || undefined,
+          this.filterCreatedTo || undefined
+        );
 
-  get blockedUsersCount(): number {
-    return this.users.filter(u => u.status === 'BLOCKED').length;
-  }
-
-  get newUsers24h(): number {
-    const cutoff = Date.now() - 24 * 60 * 60 * 1000;
-    return this.users.filter(u => u.createdAt ? new Date(u.createdAt).getTime() >= cutoff : false).length;
-  }
-
-  get healthIndex(): number {
-    return 59;
-  }
-
-  get healthLabel(): string {
-    return 'Fair';
-  }
-
-  get selectedCount(): number {
-    return this.selectedIds.size;
-  }
-
-  get isAllSelected(): boolean {
-    return this.users.length > 0 && this.selectedIds.size === this.users.length;
-  }
-
-  toggleSelectAll(event: Event): void {
-    const checked = (event.target as HTMLInputElement).checked;
-    if (checked) {
-      this.users.forEach(user => {
-        if (user.userId) {
-          this.selectedIds.add(user.userId);
+    request.pipe(finalize(() => { this.exportLoading = false; this.cdr.markForCheck(); }))
+      .subscribe({
+        next: (blob: Blob) => {
+          const timestamp = new Date().toISOString().split('T')[0];
+          const filename = ids.length > 0 ? `selected-users-${timestamp}.xlsx` : `users-export-${timestamp}.xlsx`;
+          this.downloadFile(blob, filename, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+          this.showToast('Excel exported successfully', 'success');
+          this.exportDropdownOpen = false;
+        },
+        error: () => {
+          this.showToast('Failed to export Excel', 'error');
         }
       });
-    } else {
-      this.selectedIds.clear();
-    }
-    this.cdr.markForCheck();
   }
 
-  sortBy(key: keyof UserResponse): void {
-    if (this.sortKey === key) {
-      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
-    } else {
-      this.sortKey = key;
-      this.sortDirection = 'asc';
-    }
-    this.applySorting();
+  private downloadFile(blob: Blob, filename: string, mimeType: string): void {
+    const url = window.URL.createObjectURL(new Blob([blob], { type: mimeType }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', filename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
   }
 
-  private applySorting(): void {
-    const direction = this.sortDirection === 'asc' ? 1 : -1;
+  // ==================== FILTERS ====================
 
-    this.users = [...this.users].sort((a, b) => {
-      const valueA = a[this.sortKey] ?? '';
-      const valueB = b[this.sortKey] ?? '';
-
-      if (this.sortKey === 'createdAt') {
-        return (new Date(valueA as string).getTime() - new Date(valueB as string).getTime()) * direction;
-      }
-
-      const aStr = String(valueA).toLowerCase();
-      const bStr = String(valueB).toLowerCase();
-      return aStr.localeCompare(bStr) * direction;
-    });
-    this.cdr.markForCheck();
-  }
-
-  getStatusClass(status: UserStatus): string {
-    return `status--${status?.toLowerCase()}`;
-  }
-
-  getRoleClass(role: UserRole): string {
-    return `role--${role?.toLowerCase()}`;
-  }
-
-  private showToast(message: string, type: 'success' | 'error' | 'info' = 'info'): void {
-    // Simple toast implementation - in a real app, you'd use a toast service
-    const toast = document.createElement('div');
-    toast.className = `toast toast--${type}`;
-    toast.textContent = message;
-    toast.style.cssText = `
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      padding: 12px 16px;
-      border-radius: 4px;
-      color: white;
-      font-weight: 500;
-      z-index: 1000;
-      background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-      animation: slideIn 0.3s ease-out;
-    `;
-
-    document.body.appendChild(toast);
-
-    setTimeout(() => {
-      toast.style.animation = 'slideOut 0.3s ease-in';
-      setTimeout(() => {
-        document.body.removeChild(toast);
-      }, 300);
-    }, 3000);
-  }
-
-  // Modal methods
   openAdvancedFiltersModal(): void {
     this.showAdvancedFiltersModal = true;
-    this.filteredResultsCount = null;
     this.cdr.markForCheck();
   }
 
   closeAdvancedFiltersModal(): void {
     this.showAdvancedFiltersModal = false;
+    this.cdr.markForCheck();
+  }
+
+  resetAdvancedFilters(): void {
+    this.filterQuery = '';
+    this.filterRoles = [];
+    this.filterStatus = [];
+    this.filterCreatedFrom = '';
+    this.filterCreatedTo = '';
     this.filteredResultsCount = null;
     this.cdr.markForCheck();
   }
 
-  openAddUserModal(): void {
-    this.showAddUserModal = true;
-    this.createSuccess = null;
-    this.error = null;
-    this.resetAddUserForm();
-    this.cdr.markForCheck();
-  }
-
-  closeAddUserModal(): void {
-    this.showAddUserModal = false;
-    this.createSuccess = null;
-    this.error = null;
-    this.resetAddUserForm();
-    this.cdr.markForCheck();
-  }
-
-  toggleExportDropdown(): void {
-    this.exportDropdownOpen = !this.exportDropdownOpen;
-    this.cdr.markForCheck();
-  }
-
-  togglePasswordVisibility(): void {
-    this.showPassword = !this.showPassword;
-    this.cdr.markForCheck();
-  }
-
-  // Advanced filters methods
   onFilterChange(): void {
-    // Debounce filter changes
     clearTimeout(this.filterTimeout);
     this.filterTimeout = setTimeout(() => {
       this.updateFilteredResultsCount();
     }, 300);
   }
 
-  private filterTimeout: any;
-
   updateFilteredResultsCount(): void {
-    // This would typically call a backend endpoint to get filtered count
-    // For now, we'll simulate it with local filtering
-    const filtered = this.users.filter(user => {
-      const matchesRole = this.filterRoles.length === 0 || this.filterRoles.includes(user.role);
-      const matchesStatus = this.filterStatus.length === 0 || this.filterStatus.includes(user.status);
-      const matchesQuery = !this.filterQuery ||
-        user.firstName.toLowerCase().includes(this.filterQuery.toLowerCase()) ||
-        user.lastName.toLowerCase().includes(this.filterQuery.toLowerCase()) ||
-        user.email.toLowerCase().includes(this.filterQuery.toLowerCase());
+    const roles = this.filterRoles.length > 0 ? (this.filterRoles as UserRole[]) : undefined;
+    const statuses = this.filterStatus.length > 0 ? (this.filterStatus as UserStatus[]) : undefined;
 
-      let matchesDate = true;
-      if (this.filterCreatedFrom || this.filterCreatedTo) {
-        const userDate = user.createdAt ? new Date(user.createdAt) : null;
-        if (userDate) {
-          if (this.filterCreatedFrom) {
-            matchesDate = matchesDate && userDate >= new Date(this.filterCreatedFrom);
-          }
-          if (this.filterCreatedTo) {
-            matchesDate = matchesDate && userDate <= new Date(this.filterCreatedTo + 'T23:59:59');
-          }
-        }
+    this.api.findUsers(
+      this.filterQuery || undefined,
+      roles,
+      statuses,
+      this.filterCreatedFrom || undefined,
+      this.filterCreatedTo || undefined,
+      0,
+      1
+    ).subscribe({
+      next: (data) => {
+        this.filteredResultsCount = data.totalElements ?? 0;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.filteredResultsCount = null;
       }
-
-      return matchesRole && matchesStatus && matchesQuery && matchesDate;
     });
-
-    this.filteredResultsCount = filtered.length;
-    this.cdr.markForCheck();
   }
 
   applyAdvancedFilters(): void {
-    // Apply filters to current search
-    this.query = this.filterQuery;
-    this.roleFilter = this.filterRoles.length === 1 ? this.filterRoles[0] as UserRole : '';
-    this.statusFilter = this.filterStatus.length === 1 ? this.filterStatus[0] as UserStatus : '';
-    this.createdFrom = this.filterCreatedFrom;
-    this.createdTo = this.filterCreatedTo;
     this.page = 0;
     this.loadUsers();
     this.closeAdvancedFiltersModal();
-  }
-
-  resetAdvancedFilters(): void {
-    this.filterRoles = [];
-    this.filterStatus = [];
-    this.filterCreatedFrom = '';
-    this.filterCreatedTo = '';
-    this.filterQuery = '';
-    this.filteredResultsCount = null;
-    this.cdr.markForCheck();
   }
 
   hasActiveFilters(): boolean {
@@ -570,77 +542,217 @@ export class AdminUsersPageComponent implements OnInit {
     return count;
   }
 
-  // Export methods
-  exportCsv(): void {
-    this.exportLoading = true;
+  // ==================== MODALS ====================
+
+  openAddUserModal(): void {
+    this.showAddUserModal = true;
+    this.error = null;
+    this.resetAddUserForm();
     this.cdr.markForCheck();
-
-    const ids = Array.from(this.selectedIds);
-    const request = ids.length > 0
-      ? this.api.exportSelectedCsv(ids)
-      : this.api.exportUsersCsv(this.query || undefined, this.roleFilter || undefined, this.statusFilter || undefined, this.createdFrom || undefined, this.createdTo || undefined);
-
-    request.pipe(finalize(() => { this.exportLoading = false; this.cdr.markForCheck(); }))
-      .subscribe({
-        next: (blob: Blob) => {
-          const timestamp = new Date().toISOString().split('T')[0];
-          const filename = ids.length > 0 ? `selected-users-${timestamp}.csv` : `users-export-${timestamp}.csv`;
-          // downloadBlob(blob, filename); // TODO: Fix import issue
-          this.showToast('CSV export completed successfully', 'success');
-        },
-        error: () => {
-          this.showToast('Failed to export CSV. Please try again.', 'error');
-          this.cdr.markForCheck();
-        }
-      });
   }
 
-  exportExcel(): void {
-    this.exportLoading = true;
+  closeAddUserModal(): void {
+    this.showAddUserModal = false;
+    this.error = null;
+    this.resetAddUserForm();
     this.cdr.markForCheck();
-
-    const ids = Array.from(this.selectedIds);
-    const request = ids.length > 0
-      ? this.api.exportSelectedExcel(ids)
-      : this.api.exportUsersExcel(this.query || undefined, this.roleFilter || undefined, this.statusFilter || undefined, this.createdFrom || undefined, this.createdTo || undefined);
-
-    request.pipe(finalize(() => { this.exportLoading = false; this.cdr.markForCheck(); }))
-      .subscribe({
-        next: (blob: Blob) => {
-          const timestamp = new Date().toISOString().split('T')[0];
-          const filename = ids.length > 0 ? `selected-users-${timestamp}.xlsx` : `users-export-${timestamp}.xlsx`;
-          // downloadBlob(blob, filename); // TODO: Fix import issue
-          this.showToast('Excel export completed successfully', 'success');
-        },
-        error: () => {
-          this.showToast('Failed to export Excel. Please try again.', 'error');
-          this.cdr.markForCheck();
-        }
-      });
   }
 
-  exportPdf(): void {
-    this.exportLoading = true;
+  openViewUserModal(user: UserResponse): void {
+    this.viewingUser = user;
+    this.showViewUserModal = true;
     this.cdr.markForCheck();
+  }
 
-    // For now, we'll use Excel export as PDF alternative
-    const ids = Array.from(this.selectedIds);
-    const request = ids.length > 0
-      ? this.api.exportSelectedExcel(ids)
-      : this.api.exportUsersExcel(this.query || undefined, this.roleFilter || undefined, this.statusFilter || undefined, this.createdFrom || undefined, this.createdTo || undefined);
+  closeViewUserModal(): void {
+    this.viewingUser = null;
+    this.showViewUserModal = false;
+    this.cdr.markForCheck();
+  }
 
-    request.pipe(finalize(() => { this.exportLoading = false; this.cdr.markForCheck(); }))
-      .subscribe({
-        next: (blob: Blob) => {
-          const timestamp = new Date().toISOString().split('T')[0];
-          const filename = ids.length > 0 ? `selected-users-${timestamp}.xlsx` : `users-export-${timestamp}.xlsx`;
-          // downloadBlob(blob, filename); // TODO: Fix import issue
-          this.showToast('Export completed successfully (Excel format)', 'success');
-        },
-        error: () => {
-          this.showToast('Failed to export. Please try again.', 'error');
-          this.cdr.markForCheck();
+  openEditUserModal(user: UserResponse): void {
+    this.editingUser = { ...user };
+    this.showEditUserModal = true;
+    this.error = null;
+    this.cdr.markForCheck();
+  }
+
+  closeEditUserModal(): void {
+    this.editingUser = null;
+    this.showEditUserModal = false;
+    this.error = null;
+    this.cdr.markForCheck();
+  }
+
+  // ==================== DROPDOWN & UI ====================
+
+  toggleExportDropdown(): void {
+    this.exportDropdownOpen = !this.exportDropdownOpen;
+    this.cdr.markForCheck();
+  }
+
+  togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
+    this.cdr.markForCheck();
+  }
+
+  // ==================== TABLE OPERATIONS ====================
+
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.totalElements / this.size));
+  }
+
+  goToPage(page: number): void {
+    if (page < 0 || page >= this.totalPages) return;
+    this.page = page;
+    this.loadUsers();
+  }
+
+  sortBy(key: keyof UserResponse): void {
+    if (this.sortKey === key) {
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortKey = key;
+      this.sortDirection = 'asc';
+    }
+    this.applySorting();
+  }
+
+  private applySorting(): void {
+    const direction = this.sortDirection === 'asc' ? 1 : -1;
+
+    this.users = [...this.users].sort((a, b) => {
+      let valueA = a[this.sortKey] ?? '';
+      let valueB = b[this.sortKey] ?? '';
+
+      if (this.sortKey === 'createdAt') {
+        return (new Date(valueA as string).getTime() - new Date(valueB as string).getTime()) * direction;
+      }
+
+      const aStr = String(valueA).toLowerCase();
+      const bStr = String(valueB).toLowerCase();
+      return aStr.localeCompare(bStr) * direction;
+    });
+
+    this.cdr.markForCheck();
+  }
+
+  toggleSelect(userId?: number): void {
+    if (!userId) return;
+    if (this.selectedIds.has(userId)) {
+      this.selectedIds.delete(userId);
+    } else {
+      this.selectedIds.add(userId);
+    }
+    this.cdr.markForCheck();
+  }
+
+  isSelected(userId?: number): boolean {
+    return !!userId && this.selectedIds.has(userId);
+  }
+
+  toggleSelectAll(event: Event): void {
+    const checked = (event.target as HTMLInputElement).checked;
+    if (checked) {
+      this.users.forEach(user => {
+        if (user.userId) {
+          this.selectedIds.add(user.userId);
         }
       });
+    } else {
+      this.selectedIds.clear();
+    }
+    this.cdr.markForCheck();
+  }
+
+  get isAllSelected(): boolean {
+    return this.users.length > 0 && this.selectedIds.size === this.users.length;
+  }
+
+  get selectedCount(): number {
+    return this.selectedIds.size;
+  }
+
+  // ==================== HELPERS ====================
+
+  getStatusClass(status: UserStatus): string {
+    return `status--${status?.toLowerCase()}`;
+  }
+
+  getRoleClass(role: UserRole): string {
+    return `role--${role?.toLowerCase()}`;
+  }
+
+  private resetAddUserForm(): void {
+    this.newUser = {
+      firstName: '',
+      lastName: '',
+      email: '',
+      phone: '',
+      password: '',
+      role: 'CLIENT',
+      status: 'ACTIVE'
+    };
+  }
+
+  private showToast(message: string, type: 'success' | 'error' | 'info' = 'info'): void {
+    const toast = document.createElement('div');
+    toast.className = `toast toast--${type}`;
+    toast.textContent = message;
+    toast.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 12px 16px;
+      border-radius: 4px;
+      color: white;
+      font-weight: 500;
+      z-index: 10000;
+      background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      animation: slideIn 0.3s ease-out;
+    `;
+
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+      toast.style.animation = 'slideOut 0.3s ease-in';
+      setTimeout(() => {
+        document.body.removeChild(toast);
+      }, 300);
+    }, 3000);
+  }
+
+  // ==================== COMPUTED PROPERTIES ====================
+
+  get totalUsers(): number {
+    return this.totalElements;
+  }
+
+  get activeUsersCount(): number {
+    return this.users.filter(u => u.status === 'ACTIVE').length;
+  }
+
+  get blockedUsersCount(): number {
+    return this.users.filter(u => u.status === 'BLOCKED').length;
+  }
+
+  get newUsers24h(): number {
+    const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+    return this.users.filter(u => u.createdAt ? new Date(u.createdAt).getTime() >= cutoff : false).length;
+  }
+
+  get healthIndex(): number {
+    return this.activeUsersCount > 0 && this.totalUsers > 0 
+      ? Math.round((this.activeUsersCount / this.totalUsers) * 100)
+      : 0;
+  }
+
+  get healthLabel(): string {
+    const health = this.healthIndex;
+    if (health >= 80) return 'Excellent';
+    if (health >= 60) return 'Good';
+    if (health >= 40) return 'Fair';
+    return 'Poor';
   }
 }

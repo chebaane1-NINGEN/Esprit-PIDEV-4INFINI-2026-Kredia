@@ -45,75 +45,7 @@ export class AdminAnalyticsPageComponent implements OnInit {
   kpiCards: KpiCard[] = [];
   userGrowthChart: ChartData | null = null;
   roleDistributionChart: ChartData | null = null;
-  activityChart: ChartData | null = null;
   approvalChart: ChartData | null = null;
-
-  // Mock data for demonstration
-  private mockUserGrowth = [
-    { date: '2024-01-01', users: 120 },
-    { date: '2024-01-02', users: 135 },
-    { date: '2024-01-03', users: 142 },
-    { date: '2024-01-04', users: 158 },
-    { date: '2024-01-05', users: 167 },
-    { date: '2024-01-06', users: 175 },
-    { date: '2024-01-07', users: 189 },
-    { date: '2024-01-08', users: 201 },
-    { date: '2024-01-09', users: 218 },
-    { date: '2024-01-10', users: 235 },
-    { date: '2024-01-11', users: 248 },
-    { date: '2024-01-12', users: 262 },
-    { date: '2024-01-13', users: 278 },
-    { date: '2024-01-14', users: 295 },
-    { date: '2024-01-15', users: 312 },
-    { date: '2024-01-16', users: 328 },
-    { date: '2024-01-17', users: 345 },
-    { date: '2024-01-18', users: 362 },
-    { date: '2024-01-19', users: 378 },
-    { date: '2024-01-20', users: 395 },
-    { date: '2024-01-21', users: 412 },
-    { date: '2024-01-22', users: 428 },
-    { date: '2024-01-23', users: 445 },
-    { date: '2024-01-24', users: 462 },
-    { date: '2024-01-25', users: 478 },
-    { date: '2024-01-26', users: 495 },
-    { date: '2024-01-27', users: 512 },
-    { date: '2024-01-28', users: 528 },
-    { date: '2024-01-29', users: 545 },
-    { date: '2024-01-30', users: 562 }
-  ];
-
-  private mockActivityData = [
-    { date: '2024-01-01', logins: 89, actions: 234 },
-    { date: '2024-01-02', logins: 95, actions: 245 },
-    { date: '2024-01-03', logins: 102, actions: 267 },
-    { date: '2024-01-04', logins: 108, actions: 289 },
-    { date: '2024-01-05', logins: 115, actions: 301 },
-    { date: '2024-01-06', logins: 121, actions: 315 },
-    { date: '2024-01-07', logins: 128, actions: 328 },
-    { date: '2024-01-08', logins: 134, actions: 342 },
-    { date: '2024-01-09', logins: 141, actions: 356 },
-    { date: '2024-01-10', logins: 147, actions: 369 },
-    { date: '2024-01-11', logins: 154, actions: 382 },
-    { date: '2024-01-12', logins: 160, actions: 395 },
-    { date: '2024-01-13', logins: 167, actions: 408 },
-    { date: '2024-01-14', logins: 173, actions: 421 },
-    { date: '2024-01-15', logins: 180, actions: 434 },
-    { date: '2024-01-16', logins: 186, actions: 447 },
-    { date: '2024-01-17', logins: 193, actions: 460 },
-    { date: '2024-01-18', logins: 199, actions: 473 },
-    { date: '2024-01-19', logins: 206, actions: 486 },
-    { date: '2024-01-20', logins: 212, actions: 499 },
-    { date: '2024-01-21', logins: 219, actions: 512 },
-    { date: '2024-01-22', logins: 225, actions: 525 },
-    { date: '2024-01-23', logins: 232, actions: 538 },
-    { date: '2024-01-24', logins: 238, actions: 551 },
-    { date: '2024-01-25', logins: 245, actions: 564 },
-    { date: '2024-01-26', logins: 251, actions: 577 },
-    { date: '2024-01-27', logins: 258, actions: 590 },
-    { date: '2024-01-28', logins: 264, actions: 603 },
-    { date: '2024-01-29', logins: 271, actions: 616 },
-    { date: '2024-01-30', logins: 277, actions: 629 }
-  ];
 
   ngOnInit(): void {
     this.loadAnalytics();
@@ -144,10 +76,7 @@ export class AdminAnalyticsPageComponent implements OnInit {
         });
       },
       error: () => {
-        // Use mock data if API fails
-        this.stats = this.getMockStats();
-        this.systemStats = this.getMockSystemStats();
-        this.processAnalyticsData();
+        this.error = 'Impossible de charger les statistiques administratives. Réessayez ultérieurement.';
         this.loading = false;
         this.cdr.markForCheck();
       }
@@ -170,131 +99,95 @@ export class AdminAnalyticsPageComponent implements OnInit {
     const totalUsers = this.stats.totalUser || 0;
     const activeUsers = this.stats.activeUser || 0;
     const newUsers24h = this.stats.last24hRegistrations || 0;
+    const approvalCount = this.stats.approvalCount ?? 0;
+    const rejectionCount = this.stats.rejectionCount ?? 0;
 
-    // Growth Rate: (New Users / Total Users) * 100
-    const growthRate = totalUsers > 0 ? (newUsers24h / totalUsers) * 100 : 0;
-
-    // Approval Rate (mock calculation - would come from backend)
-    const totalApprovals = Math.floor(totalUsers * 0.7); // Mock: 70% approval rate
-    const totalRejections = Math.floor(totalUsers * 0.3); // Mock: 30% rejection rate
-    const approvalRate = (totalApprovals / (totalApprovals + totalRejections)) * 100;
-
-    // System Health (from stats or calculated)
-    const systemHealth = this.stats.systemHealthIndex || 85.5;
+    const growthRate = this.calculateGrowthRate();
+    const approvalRate = approvalCount + rejectionCount > 0
+      ? (approvalCount / (approvalCount + rejectionCount)) * 100
+      : 0;
+    const systemHealth = this.stats.systemHealthIndex ?? 0;
 
     this.kpiCards = [
       {
         title: 'Total Users',
         value: totalUsers.toLocaleString(),
-        change: 12.5,
-        changeType: 'positive',
         icon: '👥',
         description: 'All registered users'
       },
       {
         title: 'Active Users',
         value: activeUsers.toLocaleString(),
-        change: 8.2,
-        changeType: 'positive',
         icon: '✅',
         description: 'Users active in last 30 days'
       },
       {
         title: 'New Users (24h)',
         value: newUsers24h.toLocaleString(),
-        change: -2.1,
-        changeType: 'negative',
         icon: '🆕',
-        description: 'Registrations in last 24 hours'
+        description: 'Registrations during the last 24 hours'
       },
       {
         title: 'Growth Rate',
         value: `${growthRate.toFixed(1)}%`,
-        change: 5.3,
-        changeType: 'positive',
         icon: '📈',
-        description: 'Monthly growth percentage'
+        description: 'Change in registration volume'
       },
       {
         title: 'Approval Rate',
         value: `${approvalRate.toFixed(1)}%`,
-        change: 1.8,
-        changeType: 'positive',
         icon: '👍',
-        description: 'Application approval rate'
+        description: 'Application approval performance'
       },
       {
         title: 'System Health',
         value: `${systemHealth.toFixed(1)}%`,
-        change: 0.5,
-        changeType: 'neutral',
         icon: '⚡',
-        description: 'Overall system performance'
+        description: 'Backend health and user activity'
       }
     ];
   }
 
   private generateCharts(): void {
     // User Growth Chart
-    const growthData = this.getFilteredUserGrowth();
-    this.userGrowthChart = {
-      labels: growthData.map(d => d.label),
-      datasets: [{
-        label: 'New Users',
-        data: growthData.map(d => d.value),
-        backgroundColor: 'rgba(124, 58, 237, 0.1)',
-        borderColor: '#7c3aed',
-        fill: true
-      }]
-    };
+    const growthData = this.getRegistrationEvolutionData();
+    if (growthData.length > 0) {
+      this.userGrowthChart = {
+        labels: growthData.map(d => d.label),
+        datasets: [{
+          label: 'New Users',
+          data: growthData.map(d => d.value),
+          backgroundColor: 'rgba(124, 58, 237, 0.1)',
+          borderColor: '#7c3aed',
+          fill: true
+        }]
+      };
+    } else {
+      this.userGrowthChart = null;
+    }
 
     // Role Distribution Chart
+    const roleDistribution = this.stats?.roleDistribution ?? {};
+    const labels = Object.keys(roleDistribution);
+    const values = labels.map(label => roleDistribution[label] ?? 0);
+    const colors = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444'];
     this.roleDistributionChart = {
-      labels: ['Admin', 'Agent', 'Client'],
+      labels,
       datasets: [{
         label: 'Users by Role',
-        data: [
-          Math.floor((this.stats?.totalUser || 0) * 0.05), // 5% admins
-          Math.floor((this.stats?.totalUser || 0) * 0.15), // 15% agents
-          Math.floor((this.stats?.totalUser || 0) * 0.80)  // 80% clients
-        ],
-        backgroundColor: [
-          '#ef4444',
-          '#f59e0b',
-          '#10b981'
-        ]
+        data: values,
+        backgroundColor: colors.slice(0, values.length)
       }]
-    };
-
-    // Activity Chart
-    const activityData = this.getFilteredActivityData();
-    this.activityChart = {
-      labels: activityData.map(d => d.label),
-      datasets: [
-        {
-          label: 'User Logins',
-          data: activityData.map(d => d.logins),
-          backgroundColor: 'rgba(59, 130, 246, 0.8)',
-          borderColor: '#3b82f6'
-        },
-        {
-          label: 'Total Actions',
-          data: activityData.map(d => d.actions),
-          backgroundColor: 'rgba(16, 185, 129, 0.8)',
-          borderColor: '#10b981'
-        }
-      ]
     };
 
     // Approval vs Rejection Chart
-    const totalApprovals = Math.floor((this.stats?.totalUser || 0) * 0.7);
-    const totalRejections = Math.floor((this.stats?.totalUser || 0) * 0.3);
-
+    const approvalCount = this.stats?.approvalCount ?? 0;
+    const rejectionCount = this.stats?.rejectionCount ?? 0;
     this.approvalChart = {
       labels: ['Approved', 'Rejected'],
       datasets: [{
         label: 'Applications',
-        data: [totalApprovals, totalRejections],
+        data: [approvalCount, rejectionCount],
         backgroundColor: [
           '#10b981',
           '#ef4444'
@@ -303,43 +196,27 @@ export class AdminAnalyticsPageComponent implements OnInit {
     };
   }
 
-  private getFilteredUserGrowth(): { label: string; value: number }[] {
-    const days = this.selectedRange === 'last7' ? 7 : this.selectedRange === 'last30' ? 30 : 90;
-    return this.mockUserGrowth.slice(-days).map(item => ({
-      label: new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-      value: item.users
+  private getRegistrationEvolutionData(): { label: string; value: number }[] {
+    if (!this.stats?.registrationEvolution) {
+      return [];
+    }
+    return Object.entries(this.stats.registrationEvolution).map(([key, value]) => ({
+      label: key,
+      value
     }));
   }
 
-  private getFilteredActivityData(): { label: string; logins: number; actions: number }[] {
-    const days = this.selectedRange === 'last7' ? 7 : this.selectedRange === 'last30' ? 30 : 90;
-    return this.mockActivityData.slice(-days).map(item => ({
-      label: new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-      logins: item.logins,
-      actions: item.actions
-    }));
-  }
-
-  private getMockStats(): AdminStats {
-    return {
-      totalUser: 562,
-      activeUser: 423,
-      last24hRegistrations: 23,
-      systemHealthIndex: 85.5,
-      totalClient: 449,
-      totalAgent: 84,
-      blockedUser: 12,
-      suspendedUser: 5
-    };
-  }
-
-  private getMockSystemStats(): SystemDashboardStats {
-    return {
-      totalTransactions: 15420,
-      totalWallets: 892,
-      totalCompletedTransactionVolume: 1250000,
-      totalFraudulentTransactions: 23
-    };
+  private calculateGrowthRate(): number {
+    if (!this.stats?.registrationEvolution) {
+      return 0;
+    }
+    const values = Object.values(this.stats.registrationEvolution);
+    if (values.length < 2) {
+      return 0;
+    }
+    const lastValue = values[values.length - 1];
+    const previousValue = values[values.length - 2];
+    return previousValue > 0 ? ((lastValue - previousValue) / previousValue) * 100 : 0;
   }
 
   onRangeChange(range: 'last7' | 'last30' | 'last90'): void {
@@ -425,19 +302,20 @@ export class AdminAnalyticsPageComponent implements OnInit {
   }
 
   getTransactionSuccessRate(): number {
-    if (!this.systemStats?.totalTransactions || !this.systemStats?.totalFraudulentTransactions) {
-      return 95.5; // Mock value
+    if (!this.systemStats?.totalTransactions || this.systemStats.totalTransactions === 0) {
+      return 0;
     }
     const total = this.systemStats.totalTransactions;
-    const fraudulent = this.systemStats.totalFraudulentTransactions;
+    const fraudulent = this.systemStats.totalFraudulentTransactions ?? 0;
     return ((total - fraudulent) / total) * 100;
   }
 
   getFraudDetectionRate(): number {
-    if (!this.systemStats?.totalFraudulentTransactions) {
-      return 2.1; // Mock value
+    const fraudulent = this.systemStats?.totalFraudulentTransactions ?? 0;
+    const total = this.systemStats?.totalTransactions ?? 0;
+    if (total === 0) {
+      return 0;
     }
-    // Mock calculation: assume we detect 85% of fraudulent transactions
-    return Math.min((this.systemStats.totalFraudulentTransactions / 100) * 85, 100);
+    return Math.min((fraudulent / total) * 100, 100);
   }
 }

@@ -31,14 +31,20 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<AuthResponseDTO>> login(@Valid @RequestBody LoginRequestDTO request) {
-        String token = authService.login(request);
-        return ResponseEntity.ok(ApiResponse.ok(new AuthResponseDTO(token)));
+        try {
+            AuthResponseDTO response = authService.login(request);
+            return ResponseEntity.ok(ApiResponse.ok(response));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error("Invalid email or password"));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.error(e.getMessage()));
+        }
     }
 
     @PostMapping("/google")
     public ResponseEntity<ApiResponse<AuthResponseDTO>> loginWithGoogle(@Valid @RequestBody GoogleLoginRequestDTO request) {
         String token = authService.loginWithGoogle(request.getIdToken());
-        return ResponseEntity.ok(ApiResponse.ok(new AuthResponseDTO(token)));
+        return ResponseEntity.ok(ApiResponse.ok(new AuthResponseDTO(token, "CLIENT"))); // Default role for Google login
     }
 
     @PostMapping("/verify-email")

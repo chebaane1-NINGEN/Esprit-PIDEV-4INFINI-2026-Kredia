@@ -7,10 +7,18 @@ export interface UserResponse {
   lastName: string;
   email: string;
   phone?: string;
+  phoneNumber?: string; // Backward compatibility
   role: UserRole;
   status: UserStatus;
+  emailVerified?: boolean;
   assignedAgentId?: number;
+  assignedAgentName?: string;
   createdAt?: string;
+  updatedAt?: string;
+  dateOfBirth?: string;
+  address?: string;
+  gender?: string;
+  password?: string;
 }
 
 export interface PageResponse<T> {
@@ -38,6 +46,8 @@ export interface AdminStats {
   roleDistribution?: Record<string, number>;
   systemHealthIndex: number;
   registrationEvolution?: Record<string, number>;
+  approvalCount?: number;
+  rejectionCount?: number;
   recentActivities?: UserActivity[];
 }
 

@@ -37,6 +37,28 @@
     </div>
   </div>
 
+  <div class="recent-summary" *ngIf="summary?.mostRecentAction || summary?.mostRecentFailure">
+    <div class="summary-detail-card">
+      <h3>Most Recent Action</h3>
+      <p *ngIf="summary?.mostRecentAction; else noRecentAction">
+        <strong>{{ summary?.mostRecentAction?.actionType }}</strong> by {{ summary?.mostRecentAction?.actorName || 'Unknown' }}
+        on {{ summary?.mostRecentAction?.timestamp | date:'short' }}
+      </p>
+      <ng-template #noRecentAction>
+        <p>No recent actions recorded.</p>
+      </ng-template>
+    </div>
+    <div class="summary-detail-card">
+      <h3>Most Recent Failure</h3>
+      <p *ngIf="summary?.mostRecentFailure; else noRecentFailure">
+        <strong>{{ summary?.mostRecentFailure?.actionType }}</strong> failed on {{ summary?.mostRecentFailure?.timestamp | date:'short' }}
+      </p>
+      <ng-template #noRecentFailure>
+        <p>No failed actions recorded today.</p>
+      </ng-template>
+    </div>
+  </div>
+
   <!-- Filters -->
   <div class="filters-section">
     <div class="filters-header">

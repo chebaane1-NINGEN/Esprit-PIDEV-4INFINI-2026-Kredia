@@ -200,11 +200,26 @@
                   <span class="text-slate-600">Clients Handled:</span>
                   <span class="font-semibold text-slate-900">{{ agent.numberOfClientsHandled || 0 }}</span>
                 </div>
+                <div class="bg-blue-50 rounded p-3 text-sm">
+                  <div class="font-semibold text-slate-900 mb-2">Action Breakdown</div>
+                  <div *ngFor="let item of agent.actionTypeBreakdown | keyvalue" class="flex justify-between text-xs text-slate-700">
+                    <span>{{ item.key }}</span>
+                    <span>{{ item.value }}</span>
+                  </div>
+                </div>
                 <div class="flex justify-between text-sm">
                   <span class="text-slate-600">Last Activity:</span>
                   <span class="font-semibold text-slate-900">{{ agent.lastActivityTime ? formatTime(agent.lastActivityTime) : 'N/A' }}</span>
                 </div>
-                
+                <div class="flex justify-between text-sm">
+                  <span class="text-slate-600">Position in Team:</span>
+                  <span class="font-semibold text-slate-900">{{ agent.positionInTeam || 'N/A' }}</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                  <span class="text-slate-600">Team Avg Response Time:</span>
+                  <span class="font-semibold text-slate-900">{{ agent.teamAverageProcessingTime ? agent.teamAverageProcessingTime.toFixed(1) + ' sec' : 'N/A' }}</span>
+                </div>
+
                 <!-- Rank Badge -->
                 <div class="p-3 rounded-lg bg-slate-100">
                   <div class="text-sm font-semibold text-slate-900">
@@ -218,8 +233,11 @@
                   <div class="text-xs text-slate-600 space-y-1">
                     <div>• Success Rate {{ agent.successRate.toFixed(1) }}% × 0.60 = {{ (agent.successRate * 0.6).toFixed(1) }}</div>
                     <div>• Volume Score {{ agent.volumeScore.toFixed(1) }} × 0.30 = {{ (agent.volumeScore * 0.3).toFixed(1) }}</div>
-                    <div>• Speed Score {{ agent.speedScore.toFixed(1) }} × 0.10 = {{ (agent.speedScore * 0.1).toFixed(1) }}</div>
+                    <div>• Speed Score ({{ agent.averageProcessingTimeSeconds.toFixed(1) }}s vs team avg {{ agent.teamAverageProcessingTime?.toFixed(1) || 'N/A' }}s) × 0.10 = {{ (agent.speedScore * 0.1).toFixed(1) }}</div>
                     <div class="font-semibold text-slate-900 mt-2">= {{ agent.finalPerformanceScore.toFixed(1) }}</div>
+                  </div>
+                  <div class="mt-3 text-xs text-slate-500">
+                    Based on real database activity logs: approval rate, action volume versus team average, and speed compared to team processing time.
                   </div>
                 </div>
               </div>

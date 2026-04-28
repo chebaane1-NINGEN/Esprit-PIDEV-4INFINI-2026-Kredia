@@ -6,7 +6,6 @@ import com.kredia.dto.audit.AuditLogSummary;
 import com.kredia.entity.audit.AuditLog;
 import com.kredia.repository.audit.AuditLogRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -31,11 +30,15 @@ import java.util.stream.Collectors;
  */
 @Service
 @Transactional
-@RequiredArgsConstructor
 public class AuditService {
     private static final Logger logger = LoggerFactory.getLogger(AuditService.class);
     private final AuditLogRepository auditLogRepository;
     private final ObjectMapper objectMapper;
+
+    public AuditService(AuditLogRepository auditLogRepository, ObjectMapper objectMapper) {
+        this.auditLogRepository = auditLogRepository;
+        this.objectMapper = objectMapper;
+    }
 
     // ==================== LOGGING ======================  
 
@@ -274,8 +277,8 @@ public class AuditService {
         Instant tomorrow = today.plus(1, ChronoUnit.DAYS);
 
         long totalToday = auditLogRepository.countByTimestampAfter(today);
-        long failedToday = auditLogRepository.countByStatus(AuditLog.AuditStatus.FAILED);
-        long highSeverityToday = auditLogRepository.countByStatus(AuditLog.AuditStatus.SUCCESS); // Placeholder
+        long failedToday = auditLogRepository.countByStatusAndTimestampBetween(AuditLog.AuditStatus.FAILED, today, tomorrow);
+        long highSeverityToday = auditLogRepository.countBySeverityAndTimestampBetween(AuditLog.AuditSeverity.HIGH, today, tomorrow);
 
         List<java.util.Map<String, Object>> actionDist = auditLogRepository.countByActionType();
         List<java.util.Map<String, Object>> severityDist = auditLogRepository.countBySeverityInRange(today, tomorrow);
@@ -285,12 +288,21 @@ public class AuditService {
         Map<String, Long> severityMap = severityDist.stream()
             .collect(Collectors.toMap(m -> m.get("severity").toString(), m -> ((Number)m.get("count")).longValue()));
 
+        AuditLogDTO mostRecentAction = auditLogRepository.findFirstByOrderByTimestampDesc()
+            .map(AuditLogDTO::fromEntity)
+            .orElse(null);
+        AuditLogDTO mostRecentFailure = auditLogRepository.findFirstByStatusOrderByTimestampDesc(AuditLog.AuditStatus.FAILED)
+            .map(AuditLogDTO::fromEntity)
+            .orElse(null);
+
         return AuditLogSummary.builder()
             .totalActionsToday(totalToday)
             .failedActionsToday(failedToday)
             .highSeverityActionsToday(highSeverityToday)
             .actionTypeDistribution(actionMap)
             .severityDistribution(severityMap)
+            .mostRecentAction(mostRecentAction)
+            .mostRecentFailure(mostRecentFailure)
             .build();
     }
 

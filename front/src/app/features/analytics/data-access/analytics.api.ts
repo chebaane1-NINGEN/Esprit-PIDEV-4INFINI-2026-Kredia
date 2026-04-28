@@ -31,7 +31,7 @@ interface ApiResponse<T> {
 @Injectable({ providedIn: 'root' })
 export class AnalyticsApi {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = API_BASE_URL + '/analytics';
+  private readonly apiUrl = API_BASE_URL + '/api/analytics';
 
   // ==================== DASHBOARD ====================
 

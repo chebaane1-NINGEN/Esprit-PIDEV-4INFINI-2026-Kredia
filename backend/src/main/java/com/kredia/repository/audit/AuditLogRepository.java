@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface AuditLogRepository extends JpaRepository<AuditLog, Long> {
@@ -99,5 +100,8 @@ public interface AuditLogRepository extends JpaRepository<AuditLog, Long> {
     long countByActionType(AuditLog.AuditActionType actionType);
     long countByStatus(AuditLog.AuditStatus status);
     long countByStatusAndTimestampBetween(AuditLog.AuditStatus status, Instant startDate, Instant endDate);
+    long countBySeverityAndTimestampBetween(AuditLog.AuditSeverity severity, Instant startDate, Instant endDate);
+    Optional<AuditLog> findFirstByOrderByTimestampDesc();
+    Optional<AuditLog> findFirstByStatusOrderByTimestampDesc(AuditLog.AuditStatus status);
     long countByTimestampAfter(Instant timestamp);
 }

@@ -430,20 +430,92 @@ public class AnalyticsServiceImpl implements AnalyticsService {
 
     @Override
     public AgentPerformanceScoreDTO calculateAgentPerformanceScore(Long actorId, Long agentId, int days) {
-        User agent = userRepository.findById(agentId)
-                .orElseThrow(() -> new IllegalArgumentException("Agent not found"));
-
         Instant endDate = Instant.now();
         Instant startDate = endDate.minus(days, ChronoUnit.DAYS);
 
+        List<User> allAgents = userRepository.findAllByRoleAndDeletedFalse(UserRole.AGENT);
+        List<AgentPerformanceScoreDTO> teamScores = buildAgentPerformanceRanking(allAgents, startDate, endDate);
+
+        return teamScores.stream()
+                .filter(score -> score.getAgentId() == agentId)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Agent not found"));
+    }
+
+    @Override
+    public AgentPerformanceScoreDTO getAgent360View(Long actorId, Long agentId) {
+        Instant endDate = Instant.now();
+        Instant startDate = endDate.minus(90, ChronoUnit.DAYS);
+        List<User> allAgents = userRepository.findAllByRoleAndDeletedFalse(UserRole.AGENT);
+        List<AgentPerformanceScoreDTO> teamScores = buildAgentPerformanceRanking(allAgents, startDate, endDate);
+
+        return teamScores.stream()
+                .filter(score -> score.getAgentId() == agentId)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Agent not found"));
+    }
+
+    @Override
+    public List<AgentPerformanceScoreDTO> getAgentPerformanceRanking(Long actorId, int limit) {
+        List<User> allAgents = userRepository.findAllByRoleAndDeletedFalse(UserRole.AGENT);
+        return buildAgentPerformanceRanking(allAgents, Instant.now().minus(30, ChronoUnit.DAYS), Instant.now())
+                .stream()
+                .limit(limit)
+                .collect(Collectors.toList());
+    }
+
+    private List<AgentPerformanceScoreDTO> buildAgentPerformanceRanking(List<User> agents, Instant startDate, Instant endDate) {
+        List<AgentPerformanceScoreDTO> scores = agents.stream()
+                .map(agent -> buildBaseAgentPerformanceScore(agent, startDate, endDate))
+                .collect(Collectors.toList());
+
+        double teamAvgSuccessRate = scores.stream()
+                .mapToDouble(AgentPerformanceScoreDTO::getSuccessRate)
+                .average().orElse(0);
+
+        double teamAvgVolume = scores.stream()
+                .mapToDouble(AgentPerformanceScoreDTO::getTotalActions)
+                .average().orElse(0);
+
+        double teamAvgProcessingTime = scores.stream()
+                .mapToDouble(AgentPerformanceScoreDTO::getAverageProcessingTimeSeconds)
+                .average().orElse(0);
+
+        for (AgentPerformanceScoreDTO score : scores) {
+            score.setTeamAverageSuccessRate(teamAvgSuccessRate);
+            score.setTeamAverageVolume(teamAvgVolume);
+            score.setTeamAverageProcessingTime(teamAvgProcessingTime);
+            score.setTeamSize(scores.size());
+
+            double speedScore = calculateSpeedScore(score.getAverageProcessingTimeSeconds(), teamAvgProcessingTime);
+            score.setSpeedScore(speedScore);
+
+            double volumeScore = calculateVolumeScore(score.getTotalActions(), teamAvgVolume);
+            score.setVolumeScore(volumeScore);
+
+            double finalScore = (score.getSuccessRate() * 0.6)
+                    + (volumeScore * 0.3)
+                    + (speedScore * 0.1);
+            score.setFinalPerformanceScore(finalScore);
+            score.setPerformanceRank(getPerformanceRank(finalScore));
+        }
+
+        scores.sort(Comparator.comparingDouble(AgentPerformanceScoreDTO::getFinalPerformanceScore).reversed());
+        for (int i = 0; i < scores.size(); i++) {
+            scores.get(i).setPositionInTeam(String.format("%d/%d", i + 1, scores.size()));
+        }
+
+        return scores;
+    }
+
+    private AgentPerformanceScoreDTO buildBaseAgentPerformanceScore(User agent, Instant startDate, Instant endDate) {
         AgentPerformanceScoreDTO score = new AgentPerformanceScoreDTO();
         score.setAgentId(agent.getId());
         score.setAgentName(agent.getFirstName() + " " + agent.getLastName());
         score.setAgentEmail(agent.getEmail());
         score.setAgentRole(agent.getRole().toString());
 
-        // === Récupérer les données brutes ===
-        List<UserActivity> agentActivities = userActivityRepository.findByUserIdAndTimestampBetween(agentId, startDate, endDate);
+        List<UserActivity> agentActivities = userActivityRepository.findByUserIdAndTimestampBetween(agent.getId(), startDate, endDate);
         long approvals = agentActivities.stream()
                 .filter(a -> a.getActionType() == UserActivityActionType.APPROVAL).count();
         long rejections = agentActivities.stream()
@@ -453,70 +525,100 @@ public class AnalyticsServiceImpl implements AnalyticsService {
         score.setTotalActions(totalActions);
         score.setApprovalCount(approvals);
         score.setRejectionCount(rejections);
-
-        // === Success Rate ===
-        double successRate = totalActions > 0 ? (approvals / (double) totalActions) * 100 : 0;
-        score.setSuccessRate(successRate);
-
-        // === Clients traités ===
-        Set<Long> uniqueClients = agentActivities.stream()
+        score.setSuccessRate(totalActions > 0 ? (approvals / (double) totalActions) * 100 : 0);
+        score.setNumberOfClientsHandled(agentActivities.stream()
                 .filter(a -> a.getActionType() == UserActivityActionType.CLIENT_HANDLED)
                 .map(UserActivity::getUserId)
-                .collect(Collectors.toSet());
-        score.setNumberOfClientsHandled(uniqueClients.size());
+                .distinct()
+                .count());
 
-        // === Calcul du score de performance ===
-        double volumeScore = calculateVolumeScore(totalActions, agentId);
-        double speedScore = calculateSpeedScore(agentActivities);
+        double avgProcessingTime = calculateAverageProcessingTimeSeconds(agentActivities);
+        score.setAverageProcessingTimeSeconds(avgProcessingTime);
 
-        double finalScore = (successRate * 0.6) + (volumeScore * 0.3) + (speedScore * 0.1);
-        score.setFinalPerformanceScore(finalScore);
-        score.setVolumeScore(volumeScore);
-        score.setSpeedScore(speedScore);
-        score.setPerformanceRank(getPerformanceRank(finalScore));
+        Map<String, Long> actionTypeBreakdown = agentActivities.stream()
+                .collect(Collectors.groupingBy(a -> a.getActionType().toString(), Collectors.counting()));
+        score.setActionTypeBreakdown(actionTypeBreakdown);
 
-        // === Comparaison avec l'équipe ===
-        List<User> allAgents = userRepository.findAllByRoleAndDeletedFalse(UserRole.AGENT);
-        double teamAvgSuccessRate = allAgents.stream()
-                .mapToDouble(a -> calculateSuccessRateForAgent(a.getId(), startDate, endDate))
-                .average()
-                .orElse(0);
-        score.setTeamAverageSuccessRate(teamAvgSuccessRate);
-        score.setTeamSize(allAgents.size());
+        score.setActivityTimeSeries(getAgentActivityTimeSeries(agent.getId(), "WEEK", startDate, endDate));
+        score.setSuccessRateTimeSeries(getAgentSuccessRateTimeSeries(agent.getId(), "WEEK", startDate, endDate));
+        score.setProcessingTimeTimeSeries(getAgentProcessingTimeTimeSeries(agent.getId(), "WEEK", startDate, endDate));
 
-        // === Time Series pour graphiques ===
-        score.setActivityTimeSeries(getAgentActivityTimeSeries(agentId, "WEEK", startDate, endDate));
-        score.setSuccessRateTimeSeries(getAgentSuccessRateTimeSeries(agentId, "WEEK", startDate, endDate));
-
-        // === Activités récentes ===
-        List<Map<String, Object>> recentActivities = agentActivities.stream().sorted(
-                Comparator.comparing(UserActivity::getTimestamp).reversed()).limit(10).map(activity -> {
-            Map<String, Object> map = new HashMap<>();
-            map.put("actionType", activity.getActionType());
-            map.put("description", activity.getDescription());
-            map.put("timestamp", activity.getTimestamp());
-            return map;
-        }).collect(Collectors.toList());
+        List<Map<String, Object>> recentActivities = agentActivities.stream()
+                .sorted(Comparator.comparing(UserActivity::getTimestamp).reversed())
+                .limit(10)
+                .map(activity -> {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("actionType", activity.getActionType());
+                    map.put("description", activity.getDescription());
+                    map.put("timestamp", activity.getTimestamp());
+                    return map;
+                }).collect(Collectors.toList());
         score.setRecentActivities(recentActivities);
+
+        agentActivities.stream()
+                .max(Comparator.comparing(UserActivity::getTimestamp))
+                .ifPresent(latest -> {
+                    score.setLastActivityTime(latest.getTimestamp().toEpochMilli());
+                    score.setLastActivityDescription(latest.getDescription());
+                });
 
         return score;
     }
 
-    @Override
-    public AgentPerformanceScoreDTO getAgent360View(Long actorId, Long agentId) {
-        // Récupérer le score sur les 90 derniers jours pour une vue complète
-        return calculateAgentPerformanceScore(actorId, agentId, 90);
+    private double calculateAverageProcessingTimeSeconds(List<UserActivity> activities) {
+        if (activities.isEmpty()) {
+            return 0;
+        }
+
+        Instant earliest = activities.stream()
+                .map(UserActivity::getTimestamp)
+                .min(Instant::compareTo)
+                .orElse(Instant.now());
+        Instant latest = activities.stream()
+                .map(UserActivity::getTimestamp)
+                .max(Instant::compareTo)
+                .orElse(Instant.now());
+
+        double totalSeconds = Math.max(0, latest.toEpochMilli() - earliest.toEpochMilli()) / 1000.0;
+        return totalSeconds > 0 ? totalSeconds / activities.size() : 0;
     }
 
-    @Override
-    public List<AgentPerformanceScoreDTO> getAgentPerformanceRanking(Long actorId, int limit) {
-        List<User> allAgents = userRepository.findAllByRoleAndDeletedFalse(UserRole.AGENT);
+    private TimeSeriesDataDTO getAgentProcessingTimeTimeSeries(Long agentId, String granularity, Instant startDate, Instant endDate) {
+        TimeSeriesDataDTO timeSeries = new TimeSeriesDataDTO("processing_time", granularity);
+        List<String> labels = new ArrayList<>();
+        List<Long> values = new ArrayList<>();
 
-        return allAgents.stream()
-                .map(agent -> calculateAgentPerformanceScore(actorId, agent.getId(), 30))
-                .sorted(Comparator.comparingDouble(AgentPerformanceScoreDTO::getFinalPerformanceScore).reversed())
-                .limit(limit)
-                .collect(Collectors.toList());
+        Instant current = startDate;
+        while (!current.isAfter(endDate)) {
+            Instant periodEnd = current.plus(1, ChronoUnit.DAYS);
+            List<UserActivity> activities = userActivityRepository.findByUserIdAndTimestampBetween(agentId, current, periodEnd);
+            double averageSeconds = calculateAverageProcessingTimeSeconds(activities);
+            labels.add(current.toString().substring(0, 10));
+            values.add(Math.round(averageSeconds));
+            current = periodEnd;
+        }
+
+        timeSeries.setLabels(labels);
+        timeSeries.setValues(values);
+        timeSeries.setTotalValue(values.stream().mapToLong(Long::longValue).sum());
+        timeSeries.setAverageValue(values.isEmpty() ? 0 : Math.round(values.stream().mapToLong(Long::longValue).sum() / (double) values.size()));
+        if (!values.isEmpty()) {
+            long peak = values.stream().mapToLong(Long::longValue).max().orElse(0);
+            timeSeries.setPeakValue(peak);
+            timeSeries.setPeakDate(labels.get(values.indexOf(peak)));
+        }
+        return timeSeries;
+    }
+
+    private double calculateSpeedScore(double averageProcessingTimeSeconds, double teamAverageProcessingTime) {
+        if (averageProcessingTimeSeconds <= 0) {
+            return teamAverageProcessingTime > 0 ? 100.0 : 50.0;
+        }
+        if (teamAverageProcessingTime <= 0) {
+            return 50.0;
+        }
+        double score = (teamAverageProcessingTime / averageProcessingTimeSeconds) * 100.0;
+        return Math.max(0, Math.min(100, score));
     }
 
     @Override
@@ -670,32 +772,11 @@ public class AnalyticsServiceImpl implements AnalyticsService {
                 .collect(Collectors.groupingBy(a -> a.getActionType().toString(), Collectors.counting()));
     }
 
-    private double calculateVolumeScore(long totalActions, Long agentId) {
-        try {
-            // Score based on agent actions vs team average (FIXED: calculate per agent)
-            List<User> allAgents = userRepository.findAllByRoleAndDeletedFalse(UserRole.AGENT);
-            if (allAgents.isEmpty()) return 0;
-            
-            Instant thirtyDaysAgo = Instant.now().minus(30, ChronoUnit.DAYS);
-            Instant now = Instant.now();
-            
-            double avgActions = allAgents.stream()
-                    .mapToLong(agent -> userActivityRepository.countByUserIdAndTimestampBetween(agent.getId(), thirtyDaysAgo, now))
-                    .average().orElse(1); // Avoid division by zero
-
-            double score = Math.min(100, (totalActions / avgActions) * 100);
-            logger.debug("VolumeScore for agent {}: {} actions vs {} avg = {}", agentId, totalActions, avgActions, score);
-            return score;
-        } catch (Exception e) {
-            logger.error("Error calculating volume score for agent {}", agentId, e);
-            return 0;
+    private double calculateVolumeScore(long totalActions, double teamAverageActions) {
+        if (teamAverageActions <= 0) {
+            return totalActions > 0 ? 50.0 : 0.0;
         }
-    }
-
-    private double calculateSpeedScore(List<UserActivity> activities) {
-        // Score basé sur la rapidité de traitement
-        // Pour l'exemple, retourner une valeur par défaut
-        return 85.0;
+        return Math.max(0, Math.min(100, (totalActions / teamAverageActions) * 100));
     }
 
     private String getPerformanceRank(double score) {

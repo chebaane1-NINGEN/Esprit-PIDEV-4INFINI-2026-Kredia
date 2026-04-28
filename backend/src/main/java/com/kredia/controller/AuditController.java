@@ -5,7 +5,6 @@ import com.kredia.dto.audit.AuditLogDTO;
 import com.kredia.dto.audit.AuditLogFilter;
 import com.kredia.dto.audit.AuditLogSummary;
 import com.kredia.service.audit.AuditService;
-import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -29,10 +28,13 @@ import java.time.Instant;
  */
 @RestController
 @RequestMapping("/api/audit")
-@RequiredArgsConstructor
 public class AuditController {
     private static final Logger logger = LoggerFactory.getLogger(AuditController.class);
     private final AuditService auditService;
+
+    public AuditController(AuditService auditService) {
+        this.auditService = auditService;
+    }
 
     // ==================== MAIN AUDIT LOG ENDPOINTS ====================
 

@@ -3,7 +3,9 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { KycLoanResponse, DocumentTypeLoan } from '../models/kyc-loan.model';
 
-const BASE = 'http://127.0.0.1:8086/api/kyc-loans';
+import { API_BASE_URL } from '../../../../core/http/api.config';
+
+const BASE = `${API_BASE_URL}/api/kyc-loans`;
 
 @Injectable({ providedIn: 'root' })
 export class KycLoanApi {

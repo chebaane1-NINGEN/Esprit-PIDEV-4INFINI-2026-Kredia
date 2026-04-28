@@ -68,24 +68,6 @@ public class ReclamationServiceImpl implements ReclamationService {
     private final MlRiskClient mlRiskClient;
     private final CloudinaryService cloudinaryService;
 
-    public ReclamationServiceImpl(ReclamationRepository reclamationRepository,
-                                 ReclamationHistoryRepository historyRepository,
-                                 ReclamationMessageRepository messageRepository,
-                                 ReclamationAttachmentRepository attachmentRepository,
-                                 ReclamationTriggerService triggerService,
-                                 RiskFeatureExtractorService riskFeatureExtractorService,
-                                 MlRiskClient mlRiskClient,
-                                 CloudinaryService cloudinaryService) {
-        this.reclamationRepository = reclamationRepository;
-        this.historyRepository = historyRepository;
-        this.messageRepository = messageRepository;
-        this.attachmentRepository = attachmentRepository;
-        this.triggerService = triggerService;
-        this.riskFeatureExtractorService = riskFeatureExtractorService;
-        this.mlRiskClient = mlRiskClient;
-        this.cloudinaryService = cloudinaryService;
-    }
-
     @Override
     public ReclamationResponse create(ReclamationCreateRequest request) {
         Priority initialPriority = request.priority() != null ? request.priority() : Priority.MEDIUM;

@@ -9,6 +9,9 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class OpenApiConfig {
 
+    @org.springframework.beans.factory.annotation.Value("${app.backend.url}")
+    private String backendUrl;
+
     @Bean
     public GroupedOpenApi userModuleApi() {
         return GroupedOpenApi.builder()
@@ -21,7 +24,7 @@ public class OpenApiConfig {
     @Bean
     public OpenAPI openAPI() {
         return new OpenAPI()
-                .addServersItem(new Server().url("http://localhost:8086"))
+                .addServersItem(new Server().url(backendUrl))
                 .info(new io.swagger.v3.oas.models.info.Info()
                         .title("Kredia API")
                         .version("1.0.0")

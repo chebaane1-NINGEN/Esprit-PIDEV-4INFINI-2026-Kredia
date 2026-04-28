@@ -34,19 +34,25 @@ function logSuccessfulRequest(request: any, response: any, startTime: number, au
   const actionType = determineActionType(request.method, request.url);
 
   if (actionType) {
-    auditService.logAction({
-      actionType: actionType,
-      status: 'SUCCESS',
-      severity: determineSeverity(actionType),
-      endpoint: request.url,
-      httpMethod: request.method,
-      durationMs: duration,
-      requestData: sanitizeRequestData(request.body),
-      responseData: sanitizeResponseData(response.body),
-      changesDescription: generateChangeDescription(actionType, request.body, response.body)
-    }).subscribe({
-      error: () => {}
-    });
+    try {
+      auditService.logAction({
+        actionType: actionType,
+        status: 'SUCCESS',
+        severity: determineSeverity(actionType),
+        endpoint: request.url,
+        httpMethod: request.method,
+        durationMs: duration,
+        requestData: sanitizeRequestData(request.body),
+        responseData: sanitizeResponseData(response.body),
+        changesDescription: generateChangeDescription(actionType, request.body, response.body)
+      }).subscribe({
+        error: (err) => {
+          console.warn('Audit log failed:', err?.message || 'Unknown error');
+        }
+      });
+    } catch (error) {
+      console.warn('Audit service error:', error);
+    }
   }
 }
 
@@ -55,19 +61,25 @@ function logFailedRequest(request: any, error: any, startTime: number, auditServ
   const actionType = determineActionType(request.method, request.url);
 
   if (actionType) {
-    auditService.logAction({
-      actionType: actionType,
-      status: 'FAILED',
-      severity: determineSeverity(actionType, true),
-      endpoint: request.url,
-      httpMethod: request.method,
-      durationMs: duration,
-      requestData: sanitizeRequestData(request.body),
-      errorMessage: error.message,
-      changesDescription: `Request failed with status ${error.status}: ${error.message}`
-    }).subscribe({
-      error: () => {}
-    });
+    try {
+      auditService.logAction({
+        actionType: actionType,
+        status: 'FAILED',
+        severity: determineSeverity(actionType, true),
+        endpoint: request.url,
+        httpMethod: request.method,
+        durationMs: duration,
+        requestData: sanitizeRequestData(request.body),
+        errorMessage: error.message,
+        changesDescription: `Request failed with status ${error.status}: ${error.message}`
+      }).subscribe({
+        error: (err) => {
+          console.warn('Audit log failed:', err?.message || 'Unknown error');
+        }
+      });
+    } catch (auditError) {
+      console.warn('Audit service error:', auditError);
+    }
   }
 }
 

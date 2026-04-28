@@ -32,6 +32,9 @@ public class EmailService {
     @Value("${kredia.mail.from.name}")
     private String fromName;
 
+    @Value("${app.backend.url}")
+    private String backendUrl;
+
     public EmailService(@Value("${brevo.api.key}") String apiKey) {
         ApiClient defaultClient = Configuration.getDefaultApiClient();
         ApiKeyAuth apiKeyAuth = (ApiKeyAuth) defaultClient.getAuthentication("api-key");
@@ -173,7 +176,7 @@ public class EmailService {
                         </p>
                         
                         <center>
-                            <a href="http://localhost:8081/api/investments/orders/%s" class="button">Voir les Détails</a>
+                            <a href="%s/api/investments/orders/%%s" class="button">Voir les Détails</a>
                         </center>
                     </div>
                     <div class="footer">
@@ -194,6 +197,7 @@ public class EmailService {
                 executedPriceFormatted,
                 executedAtFormatted,
                 totalAmountFormatted,
+                backendUrl,
                 order.getOrderId()
         );
     }

@@ -37,12 +37,6 @@ public class AuditService {
     private final AuditLogRepository auditLogRepository;
     private final ObjectMapper objectMapper;
 
-    // Constructor for dependency injection
-    public AuditService(AuditLogRepository auditLogRepository, ObjectMapper objectMapper) {
-        this.auditLogRepository = auditLogRepository;
-        this.objectMapper = objectMapper;
-    }
-
     // ==================== LOGGING ======================  
 
     /**

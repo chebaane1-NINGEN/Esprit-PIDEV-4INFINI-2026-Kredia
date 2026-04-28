@@ -34,11 +34,6 @@ public class AuditController {
     private static final Logger logger = LoggerFactory.getLogger(AuditController.class);
     private final AuditService auditService;
 
-    // Constructor for dependency injection
-    public AuditController(AuditService auditService) {
-        this.auditService = auditService;
-    }
-
     // ==================== MAIN AUDIT LOG ENDPOINTS ====================
 
     /**

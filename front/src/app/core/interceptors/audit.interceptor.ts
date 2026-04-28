@@ -3,19 +3,22 @@ import { inject } from '@angular/core';
 import { tap } from 'rxjs';
 import { AuditService } from '../services/audit.service';
 
-export const auditInterceptor: HttpInterceptorFn = (req, next) => {
-  const auditService = inject(AuditService);
-  const startTime = Date.now();
+const AUTH_ENDPOINTS = ['/api/auth/login', '/api/auth/register', '/api/auth/forgot-password', '/api/auth/reset-password', '/oauth2/'];
 
-  // Skip audit logging for audit API calls to avoid infinite loops
-  if (req.url.includes('/api/audit/')) {
+export const auditInterceptor: HttpInterceptorFn = (req, next) => {
+  const urlLower = req.url.toLowerCase();
+
+  if (urlLower.includes('/api/audit/') || AUTH_ENDPOINTS.some(endpoint => urlLower.includes(endpoint))) {
     return next(req);
   }
+
+  const auditService = inject(AuditService);
+  const startTime = Date.now();
 
   return next(req).pipe(
     tap({
       next: (event) => {
-        if (event.type === 4) { // HttpResponse
+        if (event.type === 4) {
           logSuccessfulRequest(req, event, startTime, auditService);
         }
       },
@@ -28,8 +31,6 @@ export const auditInterceptor: HttpInterceptorFn = (req, next) => {
 
 function logSuccessfulRequest(request: any, response: any, startTime: number, auditService: AuditService): void {
   const duration = Date.now() - startTime;
-
-  // Determine action type based on HTTP method and URL
   const actionType = determineActionType(request.method, request.url);
 
   if (actionType) {
@@ -44,9 +45,7 @@ function logSuccessfulRequest(request: any, response: any, startTime: number, au
       responseData: sanitizeResponseData(response.body),
       changesDescription: generateChangeDescription(actionType, request.body, response.body)
     }).subscribe({
-      error: (auditError) => {
-        console.error('Failed to log audit action:', auditError);
-      }
+      error: () => {}
     });
   }
 }
@@ -67,9 +66,7 @@ function logFailedRequest(request: any, error: any, startTime: number, auditServ
       errorMessage: error.message,
       changesDescription: `Request failed with status ${error.status}: ${error.message}`
     }).subscribe({
-      error: (auditError) => {
-        console.error('Failed to log audit action:', auditError);
-      }
+      error: () => {}
     });
   }
 }

@@ -496,6 +496,25 @@ export class AdminUsersPageComponent implements OnInit {
     }, 300);
   }
 
+  toggleFilterRole(role: UserRole): void {
+    this.toggleArrayValue(this.filterRoles, role);
+    this.cdr.markForCheck();
+  }
+
+  toggleFilterStatus(status: UserStatus): void {
+    this.toggleArrayValue(this.filterStatus, status);
+    this.cdr.markForCheck();
+  }
+
+  private toggleArrayValue<T>(array: T[], value: T): void {
+    const index = array.indexOf(value);
+    if (index === -1) {
+      array.push(value);
+    } else {
+      array.splice(index, 1);
+    }
+  }
+
   updateFilteredResultsCount(): void {
     const roles = this.filterRoles.length > 0 ? (this.filterRoles as UserRole[]) : undefined;
     const statuses = this.filterStatus.length > 0 ? (this.filterStatus as UserStatus[]) : undefined;

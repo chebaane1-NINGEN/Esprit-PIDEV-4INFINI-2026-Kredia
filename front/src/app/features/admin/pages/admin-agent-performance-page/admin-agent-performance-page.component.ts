@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { CommonModule, NgFor, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { finalize } from 'rxjs';
+import { catchError, finalize, forkJoin, map, of } from 'rxjs';
 import { AdminApi } from '../../data-access/admin.api';
 import { AgentPerformance, UserResponse } from '../../models/admin.model';
 
@@ -45,31 +45,51 @@ export class AdminAgentPerformancePageComponent implements OnInit {
   }
 
   loadAgentPerformances(): void {
-    const performancePromises = this.agents.map(agent =>
-      this.api.getAgentPerformance(agent.userId!).toPromise()
-        .then(performance => ({ agent, performance }))
-        .catch(() => ({ agent, performance: this.getMockPerformance() }))
-    );
-
-    Promise.all(performancePromises).then(results => {
-      this.agentPerformances = results.map(item => ({
-        agent: item.agent,
-        performance: item.performance || this.getMockPerformance()
-      }));
+    if (this.agents.length === 0) {
+      this.agentPerformances = [];
       this.loading = false;
       this.cdr.markForCheck();
-    });
-  }
+      return;
+    }
 
-  private getMockPerformance(): AgentPerformance {
-    return {
-      approvalActionsCount: Math.floor(Math.random() * 50) + 10,
-      rejectionActionsCount: Math.floor(Math.random() * 20) + 5,
-      totalActions: 0,
-      numberOfClientsHandled: Math.floor(Math.random() * 30) + 5,
-      performanceScore: Math.floor(Math.random() * 40) + 60,
-      averageProcessingTimeSeconds: Math.floor(Math.random() * 1800) + 900
-    };
+    const performanceRequests = this.agents.map(agent =>
+      this.api.getAgentPerformance(agent.userId!).pipe(
+        map(performance => ({ agent, performance })),
+        catchError((error) => {
+          console.error('Failed to load performance for agent', agent.userId, error);
+          this.error = 'Some agent performance metrics could not be loaded.';
+          return of({
+            agent,
+            performance: {
+              approvalActionsCount: 0,
+              rejectionActionsCount: 0,
+              totalActions: 0,
+              numberOfClientsHandled: 0,
+              performanceScore: 0,
+              averageProcessingTimeSeconds: 0
+            }
+          });
+        })
+      )
+    );
+
+    forkJoin(performanceRequests)
+      .pipe(finalize(() => {
+        this.loading = false;
+        this.cdr.markForCheck();
+      }))
+      .subscribe({
+        next: (results) => {
+          this.agentPerformances = results;
+          this.cdr.markForCheck();
+        },
+        error: (err) => {
+          console.error('Failed to load agent performance data', err);
+          this.error = 'Unable to load agent performance details. Please refresh.';
+          this.agentPerformances = [];
+          this.cdr.markForCheck();
+        }
+      });
   }
 
   getTopPerformers(): { agent: UserResponse; performance: AgentPerformance }[] {

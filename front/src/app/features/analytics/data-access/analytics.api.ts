@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { API_BASE_URL } from '../../../core/http/api.config';
 import {
   EnhancedAnalyticsDashboard,
@@ -11,6 +11,12 @@ import {
   SystemHealth,
   PeriodComparison
 } from '../models/analytics.model';
+
+interface ApiResponse<T> {
+  success: boolean;
+  data: T;
+  timestamp?: string;
+}
 
 /**
  * Analytocs API Service pour le KPI Engine
@@ -32,11 +38,11 @@ export class AnalyticsApi {
   /**
    * Récupère le tableau de bord analytique complet
    */
-  getAnalyticsDashboard(days: number = 30): Observable<{ data: EnhancedAnalyticsDashboard }> {
-    return this.http.get<{ data: EnhancedAnalyticsDashboard }>(
+  getAnalyticsDashboard(days: number = 30): Observable<EnhancedAnalyticsDashboard> {
+    return this.http.get<ApiResponse<EnhancedAnalyticsDashboard>>(
       `${this.apiUrl}/dashboard`,
       { params: new HttpParams().set('days', days.toString()) }
-    );
+    ).pipe(map(response => response.data));
   }
 
   // ==================== KPIs ====================

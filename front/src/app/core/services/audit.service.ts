@@ -1,7 +1,13 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { API_BASE_URL } from '../http/api.config';
+
+interface ApiResponse<T> {
+  success: boolean;
+  data: T;
+  timestamp?: string;
+}
 
 export interface AuditLogDTO {
   id: number;
@@ -81,15 +87,21 @@ export class AuditService {
       if (filter.sortDirection) params = params.set('sortDirection', filter.sortDirection);
     }
 
-    return this.http.get<{ content: AuditLogDTO[], totalElements: number, totalPages: number }>(`${this.apiUrl}/logs`, { params });
+    return this.http.get<ApiResponse<{ content: AuditLogDTO[], totalElements: number, totalPages: number }>>(`${this.apiUrl}/logs`, { params }).pipe(
+      map(response => response.data)
+    );
   }
 
   getAuditLogById(id: number): Observable<AuditLogDTO> {
-    return this.http.get<AuditLogDTO>(`${this.apiUrl}/logs/${id}`);
+    return this.http.get<ApiResponse<AuditLogDTO>>(`${this.apiUrl}/logs/${id}`).pipe(
+      map(response => response.data)
+    );
   }
 
   getAuditSummary(): Observable<AuditLogSummary> {
-    return this.http.get<AuditLogSummary>(`${this.apiUrl}/summary`);
+    return this.http.get<ApiResponse<AuditLogSummary>>(`${this.apiUrl}/summary`).pipe(
+      map(response => response.data)
+    );
   }
 
   getHighSeverityActions(page?: number, pageSize?: number): Observable<{ content: AuditLogDTO[], totalElements: number }> {
@@ -97,7 +109,9 @@ export class AuditService {
     if (page !== undefined) params = params.set('page', page.toString());
     if (pageSize !== undefined) params = params.set('pageSize', pageSize.toString());
 
-    return this.http.get<{ content: AuditLogDTO[], totalElements: number }>(`${this.apiUrl}/summary/high-severity`, { params });
+    return this.http.get<ApiResponse<{ content: AuditLogDTO[], totalElements: number }>>(`${this.apiUrl}/summary/high-severity`, { params }).pipe(
+      map(response => response.data)
+    );
   }
 
   getFailedActions(page?: number, pageSize?: number): Observable<{ content: AuditLogDTO[], totalElements: number }> {
@@ -105,7 +119,9 @@ export class AuditService {
     if (page !== undefined) params = params.set('page', page.toString());
     if (pageSize !== undefined) params = params.set('pageSize', pageSize.toString());
 
-    return this.http.get<{ content: AuditLogDTO[], totalElements: number }>(`${this.apiUrl}/summary/failures`, { params });
+    return this.http.get<ApiResponse<{ content: AuditLogDTO[], totalElements: number }>>(`${this.apiUrl}/summary/failures`, { params }).pipe(
+      map(response => response.data)
+    );
   }
 
   getAuditLogsByActor(actorId: number, page?: number, pageSize?: number): Observable<{ content: AuditLogDTO[], totalElements: number }> {
@@ -113,7 +129,9 @@ export class AuditService {
     if (page !== undefined) params = params.set('page', page.toString());
     if (pageSize !== undefined) params = params.set('pageSize', pageSize.toString());
 
-    return this.http.get<{ content: AuditLogDTO[], totalElements: number }>(`${this.apiUrl}/actor/${actorId}`, { params });
+    return this.http.get<ApiResponse<{ content: AuditLogDTO[], totalElements: number }>>(`${this.apiUrl}/actor/${actorId}`, { params }).pipe(
+      map(response => response.data)
+    );
   }
 
   getAuditLogsByTarget(targetId: number, page?: number, pageSize?: number): Observable<{ content: AuditLogDTO[], totalElements: number }> {
@@ -121,10 +139,14 @@ export class AuditService {
     if (page !== undefined) params = params.set('page', page.toString());
     if (pageSize !== undefined) params = params.set('pageSize', pageSize.toString());
 
-    return this.http.get<{ content: AuditLogDTO[], totalElements: number }>(`${this.apiUrl}/target/${targetId}`, { params });
+    return this.http.get<ApiResponse<{ content: AuditLogDTO[], totalElements: number }>>(`${this.apiUrl}/target/${targetId}`, { params }).pipe(
+      map(response => response.data)
+    );
   }
 
   logAction(actionData: Partial<AuditLogDTO>): Observable<AuditLogDTO> {
-    return this.http.post<AuditLogDTO>(`${this.apiUrl}/log`, actionData);
+    return this.http.post<ApiResponse<AuditLogDTO>>(`${this.apiUrl}/log`, actionData).pipe(
+      map(response => response.data)
+    );
   }
 }

@@ -277,7 +277,11 @@
             <label class="filter-label">Roles</label>
             <div class="checkbox-group">
               <label *ngFor="let role of availableRoles" class="checkbox-item">
-                <input type="checkbox" [value]="role" [(ngModel)]="filterRoles" (change)="onFilterChange()" />
+                <input
+                  type="checkbox"
+                  [checked]="filterRoles.includes(role)"
+                  (change)="toggleFilterRole(role); onFilterChange()"
+                />
                 <span class="checkmark"></span>
                 <span class="label">{{ role }}</span>
               </label>
@@ -289,7 +293,11 @@
             <label class="filter-label">Status</label>
             <div class="checkbox-group">
               <label *ngFor="let status of availableStatus" class="checkbox-item">
-                <input type="checkbox" [value]="status" [(ngModel)]="filterStatus" (change)="onFilterChange()" />
+                <input
+                  type="checkbox"
+                  [checked]="filterStatus.includes(status)"
+                  (change)="toggleFilterStatus(status); onFilterChange()"
+                />
                 <span class="checkmark"></span>
                 <span class="label">{{ status }}</span>
               </label>

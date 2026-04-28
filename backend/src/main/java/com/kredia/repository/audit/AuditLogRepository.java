@@ -98,5 +98,6 @@ public interface AuditLogRepository extends JpaRepository<AuditLog, Long> {
      */
     long countByActionType(AuditLog.AuditActionType actionType);
     long countByStatus(AuditLog.AuditStatus status);
+    long countByStatusAndTimestampBetween(AuditLog.AuditStatus status, Instant startDate, Instant endDate);
     long countByTimestampAfter(Instant timestamp);
 }

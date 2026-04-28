@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Subject, interval } from 'rxjs';
+import { EMPTY, Subject, interval } from 'rxjs';
 import { takeUntil, switchMap, finalize } from 'rxjs/operators';
 import { AnalyticsApi } from '../../data-access/analytics.api';
 import { EnhancedAnalyticsDashboard, KpiMetric, DrillDownData } from '../../models/analytics.model';
@@ -52,11 +52,11 @@ export class AnalyticsDashboardComponent implements OnInit, OnDestroy {
     interval(5 * 60 * 1000)
       .pipe(
         takeUntil(this.destroy$),
-        switchMap(() => this.autoRefreshEnabled ? this.analyticsApi.getAnalyticsDashboard(this.selectedPeriodDays) : [])
+        switchMap(() => this.autoRefreshEnabled ? this.analyticsApi.getAnalyticsDashboard(this.selectedPeriodDays) : EMPTY)
       )
       .subscribe({
-        next: (res) => {
-          this.dashboard = res.data;
+        next: (dashboard) => {
+          this.dashboard = dashboard;
           this.lastRefreshTime = new Date();
           this.cdr.markForCheck();
         }
@@ -82,8 +82,8 @@ export class AnalyticsDashboardComponent implements OnInit, OnDestroy {
         })
       )
       .subscribe({
-        next: (res) => {
-          this.dashboard = res.data;
+        next: (dashboard) => {
+          this.dashboard = dashboard;
           this.cdr.markForCheck();
         },
         error: (err) => {

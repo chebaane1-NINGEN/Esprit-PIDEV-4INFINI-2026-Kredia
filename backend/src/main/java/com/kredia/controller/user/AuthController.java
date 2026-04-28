@@ -43,8 +43,13 @@ public class AuthController {
 
     @PostMapping("/google")
     public ResponseEntity<ApiResponse<AuthResponseDTO>> loginWithGoogle(@Valid @RequestBody GoogleLoginRequestDTO request) {
-        String token = authService.loginWithGoogle(request.getIdToken());
-        return ResponseEntity.ok(ApiResponse.ok(new AuthResponseDTO(token, "CLIENT"))); // Default role for Google login
+        try {
+            String token = authService.loginWithGoogle(request.getIdToken());
+            // This should not be reached as loginWithGoogle throws UnsupportedOperationException
+            return ResponseEntity.ok(ApiResponse.ok(null));
+        } catch (UnsupportedOperationException e) {
+            return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(ApiResponse.error("Google login is handled via OAuth2 redirect flow"));
+        }
     }
 
     @PostMapping("/verify-email")

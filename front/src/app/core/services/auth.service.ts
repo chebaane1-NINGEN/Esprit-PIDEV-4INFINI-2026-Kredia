@@ -30,16 +30,23 @@ export interface ApiResponse<T> {
 
 export interface LoginResponse {
   success?: boolean;
+  message?: string;
   timestamp?: string;
   data?: {
+    user?: {
+      userId?: number;
+      email?: string;
+      role?: string;
+      firstName?: string;
+      lastName?: string;
+    };
     token?: string;
     type?: string;
-    role?: string;
     accessToken?: string;
     access_token?: string;
     jwt?: string;
-    [key: string]: any;
   };
+  user?: any;
   token?: string;
   type?: string;
   role?: string;
@@ -65,6 +72,7 @@ export class AuthService {
   private readonly router = inject(Router);
 
   private readonly TOKEN_KEY = 'token';
+  private readonly USER_KEY = 'user';
 
   login(credentials: LoginRequest): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${API_BASE_URL}/api/auth/login`, credentials);
@@ -96,7 +104,21 @@ export class AuthService {
       response?.access_token ??
       response?.jwt;
 
-    return this.saveTokenFromString(token ?? '');
+    const saved = this.saveTokenFromString(token ?? '');
+    if (!saved) {
+      return false;
+    }
+
+    const user = response?.data?.user ?? response?.user;
+    if (user) {
+      try {
+        localStorage.setItem(this.USER_KEY, JSON.stringify(user));
+      } catch {
+        // ignore storage failures, token is the primary session key
+      }
+    }
+
+    return true;
   }
 
   saveTokenFromString(token: string): boolean {
@@ -116,8 +138,24 @@ export class AuthService {
     return localStorage.getItem(this.TOKEN_KEY);
   }
 
+  getCurrentUser(): any | null {
+    const json = localStorage.getItem(this.USER_KEY);
+    if (!json) return null;
+    try {
+      return JSON.parse(json);
+    } catch {
+      return null;
+    }
+  }
+
   isLoggedIn(): boolean {
     return !!this.getToken();
+  }
+
+  private decodeBase64Url(payload: string): string {
+    const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const padded = base64.padEnd(base64.length + ((4 - base64.length % 4) % 4), '=');
+    return atob(padded);
   }
 
   decodeToken(): JwtPayload | null {
@@ -126,8 +164,7 @@ export class AuthService {
     try {
       const parts = token.split('.');
       if (parts.length !== 3) return null;
-      const payload = parts[1].replace(/-/g, '+').replace(/_/g, '/');
-      const json = atob(payload);
+      const json = this.decodeBase64Url(parts[1]);
       return JSON.parse(json) as JwtPayload;
     } catch {
       return null;
@@ -168,5 +205,12 @@ export class AuthService {
   isAdmin(): boolean {
     const role = this.getCurrentUserRole();
     return role === 'ADMIN' || role === 'SUPER_ADMIN';
+  }
+
+  getDashboardRoute(): string {
+    if (this.isAdmin()) return '/admin/analytics';
+    if (this.isAgent()) return '/agent/dashboard';
+    if (this.isClient()) return '/user';
+    return '/home';
   }
 }

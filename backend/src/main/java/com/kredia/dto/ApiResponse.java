@@ -5,6 +5,7 @@ import java.time.Instant;
 public class ApiResponse<T> {
 
     private boolean success;
+    private String message;
     private T data;
     private Instant timestamp;
 
@@ -14,6 +15,14 @@ public class ApiResponse<T> {
 
     public void setSuccess(boolean success) {
         this.success = success;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
     }
 
     public T getData() {
@@ -35,6 +44,7 @@ public class ApiResponse<T> {
     public static <T> ApiResponse<T> ok(T data) {
         ApiResponse<T> res = new ApiResponse<>();
         res.setSuccess(true);
+        res.setMessage("OK");
         res.setData(data);
         res.setTimestamp(Instant.now());
         return res;
@@ -43,6 +53,7 @@ public class ApiResponse<T> {
     public static <T> ApiResponse<T> error(String message) {
         ApiResponse<T> res = new ApiResponse<>();
         res.setSuccess(false);
+        res.setMessage(message);
         res.setData(null);
         res.setTimestamp(Instant.now());
         return res;

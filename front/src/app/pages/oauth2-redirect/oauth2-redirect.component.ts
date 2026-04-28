@@ -35,13 +35,6 @@ export class Oauth2RedirectComponent implements OnInit {
     }
 
     this.message = 'Authentification réussie. Redirection...';
-    setTimeout(() => this.router.navigateByUrl(this.redirectUrl()), 600);
-  }
-
-  private redirectUrl(): string {
-    if (this.auth.isAdmin()) return '/admin/users';
-    if (this.auth.isAgent()) return '/wallet/transactions';
-    if (this.auth.isClient()) return '/user';
-    return '/home';
+    setTimeout(() => this.router.navigateByUrl(this.auth.getDashboardRoute()), 600);
   }
 }

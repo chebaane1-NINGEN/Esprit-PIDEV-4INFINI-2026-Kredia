@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, NgZone } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, NgZone, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -13,7 +13,7 @@ import { AuthService, LoginResponse } from '../../core/services/auth.service';
   styleUrl: './login.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   private readonly auth   = inject(AuthService);
   private readonly router = inject(Router);
   private readonly fb     = inject(FormBuilder);
@@ -21,6 +21,7 @@ export class LoginComponent {
   private readonly zone   = inject(NgZone);
 
   loading = false;
+  error: string | null = null;
   showPassword = false;
   touched = { email: false, password: false };
 
@@ -71,20 +72,26 @@ export class LoginComponent {
     }
 
     this.loading = true;
+    this.error = null;
     this.cdr.markForCheck();
 
-    this.auth.login(this.form.getRawValue()).subscribe({
+    const payload = {
+      email: this.form.get('email')?.value ?? '',
+      password: this.form.get('password')?.value ?? ''
+    };
+
+    this.auth.login(payload).subscribe({
       next: (response: LoginResponse) => {
         const saved = this.auth.saveToken(response);
         this.loading = false;
 
         if (!saved) {
-          this.showToast('Token not found. Please try again.', 'error');
+          this.showToast('Unable to save your session. Please try again.', 'error');
           this.cdr.markForCheck();
           return;
         }
 
-        this.showToast('Login successful!', 'success');
+        this.showToast('Login successful! Redirecting...', 'success');
         this.navigateAfterLogin();
       },
       error: (err) => {
@@ -110,16 +117,14 @@ export class LoginComponent {
     window.location.href = `${API_BASE_URL}/oauth2/authorization/${provider}`;
   }
 
-  private navigateAfterLogin(): void {
-    const next = this.auth.isAdmin()
-      ? '/admin/dashboard'
-      : this.auth.isAgent()
-      ? '/agent/dashboard'
-      : this.auth.isClient()
-      ? '/client/dashboard'
-      : '/user';
+  ngOnInit(): void {
+    if (this.auth.isLoggedIn()) {
+      this.zone.run(() => this.router.navigateByUrl(this.auth.getDashboardRoute()));
+    }
+  }
 
-    this.zone.run(() => this.router.navigateByUrl(next));
+  private navigateAfterLogin(): void {
+    this.zone.run(() => this.router.navigateByUrl(this.auth.getDashboardRoute()));
   }
 
   private showToast(message: string, type: 'success' | 'error' | 'info' = 'info'): void {

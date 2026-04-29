@@ -1,8 +1,10 @@
 package com.kredia.dto.user;
 
+import com.kredia.entity.user.Gender;
 import com.kredia.entity.user.UserRole;
 import com.kredia.entity.user.UserStatus;
 import jakarta.validation.constraints.Email;
+import java.time.LocalDate;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
@@ -28,6 +30,9 @@ public class UserRequestDTO {
 
     private UserRole role;
     private UserStatus status;
+    private LocalDate dateOfBirth;
+    private String address;
+    private Gender gender;
 
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
@@ -49,4 +54,13 @@ public class UserRequestDTO {
 
     public UserStatus getStatus() { return status; }
     public void setStatus(UserStatus status) { this.status = status; }
+
+    public LocalDate getDateOfBirth() { return dateOfBirth; }
+    public void setDateOfBirth(LocalDate dateOfBirth) { this.dateOfBirth = dateOfBirth; }
+
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
+
+    public Gender getGender() { return gender; }
+    public void setGender(Gender gender) { this.gender = gender; }
 }

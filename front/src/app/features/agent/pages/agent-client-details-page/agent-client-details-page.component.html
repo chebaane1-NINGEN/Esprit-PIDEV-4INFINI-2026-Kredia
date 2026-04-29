@@ -1,7 +1,12 @@
 <div class="client-details-container">
   <div class="header">
     <button (click)="goBack()" class="back-btn">← Back to Clients</button>
-    <h1 *ngIf="client">Client Details: {{ client.firstName }} {{ client.lastName }}</h1>
+    <div class="header-actions">
+      <h1 *ngIf="client">Client Details: {{ client.firstName }} {{ client.lastName }}</h1>
+      <button *ngIf="!isEditMode && client" (click)="startEdit()" class="edit-btn">✏️ Edit Client</button>
+      <button *ngIf="isEditMode" (click)="saveClient()" [disabled]="loading" class="save-btn">💾 Save Changes</button>
+      <button *ngIf="isEditMode" (click)="cancelEdit()" [disabled]="loading" class="cancel-btn">✖ Cancel</button>
+    </div>
   </div>
 
   <!-- Loading State -->
@@ -26,15 +31,31 @@
       <div class="info-grid">
         <div class="info-item">
           <label>Full Name</label>
-          <span>{{ client.firstName }} {{ client.lastName }}</span>
+          <ng-container *ngIf="isEditMode; else viewName">
+            <input type="text" [(ngModel)]="editModel.firstName" placeholder="First name" />
+            <input type="text" [(ngModel)]="editModel.lastName" placeholder="Last name" />
+          </ng-container>
+          <ng-template #viewName>
+            <span>{{ client.firstName }} {{ client.lastName }}</span>
+          </ng-template>
         </div>
         <div class="info-item">
           <label>Email</label>
-          <span>{{ client.email }}</span>
+          <ng-container *ngIf="isEditMode; else viewEmail">
+            <input type="email" [(ngModel)]="editModel.email" placeholder="Email" />
+          </ng-container>
+          <ng-template #viewEmail>
+            <span>{{ client.email }}</span>
+          </ng-template>
         </div>
         <div class="info-item">
           <label>Phone</label>
-          <span>{{ client.phoneNumber }}</span>
+          <ng-container *ngIf="isEditMode; else viewPhone">
+            <input type="text" [(ngModel)]="editModel.phoneNumber" placeholder="Phone number" />
+          </ng-container>
+          <ng-template #viewPhone>
+            <span>{{ client.phoneNumber }}</span>
+          </ng-template>
         </div>
         <div class="info-item">
           <label>Status</label>
@@ -44,15 +65,34 @@
         </div>
         <div class="info-item">
           <label>Date of Birth</label>
-          <span>{{ client.dateOfBirth | date:'mediumDate' }}</span>
+          <ng-container *ngIf="isEditMode; else viewDob">
+            <input type="date" [(ngModel)]="editModel.dateOfBirth" />
+          </ng-container>
+          <ng-template #viewDob>
+            <span>{{ client.dateOfBirth | date:'mediumDate' }}</span>
+          </ng-template>
         </div>
         <div class="info-item">
           <label>Gender</label>
-          <span>{{ client.gender === 'MALE' ? 'Male' : 'Female' }}</span>
+          <ng-container *ngIf="isEditMode; else viewGender">
+            <select [(ngModel)]="editModel.gender">
+              <option value="">Select gender</option>
+              <option value="MALE">Male</option>
+              <option value="FEMALE">Female</option>
+            </select>
+          </ng-container>
+          <ng-template #viewGender>
+            <span>{{ client.gender === 'MALE' ? 'Male' : 'Female' }}</span>
+          </ng-template>
         </div>
         <div class="info-item">
           <label>Address</label>
-          <span>{{ client.address }}</span>
+          <ng-container *ngIf="isEditMode; else viewAddress">
+            <input type="text" [(ngModel)]="editModel.address" placeholder="Address" />
+          </ng-container>
+          <ng-template #viewAddress>
+            <span>{{ client.address }}</span>
+          </ng-template>
         </div>
         <div class="info-item">
           <label>Created</label>

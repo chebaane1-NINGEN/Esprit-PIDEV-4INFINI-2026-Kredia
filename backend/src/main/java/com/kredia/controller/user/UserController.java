@@ -3,6 +3,7 @@ package com.kredia.controller.user;
 import com.kredia.dto.ApiResponse;
 import com.kredia.dto.user.AdminStatsDTO;
 import com.kredia.dto.user.AgentPerformanceDTO;
+import com.kredia.dto.user.ClientDetailsDTO;
 import com.kredia.dto.user.ClientEligibilityDTO;
 import com.kredia.dto.user.ClientRiskScoreDTO;
 import com.kredia.dto.user.UserActivityResponseDTO;
@@ -326,6 +327,19 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.ok(userService.agentClients(actorId, Optional.ofNullable(email), Optional.ofNullable(status), pageable)));
     }
 
+    @GetMapping("/agent/clients/enhanced")
+    public ResponseEntity<ApiResponse<Page<com.kredia.dto.user.EnhancedClientDTO>>> agentClientsEnhanced(
+            @RequestHeader("X-Actor-Id") Long actorId,
+            @RequestParam(name = "email", required = false) String email,
+            @RequestParam(name = "statuses", required = false) List<UserStatus> statuses,
+            @RequestParam(name = "priorities", required = false) List<String> priorities,
+            @RequestParam(name = "startDate", required = false) String startDate,
+            @RequestParam(name = "endDate", required = false) String endDate,
+            @PageableDefault Pageable pageable
+    ) {
+        return ResponseEntity.ok(ApiResponse.ok(userService.agentClientsEnhanced(actorId, Optional.ofNullable(email), Optional.ofNullable(statuses), Optional.ofNullable(priorities), parseStartOfDay(startDate), parseEndOfDay(endDate), pageable)));
+    }
+
     @GetMapping("/admin/activities")
     public ResponseEntity<ApiResponse<Page<UserActivityResponseDTO>>> adminActivities(
             @RequestHeader("X-Actor-Id") Long actorId,
@@ -374,17 +388,37 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.ok(userService.agentActivity(agentId, pageable)));
     }
 
+    @GetMapping("/agent/{agentId}/activity/clients")
+    public ResponseEntity<ApiResponse<Page<UserActivityResponseDTO>>> agentActivityForClients(
+            @PathVariable("agentId") Long agentId,
+            @PageableDefault Pageable pageable
+    ) {
+        return ResponseEntity.ok(ApiResponse.ok(userService.agentActivityForClients(agentId, pageable)));
+    }
+
     @GetMapping("/client/{clientId}/profile")
-    public ResponseEntity<ApiResponse<UserResponseDTO>> clientProfile(@PathVariable("clientId") Long clientId) {
-        return ResponseEntity.ok(ApiResponse.ok(userService.clientProfile(clientId)));
+    public ResponseEntity<ApiResponse<UserResponseDTO>> clientProfile(
+            @RequestHeader("X-Actor-Id") Long actorId,
+            @PathVariable("clientId") Long clientId
+    ) {
+        return ResponseEntity.ok(ApiResponse.ok(userService.clientProfile(actorId, clientId)));
+    }
+
+    @GetMapping("/agent/client/{clientId}")
+    public ResponseEntity<ApiResponse<ClientDetailsDTO>> agentClientDetails(
+            @RequestHeader("X-Actor-Id") Long actorId,
+            @PathVariable("clientId") Long clientId
+    ) {
+        return ResponseEntity.ok(ApiResponse.ok(userService.agentClientDetails(actorId, clientId)));
     }
 
     @GetMapping("/client/{clientId}/activity")
     public ResponseEntity<ApiResponse<Page<UserActivityResponseDTO>>> clientActivity(
+            @RequestHeader("X-Actor-Id") Long actorId,
             @PathVariable("clientId") Long clientId,
             @PageableDefault Pageable pageable
     ) {
-        return ResponseEntity.ok(ApiResponse.ok(userService.clientActivity(clientId, pageable)));
+        return ResponseEntity.ok(ApiResponse.ok(userService.clientActivity(actorId, clientId, pageable)));
     }
 
     @GetMapping("/client/{clientId}/risk-score")

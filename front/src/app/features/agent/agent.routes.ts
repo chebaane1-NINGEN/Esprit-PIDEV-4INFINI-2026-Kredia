@@ -11,6 +11,10 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/agent-clients-page/agent-clients-page.component').then(m => m.AgentClientsPageComponent)
   },
   {
+    path: 'clients/new',
+    loadComponent: () => import('./pages/agent-client-form-page/agent-client-form-page.component').then(m => m.AgentClientFormPageComponent)
+  },
+  {
     path: 'clients/:id',
     loadComponent: () => import('./pages/agent-client-details-page/agent-client-details-page.component').then(m => m.AgentClientDetailsPageComponent)
   },

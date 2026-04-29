@@ -1,0 +1,56 @@
+<div class="client-form-container">
+  <div class="header">
+    <button (click)="cancel()" class="back-btn">← Back to Clients</button>
+    <h1>Create New Client</h1>
+  </div>
+
+  <div *ngIf="error" class="error-state">
+    <p>{{ error }}</p>
+  </div>
+
+  <form class="client-form" (ngSubmit)="saveClient()">
+    <div class="field-group">
+      <label>First Name</label>
+      <input type="text" [(ngModel)]="client.firstName" name="firstName" required />
+    </div>
+
+    <div class="field-group">
+      <label>Last Name</label>
+      <input type="text" [(ngModel)]="client.lastName" name="lastName" required />
+    </div>
+
+    <div class="field-group">
+      <label>Email</label>
+      <input type="email" [(ngModel)]="client.email" name="email" required />
+    </div>
+
+    <div class="field-group">
+      <label>Phone</label>
+      <input type="text" [(ngModel)]="client.phoneNumber" name="phoneNumber" required />
+    </div>
+
+    <div class="field-group">
+      <label>Date of Birth</label>
+      <input type="date" [(ngModel)]="client.dateOfBirth" name="dateOfBirth" />
+    </div>
+
+    <div class="field-group">
+      <label>Gender</label>
+      <select [(ngModel)]="client.gender" name="gender">
+        <option value="">Select gender</option>
+        <option value="MALE">Male</option>
+        <option value="FEMALE">Female</option>
+      </select>
+    </div>
+
+    <div class="field-group full-width">
+      <label>Address</label>
+      <input type="text" [(ngModel)]="client.address" name="address" />
+    </div>
+
+    <div class="actions">
+      <button type="submit" [disabled]="loading" class="primary-btn">Create Client</button>
+      <button type="button" (click)="cancel()" class="secondary-btn">Cancel</button>
+    </div>
+  </form>
+</div>

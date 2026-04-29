@@ -6,8 +6,10 @@ import com.kredia.dto.user.AdminUserUpdateDTO;
 import com.kredia.dto.user.ClientProfileUpdateDTO;
 import com.kredia.dto.user.AdminStatsDTO;
 import com.kredia.dto.user.AgentPerformanceDTO;
+import com.kredia.dto.user.ClientDetailsDTO;
 import com.kredia.dto.user.ClientEligibilityDTO;
 import com.kredia.dto.user.ClientRiskScoreDTO;
+import com.kredia.dto.user.EnhancedClientDTO;
 import com.kredia.dto.user.UserActivityResponseDTO;
 import com.kredia.entity.user.UserRole;
 import com.kredia.entity.user.UserStatus;
@@ -63,6 +65,7 @@ public interface UserService {
     Page<UserResponseDTO> adminAgent(Long actorId, Pageable pageable);
     Page<UserResponseDTO> adminClient(Long actorId, Pageable pageable);
     Page<UserResponseDTO> agentClients(Long actorId, Optional<String> email, Optional<UserStatus> status, Pageable pageable);
+    Page<EnhancedClientDTO> agentClientsEnhanced(Long actorId, Optional<String> email, Optional<List<UserStatus>> statuses, Optional<List<String>> priorities, Optional<Instant> startDate, Optional<Instant> endDate, Pageable pageable);
     Page<UserActivityResponseDTO> adminAudit(Long actorId, Long userId, Pageable pageable);
     Page<UserActivityResponseDTO> adminActivities(Long actorId, Optional<UserRole> role, Optional<String> actionType, Optional<Long> userId, Optional<Instant> from, Optional<Instant> to, Pageable pageable);
     byte[] exportUsersCsv(Long actorId, Optional<String> email, Optional<List<UserStatus>> status, Optional<List<UserRole>> role, Optional<Instant> createdFrom, Optional<Instant> createdTo);
@@ -74,10 +77,12 @@ public interface UserService {
     AgentPerformanceDTO agentDashboard(Long agentId);
     AgentPerformanceDTO agentPerformance(Long agentId);
     Page<UserActivityResponseDTO> agentActivity(Long agentId, Pageable pageable);
+    Page<UserActivityResponseDTO> agentActivityForClients(Long agentId, Pageable pageable);
 
     // --- Client Profile & Analytics ---
-    UserResponseDTO clientProfile(Long clientId);
-    Page<UserActivityResponseDTO> clientActivity(Long clientId, Pageable pageable);
+    UserResponseDTO clientProfile(Long actorId, Long clientId);
+    ClientDetailsDTO agentClientDetails(Long agentId, Long clientId);
+    Page<UserActivityResponseDTO> clientActivity(Long actorId, Long clientId, Pageable pageable);
     ClientRiskScoreDTO clientRiskScore(Long clientId);
     ClientEligibilityDTO clientEligibility(Long clientId);
 

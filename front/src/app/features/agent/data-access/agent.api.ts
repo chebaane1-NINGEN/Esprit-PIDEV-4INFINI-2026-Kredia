@@ -39,23 +39,29 @@ export class AgentApi {
   // Clients
   getClients(
     email?: string,
-    status?: string,
+    statuses?: string,
     page = 0,
-    size = 10,
+    size = 100,
     sortBy?: string,
-    sortDirection?: string
+    sortDirection?: string,
+    startDate?: string,
+    endDate?: string,
+    priorities?: string
   ): Observable<PageResponse<AgentClient>> {
     let params = new HttpParams()
       .set('page', page.toString())
       .set('size', size.toString());
 
     if (email) params = params.set('email', email);
-    if (status) params = params.set('status', status);
+    if (statuses) params = params.set('statuses', statuses);
     if (sortBy) params = params.set('sortBy', sortBy);
     if (sortDirection) params = params.set('sortDirection', sortDirection);
+    if (startDate) params = params.set('startDate', startDate);
+    if (endDate) params = params.set('endDate', endDate);
+    if (priorities) params = params.set('priorities', priorities);
 
-    console.debug('[AgentApi] getClients', { email, status, page, size });
-    return this.http.get<ApiResponse<PageResponse<AgentClient>>>(`${API_BASE_URL}/api/user/agent/clients`, { params }).pipe(
+    console.debug('[AgentApi] getClients', { email, statuses, page, size, startDate, endDate, priorities });
+    return this.http.get<ApiResponse<PageResponse<AgentClient>>>(`${API_BASE_URL}/api/user/agent/clients/enhanced`, { params }).pipe(
       map(response => response.data)
     );
   }
@@ -63,8 +69,28 @@ export class AgentApi {
   // Client Details
   getClientDetails(clientId: number): Observable<ClientDetails> {
     console.debug('[AgentApi] getClientDetails', clientId);
-    return this.http.get<ApiResponse<ClientDetails>>(`${API_BASE_URL}/api/user/client/${clientId}/profile`).pipe(
+    return this.http.get<ApiResponse<ClientDetails>>(`${API_BASE_URL}/api/user/agent/client/${clientId}`).pipe(
       map(response => response.data)
+    );
+  }
+
+  // Create client
+  createClient(payload: Partial<AgentClient>): Observable<AgentClient> {
+    console.debug('[AgentApi] createClient', payload);
+    // Filter payload to only include fields expected by UserRequestDTO
+    const createPayload = {
+      email: payload.email,
+      firstName: payload.firstName,
+      lastName: payload.lastName,
+      phoneNumber: payload.phoneNumber,
+      role: payload.role,
+      status: payload.status,
+      dateOfBirth: payload.dateOfBirth,
+      address: payload.address,
+      gender: payload.gender
+    };
+    return this.http.post<ApiResponse<any>>(`${API_BASE_URL}/api/user`, createPayload).pipe(
+      map(response => this.mapToAgentClient(response.data))
     );
   }
 
@@ -85,16 +111,37 @@ export class AgentApi {
       .set('size', size.toString());
 
     console.debug('[AgentApi] getActivity', { agentId, page, size });
-    return this.http.get<ApiResponse<PageResponse<AgentActivity>>>(`${API_BASE_URL}/api/user/agent/${agentId}/activity`, { params }).pipe(
+    return this.http.get<ApiResponse<PageResponse<AgentActivity>>>(`${API_BASE_URL}/api/user/agent/${agentId}/activity/clients`, { params }).pipe(
       map(response => response.data)
     );
   }
 
   // Update client
   updateClient(clientId: number, updates: Partial<AgentClient>): Observable<AgentClient> {
-    return this.http.put<ApiResponse<AgentClient>>(`${API_BASE_URL}/api/user/${clientId}`, updates).pipe(
-      map(response => response.data)
+    return this.http.put<ApiResponse<any>>(`${API_BASE_URL}/api/user/${clientId}`, updates).pipe(
+      map(response => this.mapToAgentClient(response.data))
     );
+  }
+
+  private mapToAgentClient(data: any): AgentClient {
+    return {
+      userId: data.id,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      email: data.email,
+      phoneNumber: data.phoneNumber,
+      status: data.status,
+      role: data.role,
+      createdAt: data.createdAt,
+      updatedAt: data.updatedAt,
+      assignedAgentId: data.assignedAgentId,
+      assignedAgentName: data.assignedAgentName,
+      dateOfBirth: data.dateOfBirth,
+      address: data.address,
+      gender: data.gender,
+      lastInteraction: data.lastInteraction,
+      priorityScore: data.priorityScore
+    } as AgentClient;
   }
 
   // Profile

@@ -11,7 +11,9 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import jakarta.persistence.EntityManager;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,10 +24,12 @@ import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,20 +39,28 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserActivityRepository userActivityRepository;
+    private final EntityManager entityManager;
 
     public UserServiceImpl(UserRepository userRepository,
                            PasswordEncoder passwordEncoder,
-                           UserActivityRepository userActivityRepository) {
+                           UserActivityRepository userActivityRepository,
+                           EntityManager entityManager) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.userActivityRepository = userActivityRepository;
+        this.entityManager = entityManager;
     }
 
     @Override
     public UserResponseDTO create(Long actorId, UserRequestDTO request) {
+        User actor = findUser(actorId);
         if (userRepository.existsByEmailAndDeletedFalse(request.getEmail())) {
             throw new IllegalArgumentException("Email already in use");
         }
+        if (userRepository.existsByPhoneNumberAndDeletedFalse(request.getPhoneNumber())) {
+            throw new IllegalArgumentException("Phone number already in use");
+        }
+
         User user = new User();
         user.setEmail(request.getEmail());
         user.setFirstName(request.getFirstName());
@@ -56,10 +68,26 @@ public class UserServiceImpl implements UserService {
         user.setPhoneNumber(request.getPhoneNumber());
         user.setRole(request.getRole() != null ? request.getRole() : UserRole.CLIENT);
         user.setStatus(request.getStatus() != null ? request.getStatus() : UserStatus.ACTIVE);
+        user.setDateOfBirth(request.getDateOfBirth());
+        user.setAddress(request.getAddress());
+        user.setGender(request.getGender());
         if (request.getPassword() != null) {
             user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         }
-        return toDto(userRepository.save(user));
+        if (actor.getRole() == UserRole.AGENT) {
+            user.setRole(UserRole.CLIENT);
+            user.setAssignedAgent(actor);
+            if (request.getStatus() == null) {
+                user.setStatus(UserStatus.ACTIVE);
+            }
+        }
+
+        User savedUser = userRepository.save(user);
+        String description = actor.getRole() == UserRole.AGENT
+                ? String.format("Client created by agent %s", actor.getEmail())
+                : String.format("User created by %s", actor.getEmail());
+        logActivity(savedUser.getId(), UserActivityActionType.CREATED, description);
+        return toDto(savedUser);
     }
 
     @Override
@@ -207,14 +235,47 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDTO update(Long actorId, Long id, UserRequestDTO payload) {
+        User actor = findUser(actorId);
         User user = findUser(id);
-        user.setEmail(payload.getEmail());
-        user.setFirstName(payload.getFirstName());
-        user.setLastName(payload.getLastName());
-        user.setPhoneNumber(payload.getPhoneNumber());
-        if (payload.getRole() != null) user.setRole(payload.getRole());
-        if (payload.getStatus() != null) user.setStatus(payload.getStatus());
-        return toDto(userRepository.save(user));
+
+        if (actor.getRole() == UserRole.AGENT) {
+            if (user.getAssignedAgent() == null || !user.getAssignedAgent().getId().equals(actorId)) {
+                throw new IllegalArgumentException("Agent can only update assigned clients");
+            }
+            if (user.getRole() != UserRole.CLIENT) {
+                throw new IllegalArgumentException("Agent cannot modify admins or other agents");
+            }
+            user.setEmail(payload.getEmail());
+            user.setFirstName(payload.getFirstName());
+            user.setLastName(payload.getLastName());
+            user.setPhoneNumber(payload.getPhoneNumber());
+            user.setDateOfBirth(payload.getDateOfBirth());
+            user.setAddress(payload.getAddress());
+            user.setGender(payload.getGender());
+            if (payload.getPassword() != null) {
+                user.setPasswordHash(passwordEncoder.encode(payload.getPassword()));
+            }
+        } else {
+            user.setEmail(payload.getEmail());
+            user.setFirstName(payload.getFirstName());
+            user.setLastName(payload.getLastName());
+            user.setPhoneNumber(payload.getPhoneNumber());
+            if (payload.getRole() != null) user.setRole(payload.getRole());
+            if (payload.getStatus() != null) user.setStatus(payload.getStatus());
+            user.setDateOfBirth(payload.getDateOfBirth());
+            user.setAddress(payload.getAddress());
+            user.setGender(payload.getGender());
+            if (payload.getPassword() != null) {
+                user.setPasswordHash(passwordEncoder.encode(payload.getPassword()));
+            }
+        }
+
+        User savedUser = userRepository.save(user);
+        if (actor.getRole() == UserRole.AGENT) {
+            logActivity(savedUser.getId(), UserActivityActionType.CLIENT_HANDLED,
+                    String.format("Updated client profile %s %s", savedUser.getFirstName(), savedUser.getLastName()));
+        }
+        return toDto(savedUser);
     }
 
     @Override
@@ -239,6 +300,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void delete(Long actorId, Long id) {
+        User actor = findUser(actorId);
+        if (actor.getRole() == UserRole.AGENT) {
+            throw new IllegalArgumentException("Agents are not permitted to delete clients");
+        }
         User user = findUser(id);
         user.setDeleted(true);
         userRepository.save(user);
@@ -377,27 +442,127 @@ public class UserServiceImpl implements UserService {
     public Page<UserResponseDTO> agentClients(Long actorId, Optional<String> email, Optional<UserStatus> status, Pageable pageable) {
         User agent = findUser(actorId);
         
-        // FIX #3: Properly apply email and status filters
         Page<User> clients;
         
         if (email.isPresent() && status.isPresent()) {
-            // Both filters applied
-            clients = userRepository.findAllByAssignedAgentAndEmailContainingIgnoreCaseAndStatusAndDeletedFalse(
-                agent, email.get(), status.get(), pageable);
+            clients = userRepository.findAllByAssignedAgentAndRoleAndEmailContainingIgnoreCaseAndStatusAndDeletedFalse(
+                agent, UserRole.CLIENT, email.get(), status.get(), pageable);
         } else if (email.isPresent()) {
-            // Email filter only
-            clients = userRepository.findAllByAssignedAgentAndEmailContainingIgnoreCaseAndDeletedFalse(
-                agent, email.get(), pageable);
+            clients = userRepository.findAllByAssignedAgentAndRoleAndEmailContainingIgnoreCaseAndDeletedFalse(
+                agent, UserRole.CLIENT, email.get(), pageable);
         } else if (status.isPresent()) {
-            // Status filter only
-            clients = userRepository.findAllByAssignedAgentAndStatusAndDeletedFalse(
-                agent, status.get(), pageable);
+            clients = userRepository.findAllByAssignedAgentAndRoleAndStatusAndDeletedFalse(
+                agent, UserRole.CLIENT, status.get(), pageable);
         } else {
-            // No filters applied
-            clients = userRepository.findAllByAssignedAgentAndDeletedFalse(agent, pageable);
+            clients = userRepository.findAllByAssignedAgentAndRoleAndDeletedFalse(agent, UserRole.CLIENT, pageable);
         }
         
         return clients.map(this::toDto);
+    }
+
+    @Override
+    public Page<EnhancedClientDTO> agentClientsEnhanced(Long actorId, Optional<String> email, Optional<List<UserStatus>> statuses, Optional<List<String>> priorities, Optional<Instant> startDate, Optional<Instant> endDate, Pageable pageable) {
+        User agent = findUser(actorId);
+        
+        // Build dynamic query based on filters
+        var queryBuilder = new StringBuilder();
+        var params = new HashMap<String, Object>();
+        
+        queryBuilder.append("SELECT u FROM User u WHERE u.role = :role AND u.deleted = false AND u.assignedAgent.id = :agentId");
+        params.put("role", UserRole.CLIENT);
+        params.put("agentId", actorId);
+        
+        // Email filter
+        if (email.isPresent() && !email.get().trim().isEmpty()) {
+            queryBuilder.append(" AND LOWER(u.email) LIKE LOWER(:email)");
+            params.put("email", "%" + email.get().trim() + "%");
+        }
+        
+        // Status filter
+        if (statuses.isPresent() && !statuses.get().isEmpty()) {
+            queryBuilder.append(" AND u.status IN :statuses");
+            params.put("statuses", statuses.get());
+        }
+        
+        // Date range filter
+        if (startDate.isPresent()) {
+            queryBuilder.append(" AND u.createdAt >= :startDate");
+            params.put("startDate", startDate.get());
+        }
+        if (endDate.isPresent()) {
+            queryBuilder.append(" AND u.createdAt <= :endDate");
+            params.put("endDate", endDate.get());
+        }
+        
+        // Priority filter (based on priorityScore)
+        if (priorities.isPresent() && !priorities.get().isEmpty()) {
+            var priorityConditions = new ArrayList<String>();
+            for (String priority : priorities.get()) {
+                switch (priority.toUpperCase()) {
+                    case "HIGH":
+                        priorityConditions.add("u.priorityScore >= 80");
+                        break;
+                    case "MEDIUM":
+                        priorityConditions.add("u.priorityScore >= 50 AND u.priorityScore < 80");
+                        break;
+                    case "LOW":
+                        priorityConditions.add("(u.priorityScore < 50 OR u.priorityScore IS NULL)");
+                        break;
+                }
+            }
+            if (!priorityConditions.isEmpty()) {
+                queryBuilder.append(" AND (").append(String.join(" OR ", priorityConditions)).append(")");
+            }
+        }
+        
+        var query = entityManager.createQuery(queryBuilder.toString(), User.class);
+        params.forEach(query::setParameter);
+        
+        // Apply pagination
+        query.setFirstResult((int) pageable.getOffset());
+        query.setMaxResults(pageable.getPageSize());
+        
+        var clients = query.getResultList();
+        
+        // Count query for total elements
+        var countQueryBuilder = new StringBuilder("SELECT COUNT(u) FROM User u WHERE u.role = :role AND u.deleted = false AND u.assignedAgent.id = :agentId");
+        if (email.isPresent() && !email.get().trim().isEmpty()) {
+            countQueryBuilder.append(" AND LOWER(u.email) LIKE LOWER(:email)");
+        }
+        if (statuses.isPresent() && !statuses.get().isEmpty()) {
+            countQueryBuilder.append(" AND u.status IN :statuses");
+        }
+        if (startDate.isPresent()) {
+            countQueryBuilder.append(" AND u.createdAt >= :startDate");
+        }
+        if (endDate.isPresent()) {
+            countQueryBuilder.append(" AND u.createdAt <= :endDate");
+        }
+        if (priorities.isPresent() && !priorities.get().isEmpty()) {
+            var priorityConditions = new ArrayList<String>();
+            for (String priority : priorities.get()) {
+                switch (priority.toUpperCase()) {
+                    case "HIGH":
+                        priorityConditions.add("u.priorityScore >= 80");
+                        break;
+                    case "MEDIUM":
+                        priorityConditions.add("u.priorityScore >= 50 AND u.priorityScore < 80");
+                        break;
+                    case "LOW":
+                        priorityConditions.add("(u.priorityScore < 50 OR u.priorityScore IS NULL)");
+                        break;
+                }
+            }
+            if (!priorityConditions.isEmpty()) {
+                countQueryBuilder.append(" AND (").append(String.join(" OR ", priorityConditions)).append(")");
+            }
+        }
+        
+        var countQuery = entityManager.createQuery(countQueryBuilder.toString(), Long.class);
+        params.forEach(countQuery::setParameter);
+        var total = countQuery.getSingleResult();
+        
+        return new PageImpl<>(clients, pageable, total).map(client -> toEnhancedClientDto(client, agent));
     }
 
     @Override
@@ -469,12 +634,83 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponseDTO clientProfile(Long clientId) {
-        return toDto(findUser(clientId));
+    public Page<UserActivityResponseDTO> agentActivityForClients(Long agentId, Pageable pageable) {
+        // Get all clients assigned to this agent
+        User agent = findUser(agentId);
+        List<User> assignedClients = userRepository.findAllByAssignedAgentAndRoleAndDeletedFalse(agent, UserRole.CLIENT);
+        
+        if (assignedClients.isEmpty()) {
+            return Page.empty(pageable);
+        }
+        
+        Set<Long> clientIds = assignedClients.stream().map(User::getId).collect(Collectors.toSet());
+        clientIds.add(agentId); // Include agent's own activities
+        
+        // Get activities for agent and all their clients
+        return userActivityRepository.findByUserIdInOrderByTimestampAsc(clientIds, pageable).map(this::toActivityDto);
     }
 
     @Override
-    public Page<UserActivityResponseDTO> clientActivity(Long clientId, Pageable pageable) {
+    public UserResponseDTO clientProfile(Long actorId, Long clientId) {
+        User actor = findUser(actorId);
+        User client = findUser(clientId);
+
+        if (actor.getRole() == UserRole.AGENT) {
+            if (client.getAssignedAgent() == null || !client.getAssignedAgent().getId().equals(actorId)) {
+                throw new IllegalArgumentException("Agent can only view profiles for assigned clients");
+            }
+        }
+        return toDto(client);
+    }
+
+    @Override
+    public ClientDetailsDTO agentClientDetails(Long agentId, Long clientId) {
+        User agent = findUser(agentId);
+        if (agent.getRole() != UserRole.AGENT) {
+            throw new IllegalArgumentException("Only agents can access agent client details");
+        }
+
+        User client = findUser(clientId);
+        if (client.getAssignedAgent() == null || !client.getAssignedAgent().getId().equals(agentId)) {
+            throw new IllegalArgumentException("Agent not assigned to this client");
+        }
+
+        ClientDetailsDTO dto = new ClientDetailsDTO();
+        dto.setId(client.getId());
+        dto.setEmail(client.getEmail());
+        dto.setFirstName(client.getFirstName());
+        dto.setLastName(client.getLastName());
+        dto.setPhoneNumber(client.getPhoneNumber());
+        dto.setRole(client.getRole());
+        dto.setStatus(client.getStatus());
+        dto.setCreatedAt(client.getCreatedAt());
+        dto.setUpdatedAt(client.getUpdatedAt());
+        dto.setDateOfBirth(client.getDateOfBirth());
+        dto.setAddress(client.getAddress());
+        dto.setGender(client.getGender());
+        if (client.getAssignedAgent() != null) {
+            dto.setAssignedAgentId(client.getAssignedAgent().getId());
+            dto.setAssignedAgentName(client.getAssignedAgent().getFirstName() + " " + client.getAssignedAgent().getLastName());
+        }
+        dto.setLastInteraction(calculateLastInteraction(client));
+        dto.setPriorityScore(calculatePriorityScore(client, agent));
+        dto.setActivities(userActivityRepository.findByUserIdOrderByTimestampAsc(client.getId()).stream().map(this::toActivityDto).collect(Collectors.toList()));
+        dto.setRiskScore(clientRiskScore(clientId).getRiskScore());
+        dto.setEligibility(clientEligibility(clientId).getReason());
+
+        return dto;
+    }
+
+    @Override
+    public Page<UserActivityResponseDTO> clientActivity(Long actorId, Long clientId, Pageable pageable) {
+        User actor = findUser(actorId);
+        User client = findUser(clientId);
+
+        if (actor.getRole() == UserRole.AGENT) {
+            if (client.getAssignedAgent() == null || !client.getAssignedAgent().getId().equals(actorId)) {
+                throw new IllegalArgumentException("Agent can only view activity for assigned clients");
+            }
+        }
         return userActivityRepository.findByUserIdOrderByTimestampAsc(clientId, pageable).map(this::toActivityDto);
     }
 
@@ -539,6 +775,78 @@ public class UserServiceImpl implements UserService {
             dto.setAssignedAgentName(user.getAssignedAgent().getFirstName() + " " + user.getAssignedAgent().getLastName());
         }
         return dto;
+    }
+
+    private EnhancedClientDTO toEnhancedClientDto(User user, User agent) {
+        EnhancedClientDTO dto = new EnhancedClientDTO();
+        dto.setId(user.getId());
+        dto.setEmail(user.getEmail());
+        dto.setFirstName(user.getFirstName());
+        dto.setLastName(user.getLastName());
+        dto.setPhoneNumber(user.getPhoneNumber());
+        dto.setRole(user.getRole());
+        dto.setStatus(user.getStatus());
+        dto.setCreatedAt(user.getCreatedAt());
+        dto.setUpdatedAt(user.getUpdatedAt());
+        dto.setDateOfBirth(user.getDateOfBirth());
+        dto.setAddress(user.getAddress());
+        dto.setGender(user.getGender());
+        if (user.getAssignedAgent() != null) {
+            dto.setAssignedAgentId(user.getAssignedAgent().getId());
+            dto.setAssignedAgentName(user.getAssignedAgent().getFirstName() + " " + user.getAssignedAgent().getLastName());
+        }
+        
+        // Calculate last interaction timestamp
+        Instant lastInteraction = calculateLastInteraction(user);
+        dto.setLastInteraction(lastInteraction);
+        
+        // Calculate priority score
+        Integer priorityScore = calculatePriorityScore(user, agent);
+        dto.setPriorityScore(priorityScore);
+        
+        return dto;
+    }
+
+    private Instant calculateLastInteraction(User client) {
+        // Get the most recent activity for this client
+        List<UserActivity> activities = userActivityRepository.findByUserIdOrderByTimestampAsc(client.getId());
+        if (activities.isEmpty()) {
+            return client.getUpdatedAt();
+        }
+        return activities.get(activities.size() - 1).getTimestamp();
+    }
+
+    private Integer calculatePriorityScore(User client, User agent) {
+        int score = 50; // Base score
+        
+        // Status bonus: ACTIVE clients get higher priority
+        if (client.getStatus() == UserStatus.ACTIVE) {
+            score += 20;
+        } else if (client.getStatus() == UserStatus.INACTIVE) {
+            score += 10;
+        } else if (client.getStatus() == UserStatus.SUSPENDED) {
+            score -= 10;
+        } else if (client.getStatus() == UserStatus.BLOCKED) {
+            score -= 30;
+        }
+        
+        // Recency bonus: More recent interactions = higher priority
+        Instant lastInteraction = calculateLastInteraction(client);
+        Instant now = Instant.now();
+        long daysSinceInteraction = java.time.temporal.ChronoUnit.DAYS.between(lastInteraction, now);
+        
+        if (daysSinceInteraction <= 7) {
+            score += 15;
+        } else if (daysSinceInteraction <= 30) {
+            score += 10;
+        } else if (daysSinceInteraction <= 90) {
+            score += 5;
+        } else {
+            score -= 10;
+        }
+        
+        // Ensure score is within bounds
+        return Math.max(0, Math.min(100, score));
     }
 
     private UserActivityResponseDTO toActivityDto(com.kredia.entity.user.UserActivity a) {
@@ -606,8 +914,8 @@ public class UserServiceImpl implements UserService {
         client.setStatus(UserStatus.ACTIVE);
         userRepository.save(client);
 
-        // Log activity
-        logActivity(agentId, UserActivityActionType.APPROVAL,
+        // Log activity on the client record so history is available for the client
+        logActivity(clientId, UserActivityActionType.APPROVAL,
             String.format("Approved client %s %s", client.getFirstName(), client.getLastName()));
 
         return toDto(client);
@@ -627,12 +935,12 @@ public class UserServiceImpl implements UserService {
         client.setStatus(UserStatus.BLOCKED);
         userRepository.save(client);
 
-        // Log activity
+        // Log activity on the client record so history is available for the client
         String description = String.format("Rejected client %s %s", client.getFirstName(), client.getLastName());
         if (reason != null && !reason.trim().isEmpty()) {
             description += " - Reason: " + reason;
         }
-        logActivity(agentId, UserActivityActionType.REJECTION, description);
+        logActivity(clientId, UserActivityActionType.REJECTION, description);
 
         return toDto(client);
     }
@@ -651,12 +959,12 @@ public class UserServiceImpl implements UserService {
         client.setStatus(UserStatus.SUSPENDED);
         userRepository.save(client);
 
-        // Log activity
+        // Log activity on the client record so history is available for the client
         String description = String.format("Suspended client %s %s", client.getFirstName(), client.getLastName());
         if (reason != null && !reason.trim().isEmpty()) {
             description += " - Reason: " + reason;
         }
-        logActivity(agentId, UserActivityActionType.CLIENT_SUSPENDED, description);
+        logActivity(clientId, UserActivityActionType.CLIENT_SUSPENDED, description);
 
         return toDto(client);
     }

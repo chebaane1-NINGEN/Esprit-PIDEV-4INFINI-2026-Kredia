@@ -1,41 +1,79 @@
-Kredia – Projet Spring Boot
-Overview
+# Kredia – AI-Powered Microfinance Platform
 
-Ce projet a été développé dans le cadre du PIDEV – ᵉ année du cycle ingénieur à Esprit School of Engineering (Année académique 2026-2027).
-Il s'agit d'une application back-end Spring Boot complète pour la gestion de microcrédits, intégrant des fonctionnalités avancées telles que l’envoi d’emails transactionnels, le stockage cloud d’images, l’accès à des données financières externes et l’intégration d’IA via Google Gemini.
+## Overview
 
-Tech Stack
-Backend : Spring Boot 3.2.2, Maven, Lombok
-Base de données : MySQL avec Spring Data JPA et Flyway pour les migrations
-Services externes : Brevo (emails transactionnels), Cloudinary (stockage d’images), Hedera SDK (blockchain), Google Gemini AI, Alpha Vantage API (données financières)
-Dev Tools : Spring DevTools
-Academic Context
+This project was developed as part of the PIDEV – 4th Year Engineering Program at **Esprit School of Engineering** (Academic Year 2025–2026).
 
-Développé à Esprit School of Engineering, ce projet vise à :
+Kredia is a full-stack microfinance platform designed to simplify and modernize the credit management process through intelligent digital services. The platform provides advanced features such as loan simulation, online credit applications, transaction management, AI-powered financial assistance, cloud image storage, and external financial data integration.
 
-Créer une architecture Spring Boot robuste et modulaire
-Intégrer des API externes pour enrichir l’application
-Assurer la portabilité et la maintenabilité du code
-Description
+The backend is built with Spring Boot and follows a modular and scalable architecture to ensure maintainability, portability, and extensibility.
 
-Projet Spring Boot vierge avec Maven et Lombok, prêt à accueillir des modules métiers (crédits, utilisateurs, transactions, notifications, etc.).
+---
 
-Prérequis
-Java 17 ou supérieur
-Maven 3.6+ (ou wrapper Maven inclus)
-MySQL installé et configuré
-Installation
-Cloner le projet
-git clone <url-du-repo>
-cd kredia
-Compiler le projet
-mvn clean install
-Lancer l'application
-mvn spring-boot:run
+## Features
 
-L'application démarrera sur http://localhost:8080
+* User authentication and account management
+* Loan simulation and credit application system
+* Credit approval and repayment tracking
+* Transaction and invoice management
+* AI-powered financial assistant using Google Gemini
+* Email notification system with Brevo
+* Cloud image upload using Cloudinary
+* Financial market integration with Alpha Vantage API
+* Blockchain integration with Hedera SDK
+* Investment and portfolio management
+* Complaint and notification management
+* Secure REST API architecture
 
-Structure du projet
+---
+
+## Tech Stack
+
+### Backend
+
+* Java 17
+* Spring Boot 3.2.2
+* Spring Data JPA
+* Maven
+* Lombok
+* Flyway
+
+### Database
+
+* MySQL
+
+### External Services
+
+* Google Gemini AI
+* Brevo API
+* Cloudinary
+* Alpha Vantage API
+* Hedera SDK
+
+### Dev Tools
+
+* Spring DevTools
+* Git & GitHub
+* Postman
+
+---
+
+## Architecture
+
+The project follows a layered Spring Boot architecture:
+
+* Controller Layer
+* Service Layer
+* Repository Layer
+* Entity Layer
+
+The system is designed using modular principles to facilitate scalability and maintainability. External APIs and third-party services are integrated through dedicated service modules.
+
+---
+
+## Project Structure
+
+```txt
 kredia/
 ├── src/
 │   ├── main/
@@ -50,50 +88,131 @@ kredia/
 │               └── KrediaApplicationTests.java
 ├── pom.xml
 └── README.md
-Configuration Lombok dans l'IDE
-IntelliJ IDEA
-Installer le plugin Lombok (File > Settings > Plugins)
-Activer l’annotation processing (File > Settings > Build, Execution, Deployment > Compiler > Annotation Processors)
-VS Code
-Installer l’extension Language Support for Java
-Lombok sera automatiquement détecté via Maven
-Commandes Maven utiles
-# Compiler le projet
+```
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+* Java 17 or higher
+* Maven 3.6+
+* MySQL Server
+
+### Installation
+
+Clone the repository:
+
+```bash
+git clone <repository-url>
+cd kredia
+```
+
+Compile the project:
+
+```bash
+mvn clean install
+```
+
+Run the application:
+
+```bash
+mvn spring-boot:run
+```
+
+The application will start on:
+
+```txt
+http://localhost:8080
+```
+
+---
+
+## Useful Maven Commands
+
+### Compile the project
+
+```bash
 mvn clean compile
+```
 
-# Lancer les tests
+### Run tests
+
+```bash
 mvn test
+```
 
-# Créer un package JAR
+### Generate JAR package
+
+```bash
 mvn clean package
+```
 
-# Nettoyer le projet
+### Clean the project
+
+```bash
 mvn clean
-Portabilité
+```
 
-Le projet peut être exécuté sur n’importe quel poste avec Java 17+ et Maven installés.
-Toutes les configurations nécessaires sont incluses dans le dépôt.
+---
 
-📧 Configuration Email (Brevo)
+## Email Configuration (Brevo)
 
-Le système utilise Brevo pour l’envoi d’emails transactionnels.
+The project uses Brevo for transactional email services.
 
-Guide rapide
-Créez un compte sur Brevo
- (300 emails/jour gratuits)
-Obtenez votre clé API dans Settings → SMTP & API
-Configurez les variables d’environnement :
-export BREVO_API_KEY="votre-clé-api-brevo"
+### Quick Setup
+
+Create environment variables:
+
+```bash
+export BREVO_API_KEY="your-api-key"
 export MAIL_FROM="noreply@kredia.com"
+```
 
-📖 Documentation complète : BREVO_SETUP_GUIDE.md
+### Documentation
 
-📚 Documentation supplémentaire
-EMAIL_NOTIFICATION_SETUP.md
- - Configuration des notifications email
-BREVO_SETUP_GUIDE.md
- - Guide de démarrage Brevo
-DATABASE_SETUP.md
- - Configuration de la base de données
-MIGRATIONS_GUIDE.md
- - Guide des migrations Flyway
+* BREVO_SETUP_GUIDE.md
+* EMAIL_NOTIFICATION_SETUP.md
+* DATABASE_SETUP.md
+* MIGRATIONS_GUIDE.md
+
+---
+
+## Contributors
+
+* Mohamed Youssef Mellouli
+* Project Team – PIDEV
+
+---
+
+## Academic Context
+
+Developed at **Esprit School of Engineering – Tunisia**
+
+PIDEV – 4INFINI1 | 2025–2026
+
+This academic project aims to:
+
+* Build a robust Spring Boot architecture
+* Integrate modern external APIs and AI services
+* Apply software engineering best practices
+* Develop scalable and maintainable enterprise applications
+
+---
+
+## Deployment
+
+The project can be deployed using:
+
+* Render
+* Railway
+* Vercel
+* DigitalOcean
+* Docker
+
+---
+
+## Acknowledgments
+
+Special thanks to **Esprit School of Engineering**, supervisors, and all contributors who supported the development of this project.

@@ -1,29 +1,38 @@
-# Kredia – AI-Powered Microfinance Platform
+# Kredia Backend – AI-Powered Microfinance Platform
+
+![Java](https://img.shields.io/badge/Java-17-blue)
+![Spring Boot](https://img.shields.io/badge/SpringBoot-3.2.2-brightgreen)
+![MySQL](https://img.shields.io/badge/MySQL-Database-blue)
+![Maven](https://img.shields.io/badge/Maven-Build-orange)
+![License](https://img.shields.io/badge/license-Academic-orange)
+
+---
 
 ## Overview
 
 This project was developed as part of the PIDEV – 4th Year Engineering Program at **Esprit School of Engineering** (Academic Year 2025–2026).
 
-Kredia is a full-stack microfinance platform designed to simplify and modernize the credit management process through intelligent digital services. The platform provides advanced features such as loan simulation, online credit applications, transaction management, AI-powered financial assistance, cloud image storage, and external financial data integration.
+Kredia Backend is a robust Spring Boot microservice-based system designed to power an intelligent microfinance platform. It handles core business logic including credit management, user processing, financial transactions, AI services integration, and external API communication.
 
-The backend is built with Spring Boot and follows a modular and scalable architecture to ensure maintainability, portability, and extensibility.
+The backend follows a clean, layered, and modular architecture to ensure scalability, maintainability, and high performance.
 
 ---
 
 ## Features
 
-* User authentication and account management
-* Loan simulation and credit application system
-* Credit approval and repayment tracking
-* Transaction and invoice management
+* User authentication and authorization
+* Loan simulation and credit management
+* Transaction processing and invoice handling
+* Credit approval workflow and repayment tracking
 * AI-powered financial assistant using Google Gemini
-* Email notification system with Brevo
-* Cloud image upload using Cloudinary
-* Financial market integration with Alpha Vantage API
-* Blockchain integration with Hedera SDK
-* Investment and portfolio management
+* Email notification system using Brevo
+* Cloud image storage with Cloudinary
+* Financial market data integration (Alpha Vantage API)
+* Blockchain integration using Hedera SDK
+* Investment and portfolio management system
 * Complaint and notification management
-* Secure REST API architecture
+* Secure RESTful API architecture
+* Modular and scalable backend design
 
 ---
 
@@ -34,6 +43,7 @@ The backend is built with Spring Boot and follows a modular and scalable archite
 * Java 17
 * Spring Boot 3.2.2
 * Spring Data JPA
+* Spring Security
 * Maven
 * Lombok
 * Flyway
@@ -45,7 +55,7 @@ The backend is built with Spring Boot and follows a modular and scalable archite
 ### External Services
 
 * Google Gemini AI
-* Brevo API
+* Brevo Email API
 * Cloudinary
 * Alpha Vantage API
 * Hedera SDK
@@ -55,19 +65,29 @@ The backend is built with Spring Boot and follows a modular and scalable archite
 * Spring DevTools
 * Git & GitHub
 * Postman
+* IntelliJ IDEA
 
 ---
 
 ## Architecture
 
-The project follows a layered Spring Boot architecture:
+The backend is built using a layered architecture following Spring Boot best practices.
 
-* Controller Layer
-* Service Layer
-* Repository Layer
-* Entity Layer
+### Application Layers
 
-The system is designed using modular principles to facilitate scalability and maintainability. External APIs and third-party services are integrated through dedicated service modules.
+* Controller Layer (REST APIs)
+* Service Layer (Business Logic)
+* Repository Layer (Data Access)
+* Entity Layer (Database Models)
+
+### Architecture Principles
+
+* Modular design
+* Separation of concerns
+* RESTful communication
+* Scalable microservice-ready structure
+* External API integration via dedicated services
+* Clean and maintainable codebase
 
 ---
 
@@ -79,9 +99,14 @@ kredia/
 │   ├── main/
 │   │   ├── java/
 │   │   │   └── com/kredia/
+│   │   │       ├── controller/
+│   │   │       ├── service/
+│   │   │       ├── repository/
+│   │   │       ├── entity/
 │   │   │       └── KrediaApplication.java
 │   │   └── resources/
-│   │       └── application.properties
+│   │       ├── application.properties
+│   │       └── db/migration/
 │   └── test/
 │       └── java/
 │           └── com/kredia/
@@ -96,32 +121,37 @@ kredia/
 
 ### Prerequisites
 
-* Java 17 or higher
+* Java 17+
 * Maven 3.6+
 * MySQL Server
 
-### Installation
+---
 
-Clone the repository:
+## Installation
+
+### Clone the Repository
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/your-username/Esprit-PIDEV-4INFINI1-2025-Kredia.git
 cd kredia
 ```
 
-Compile the project:
+### Configure Database
+
+```properties
+spring.datasource.url=jdbc:mysql://localhost:3306/kredia
+spring.datasource.username=root
+spring.datasource.password=your_password
+```
+
+### Run the Application
 
 ```bash
 mvn clean install
-```
-
-Run the application:
-
-```bash
 mvn spring-boot:run
 ```
 
-The application will start on:
+Backend runs on:
 
 ```txt
 http://localhost:8080
@@ -129,27 +159,27 @@ http://localhost:8080
 
 ---
 
-## Useful Maven Commands
+## Useful Commands
 
-### Compile the project
+### Compile Project
 
 ```bash
 mvn clean compile
 ```
 
-### Run tests
+### Run Tests
 
 ```bash
 mvn test
 ```
 
-### Generate JAR package
+### Build JAR
 
 ```bash
 mvn clean package
 ```
 
-### Clean the project
+### Clean Project
 
 ```bash
 mvn clean
@@ -157,32 +187,41 @@ mvn clean
 
 ---
 
-## Email Configuration (Brevo)
+## API Integration
 
-The project uses Brevo for transactional email services.
+Backend exposes REST APIs consumed by the Angular frontend.
 
-### Quick Setup
+Base URL:
 
-Create environment variables:
-
-```bash
-export BREVO_API_KEY="your-api-key"
-export MAIL_FROM="noreply@kredia.com"
+```txt
+http://localhost:8080
 ```
 
-### Documentation
+Integrated services:
 
-* BREVO_SETUP_GUIDE.md
-* EMAIL_NOTIFICATION_SETUP.md
-* DATABASE_SETUP.md
-* MIGRATIONS_GUIDE.md
+* AI financial assistant (Gemini)
+* Credit management APIs
+* Authentication services
+* Financial analytics APIs
+
+---
+
+## Deployment
+
+The backend can be deployed using:
+
+* Docker
+* Render
+* Railway
+* DigitalOcean
+* AWS
 
 ---
 
 ## Contributors
 
 * Mohamed Youssef Mellouli
-* Project Team – PIDEV
+* PIDEV Project Team
 
 ---
 
@@ -190,29 +229,10 @@ export MAIL_FROM="noreply@kredia.com"
 
 Developed at **Esprit School of Engineering – Tunisia**
 
-PIDEV – 4INFINI1 | 2025–2026
-
-This academic project aims to:
-
-* Build a robust Spring Boot architecture
-* Integrate modern external APIs and AI services
-* Apply software engineering best practices
-* Develop scalable and maintainable enterprise applications
-
----
-
-## Deployment
-
-The project can be deployed using:
-
-* Render
-* Railway
-* Vercel
-* DigitalOcean
-* Docker
+PIDEV – 4INFINI1 | Academic Year 2025–2026
 
 ---
 
 ## Acknowledgments
 
-Special thanks to **Esprit School of Engineering**, supervisors, and all contributors who supported the development of this project.
+Special thanks to **Esprit School of Engineering**, supervisors, and contributors for their guidance and support.

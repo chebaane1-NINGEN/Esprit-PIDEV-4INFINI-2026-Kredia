@@ -1,7 +1,10 @@
 package com.kredia.controller;
 
+import com.kredia.dto.ml.ApplicationPredictionResponse;
 import com.kredia.entity.credit.Credit;
 import com.kredia.entity.credit.DemandeCredit;
+import com.kredia.repository.DemandeCreditRepository;
+import com.kredia.service.ApplicationPredictionService;
 import jakarta.validation.Valid;
 import com.kredia.service.CreditService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +15,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/credits")
@@ -22,22 +27,61 @@ public class CreditController {
     private final com.kredia.service.CreditExcelExportService creditExcelExportService;
     private final com.kredia.service.StatisticsPdfExportService statisticsPdfExportService;
     private final com.kredia.service.DefaultPredictionService defaultPredictionService;
+    private final ApplicationPredictionService applicationPredictionService;
+    private final DemandeCreditRepository demandeCreditRepository;
 
     @Autowired
     public CreditController(CreditService creditService,
             com.kredia.service.CreditExcelExportService creditExcelExportService,
             com.kredia.service.StatisticsPdfExportService statisticsPdfExportService,
-            com.kredia.service.DefaultPredictionService defaultPredictionService) {
+            com.kredia.service.DefaultPredictionService defaultPredictionService,
+            ApplicationPredictionService applicationPredictionService,
+            DemandeCreditRepository demandeCreditRepository) {
         this.creditService = creditService;
         this.creditExcelExportService = creditExcelExportService;
         this.statisticsPdfExportService = statisticsPdfExportService;
         this.defaultPredictionService = defaultPredictionService;
+        this.applicationPredictionService = applicationPredictionService;
+        this.demandeCreditRepository = demandeCreditRepository;
     }
 
+    /**
+     * Submit a credit application.
+     * Automatically calls the ML application-prediction-service to get status=0/1.
+     * Returns both the saved demande and the ML prediction result.
+     */
     @PostMapping
-    public ResponseEntity<DemandeCredit> createDemande(@Valid @RequestBody DemandeCredit demandeCredit) {
+    public ResponseEntity<Map<String, Object>> createDemande(@Valid @RequestBody DemandeCredit demandeCredit) {
         DemandeCredit created = creditService.createDemande(demandeCredit);
-        return new ResponseEntity<>(created, HttpStatus.CREATED);
+
+        // Call ML prediction service (fail-safe: won't block if service is down)
+        ApplicationPredictionResponse mlPrediction = applicationPredictionService.predictForDemande(created);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("demande", created);
+        response.put("mlPrediction", mlPrediction);  // null if service unavailable
+
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    /**
+     * Re-run ML application prediction on an existing demande.
+     * Useful for admin review dashboard.
+     */
+    @PostMapping("/demandes/{id}/predict-application")
+    public ResponseEntity<?> predictApplication(@PathVariable Long id) {
+        try {
+            DemandeCredit demande = demandeCreditRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Demande not found: " + id));
+            ApplicationPredictionResponse prediction = applicationPredictionService.predictForDemande(demande);
+            if (prediction == null) {
+                return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                        .body("ML prediction service is currently unavailable.");
+            }
+            return ResponseEntity.ok(prediction);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @GetMapping("/{id}")
